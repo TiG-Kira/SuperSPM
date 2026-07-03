@@ -65,6 +65,7 @@ fun DetailScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(getPageBackgroundColor(isDark))
+            .padding(bottom = 80.dp)
     ) {
         item {
             Row(

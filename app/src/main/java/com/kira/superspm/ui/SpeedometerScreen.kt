@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -623,12 +624,12 @@ fun SpeedometerGauge(speed: Double) {
             )
         }
 
-        Text(text = "0", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.CenterStart).padding(start = 30.dp))
-        Text(text = "20", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.BottomStart).padding(start = 50.dp, bottom = 50.dp))
+        Text(text = "0", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.CenterStart).padding(start = 25.dp))
+        Text(text = "20", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.BottomStart).padding(start = 60.dp, bottom = 60.dp))
         Text(text = "40", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 30.dp))
-        Text(text = "60", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.BottomEnd).padding(end = 50.dp, bottom = 50.dp))
-        Text(text = "80", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.CenterEnd).padding(end = 30.dp))
-        Text(text = "100", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.TopEnd).padding(end = 50.dp, top = 50.dp))
+        Text(text = "60", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.BottomEnd).padding(end = 60.dp, bottom = 60.dp))
+        Text(text = "80", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.CenterEnd).padding(end = 25.dp))
+        Text(text = "100", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.TopEnd).padding(end = 60.dp, top = 60.dp))
         Text(text = "120", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.TopCenter).padding(top = 30.dp))
     }
 }
@@ -681,6 +682,7 @@ fun GpsStrengthIndicator(accuracy: Float?) {
 fun StatCard(title: String, value: String, unit: String) {
     Card(
         modifier = Modifier
+            .width(100.dp)
             .height(80.dp)
             .padding(4.dp)
     ) {
