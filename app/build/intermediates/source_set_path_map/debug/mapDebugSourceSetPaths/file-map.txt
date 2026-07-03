@@ -1,0 +1,64 @@
+com.kira.superspm.app-jetified-ui-0 C:\Users\Kira\.gradle\caches\8.11.1\transforms\076e0ffd54cfe04745e1990037cd7dce\transformed\jetified-ui\res
+com.kira.superspm.app-jetified-lifecycle-viewmodel-compose-release-1 C:\Users\Kira\.gradle\caches\8.11.1\transforms\0e75855664473d63849857614e8a7bb3\transformed\jetified-lifecycle-viewmodel-compose-release\res
+com.kira.superspm.app-jetified-activity-1.9.3-2 C:\Users\Kira\.gradle\caches\8.11.1\transforms\128e821002ee614bf9d669d43dd51874\transformed\jetified-activity-1.9.3\res
+com.kira.superspm.app-appcompat-1.6.1-3 C:\Users\Kira\.gradle\caches\8.11.1\transforms\12a7e8960a1bfe95f3a1e0dc2da913dc\transformed\appcompat-1.6.1\res
+com.kira.superspm.app-jetified-sqlite-framework-release-4 C:\Users\Kira\.gradle\caches\8.11.1\transforms\12cec09c9b1ddb36008d2c5f3581fe9b\transformed\jetified-sqlite-framework-release\res
+com.kira.superspm.app-jetified-lifecycle-process-2.9.4-5 C:\Users\Kira\.gradle\caches\8.11.1\transforms\1546b7c1d36440f3adf2e504497d21e8\transformed\jetified-lifecycle-process-2.9.4\res
+com.kira.superspm.app-jetified-appcompat-resources-1.6.1-6 C:\Users\Kira\.gradle\caches\8.11.1\transforms\19250a50279e22fcd5c0f2dda2bbbdc7\transformed\jetified-appcompat-resources-1.6.1\res
+com.kira.superspm.app-jetified-emoji2-1.4.0-7 C:\Users\Kira\.gradle\caches\8.11.1\transforms\198b20fd450b07e117b0613259109453\transformed\jetified-emoji2-1.4.0\res
+com.kira.superspm.app-jetified-lifecycle-runtime-release-8 C:\Users\Kira\.gradle\caches\8.11.1\transforms\1c32c5ff628cc971698296644dcc0775\transformed\jetified-lifecycle-runtime-release\res
+com.kira.superspm.app-fragment-1.6.2-9 C:\Users\Kira\.gradle\caches\8.11.1\transforms\2194540d142922435588fc2187acc7c2\transformed\fragment-1.6.2\res
+com.kira.superspm.app-jetified-core-ktx-1.16.0-10 C:\Users\Kira\.gradle\caches\8.11.1\transforms\231afd100a7f711866f64b44540e06e1\transformed\jetified-core-ktx-1.16.0\res
+com.kira.superspm.app-transition-1.6.0-11 C:\Users\Kira\.gradle\caches\8.11.1\transforms\24637ac0168b0f25ba77802f03a274ed\transformed\transition-1.6.0\res
+com.kira.superspm.app-navigation-common-ktx-2.8.3-12 C:\Users\Kira\.gradle\caches\8.11.1\transforms\306f6e025742d47ada4c3e49e0c3a1d9\transformed\navigation-common-ktx-2.8.3\res
+com.kira.superspm.app-jetified-tracing-1.2.0-13 C:\Users\Kira\.gradle\caches\8.11.1\transforms\33f2829505ddf09efc0d9bd41bd50433\transformed\jetified-tracing-1.2.0\res
+com.kira.superspm.app-jetified-lifecycle-viewmodel-release-14 C:\Users\Kira\.gradle\caches\8.11.1\transforms\361663564d3678959747ecae799084b9\transformed\jetified-lifecycle-viewmodel-release\res
+com.kira.superspm.app-jetified-window-1.5.0-15 C:\Users\Kira\.gradle\caches\8.11.1\transforms\43c8b90679989fe818b2cff532511226\transformed\jetified-window-1.5.0\res
+com.kira.superspm.app-jetified-lifecycle-runtime-compose-release-16 C:\Users\Kira\.gradle\caches\8.11.1\transforms\45ce88d6058a521b12ae24b309bb0613\transformed\jetified-lifecycle-runtime-compose-release\res
+com.kira.superspm.app-jetified-material-ripple-release-17 C:\Users\Kira\.gradle\caches\8.11.1\transforms\464c3723a5590f0b54ade346d61ed5b3\transformed\jetified-material-ripple-release\res
+com.kira.superspm.app-jetified-annotation-experimental-1.4.1-18 C:\Users\Kira\.gradle\caches\8.11.1\transforms\57f85c837c2b9c4152f7e05d81f7031c\transformed\jetified-annotation-experimental-1.4.1\res
+com.kira.superspm.app-jetified-savedstate-release-19 C:\Users\Kira\.gradle\caches\8.11.1\transforms\61cef1af232af937d5d36bb5b2cffb4e\transformed\jetified-savedstate-release\res
+com.kira.superspm.app-jetified-lifecycle-viewmodel-savedstate-release-20 C:\Users\Kira\.gradle\caches\8.11.1\transforms\63ff20554038887f1fb98fe4487ea445\transformed\jetified-lifecycle-viewmodel-savedstate-release\res
+com.kira.superspm.app-core-runtime-2.2.0-21 C:\Users\Kira\.gradle\caches\8.11.1\transforms\6746bb42e8eb9170164a432fe6638fba\transformed\core-runtime-2.2.0\res
+com.kira.superspm.app-jetified-foundation-22 C:\Users\Kira\.gradle\caches\8.11.1\transforms\67a7481405793495ba60d300784d8e46\transformed\jetified-foundation\res
+com.kira.superspm.app-jetified-ui-tooling-23 C:\Users\Kira\.gradle\caches\8.11.1\transforms\6a0ca052ac624d7f6566ce48d513d769\transformed\jetified-ui-tooling\res
+com.kira.superspm.app-jetified-core-viewtree-1.0.0-24 C:\Users\Kira\.gradle\caches\8.11.1\transforms\6eba053221460544d476e79a22773f01\transformed\jetified-core-viewtree-1.0.0\res
+com.kira.superspm.app-jetified-startup-runtime-1.1.1-25 C:\Users\Kira\.gradle\caches\8.11.1\transforms\717db059472eccb534bfa06d3b773bf1\transformed\jetified-startup-runtime-1.1.1\res
+com.kira.superspm.app-jetified-datastore-preferences-1.0.0-26 C:\Users\Kira\.gradle\caches\8.11.1\transforms\7b2b203288ed5205a6ca8812f3298a24\transformed\jetified-datastore-preferences-1.0.0\res
+com.kira.superspm.app-jetified-play-services-base-18.9.0-27 C:\Users\Kira\.gradle\caches\8.11.1\transforms\7cf2b255559b68cfd796c7f87587e2bc\transformed\jetified-play-services-base-18.9.0\res
+com.kira.superspm.app-jetified-lifecycle-viewmodel-ktx-2.9.4-28 C:\Users\Kira\.gradle\caches\8.11.1\transforms\876e7daf1cf286d6179562dd294197a1\transformed\jetified-lifecycle-viewmodel-ktx-2.9.4\res
+com.kira.superspm.app-jetified-graphics-path-1.0.1-29 C:\Users\Kira\.gradle\caches\8.11.1\transforms\88f77c68cd96c785b7f3f104fd1b4e46\transformed\jetified-graphics-path-1.0.1\res
+com.kira.superspm.app-lifecycle-livedata-2.9.4-30 C:\Users\Kira\.gradle\caches\8.11.1\transforms\88ff8c1035b40b81ff2bd4d07d8b77cd\transformed\lifecycle-livedata-2.9.4\res
+com.kira.superspm.app-jetified-room-runtime-release-31 C:\Users\Kira\.gradle\caches\8.11.1\transforms\8950c9db617351d3a57076e76d4348a2\transformed\jetified-room-runtime-release\res
+com.kira.superspm.app-navigation-common-2.8.3-32 C:\Users\Kira\.gradle\caches\8.11.1\transforms\8b977a29abccc5c33a46ca7b8b96582a\transformed\navigation-common-2.8.3\res
+com.kira.superspm.app-jetified-emoji2-views-helper-1.4.0-33 C:\Users\Kira\.gradle\caches\8.11.1\transforms\8efe9ffaeb7d8fee6c22f592216d8d4a\transformed\jetified-emoji2-views-helper-1.4.0\res
+com.kira.superspm.app-jetified-room-ktx-2.7.0-34 C:\Users\Kira\.gradle\caches\8.11.1\transforms\960ad577761a929050b34d73d1776876\transformed\jetified-room-ktx-2.7.0\res
+com.kira.superspm.app-jetified-ui-graphics-35 C:\Users\Kira\.gradle\caches\8.11.1\transforms\971e1dfa8a8ef2da4eb2e907c9fa30ea\transformed\jetified-ui-graphics\res
+com.kira.superspm.app-lifecycle-livedata-core-2.9.4-36 C:\Users\Kira\.gradle\caches\8.11.1\transforms\9e67317f201c86968a0ccad3e8fbf463\transformed\lifecycle-livedata-core-2.9.4\res
+com.kira.superspm.app-jetified-datastore-1.0.0-37 C:\Users\Kira\.gradle\caches\8.11.1\transforms\a7b298a8d91168c0176a6559cc9bfe44\transformed\jetified-datastore-1.0.0\res
+com.kira.superspm.app-jetified-customview-poolingcontainer-1.0.0-38 C:\Users\Kira\.gradle\caches\8.11.1\transforms\aae2cf814b1c6be58b8a58a2d77fba59\transformed\jetified-customview-poolingcontainer-1.0.0\res
+com.kira.superspm.app-jetified-material-release-39 C:\Users\Kira\.gradle\caches\8.11.1\transforms\aeddfc0f38cad40ce8f27e7065757a64\transformed\jetified-material-release\res
+com.kira.superspm.app-jetified-material3-40 C:\Users\Kira\.gradle\caches\8.11.1\transforms\b1c60afc47193cf8a32065a8db44ed39\transformed\jetified-material3\res
+com.kira.superspm.app-core-1.16.0-41 C:\Users\Kira\.gradle\caches\8.11.1\transforms\b8d02d3eb4828c34d83dc701eca1f04a\transformed\core-1.16.0\res
+com.kira.superspm.app-jetified-activity-ktx-1.9.3-42 C:\Users\Kira\.gradle\caches\8.11.1\transforms\bc60d8e1e7a709563b9e98352d31f85b\transformed\jetified-activity-ktx-1.9.3\res
+com.kira.superspm.app-navigation-runtime-ktx-2.8.3-43 C:\Users\Kira\.gradle\caches\8.11.1\transforms\bf343553c74e4c0235b3a20ed33ff1e1\transformed\navigation-runtime-ktx-2.8.3\res
+com.kira.superspm.app-jetified-activity-compose-1.9.3-44 C:\Users\Kira\.gradle\caches\8.11.1\transforms\c2fa95d53168489fdf9516e547fee586\transformed\jetified-activity-compose-1.9.3\res
+com.kira.superspm.app-jetified-lifecycle-livedata-core-ktx-2.9.4-45 C:\Users\Kira\.gradle\caches\8.11.1\transforms\d89eb14b16e70a95fc2e785481686a16\transformed\jetified-lifecycle-livedata-core-ktx-2.9.4\res
+com.kira.superspm.app-jetified-sqlite-release-46 C:\Users\Kira\.gradle\caches\8.11.1\transforms\d90682a7259cc3d3b90f4742cbcb1043\transformed\jetified-sqlite-release\res
+com.kira.superspm.app-jetified-navigationevent-47 C:\Users\Kira\.gradle\caches\8.11.1\transforms\da2e606caa76bbab759e259d41e05c0c\transformed\jetified-navigationevent\res
+com.kira.superspm.app-jetified-fragment-ktx-1.6.2-48 C:\Users\Kira\.gradle\caches\8.11.1\transforms\da5be9d35aae03d056364ddccf8656c0\transformed\jetified-fragment-ktx-1.6.2\res
+com.kira.superspm.app-navigation-runtime-2.8.3-49 C:\Users\Kira\.gradle\caches\8.11.1\transforms\e41cbd27400d287e3795599dd74429a3\transformed\navigation-runtime-2.8.3\res
+com.kira.superspm.app-jetified-profileinstaller-1.4.0-50 C:\Users\Kira\.gradle\caches\8.11.1\transforms\e45afdf0e964a718bce52ae5e398bb4f\transformed\jetified-profileinstaller-1.4.0\res
+com.kira.superspm.app-jetified-ui-text-51 C:\Users\Kira\.gradle\caches\8.11.1\transforms\ecd6a0fd78d786316d62adc9a15d1b99\transformed\jetified-ui-text\res
+com.kira.superspm.app-jetified-navigation-compose-2.8.3-52 C:\Users\Kira\.gradle\caches\8.11.1\transforms\f262cd6d7fcb2abf7a4b3d4e695d1260\transformed\jetified-navigation-compose-2.8.3\res
+com.kira.superspm.app-jetified-runtime-saveable-53 C:\Users\Kira\.gradle\caches\8.11.1\transforms\f6d244c040d78357489d31ad6fc2ee21\transformed\jetified-runtime-saveable\res
+com.kira.superspm.app-jetified-coil-base-2.5.0-54 C:\Users\Kira\.gradle\caches\8.11.1\transforms\f750289bc233ea30d1b08655a98f1402\transformed\jetified-coil-base-2.5.0\res
+com.kira.superspm.app-jetified-savedstate-ktx-1.3.3-55 C:\Users\Kira\.gradle\caches\8.11.1\transforms\fd1f3c0f124fdb34c27b6edfd3af2aed\transformed\jetified-savedstate-ktx-1.3.3\res
+com.kira.superspm.app-jetified-play-services-basement-18.9.0-56 C:\Users\Kira\.gradle\caches\8.11.1\transforms\fd93e80548006f7f952525003f8672df\transformed\jetified-play-services-basement-18.9.0\res
+com.kira.superspm.app-pngs-57 D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\build\generated\res\pngs\debug
+com.kira.superspm.app-resValues-58 D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\build\generated\res\resValues\debug
+com.kira.superspm.app-packageDebugResources-59 D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.kira.superspm.app-packageDebugResources-60 D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.kira.superspm.app-debug-61 D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.kira.superspm.app-debug-62 D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\debug\res
+com.kira.superspm.app-main-63 D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\res
