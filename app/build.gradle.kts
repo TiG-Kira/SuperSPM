@@ -56,6 +56,8 @@ dependencies {
     implementation(Dependencies.composeFoundation)
     implementation(Dependencies.composeMaterial)
     implementation(Dependencies.composeMaterial3)
+    implementation(Dependencies.composeMaterialIcons)
+    implementation(Dependencies.composeMaterialIconsExtended)
     implementation(Dependencies.composeRuntime)
     implementation(Dependencies.composeActivity)
     debugImplementation(Dependencies.composeUiTooling)
