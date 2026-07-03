@@ -16,7 +16,7 @@ android {
         minSdk = Versions.minSdk
         targetSdk = Versions.targetSdk
         versionCode = 1
-        versionName = "1.0.1"
+        versionName = "1.0.2"
     }
 
     buildTypes {

@@ -40,6 +40,7 @@ fun AppNavHost(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val baseRoute = currentRoute?.split("/")?.firstOrNull() ?: currentRoute
 
     val backgroundColor = getPageBackgroundColor(isDark)
 
@@ -84,7 +85,7 @@ fun AppNavHost(
             }
         }
 
-        if (currentRoute in listOf("speedometer", "history", "settings")) {
+        if (baseRoute in listOf("speedometer", "history", "settings", "detail", "about", "openSource")) {
             NavigationBar(
                 modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
                 containerColor = backgroundColor,

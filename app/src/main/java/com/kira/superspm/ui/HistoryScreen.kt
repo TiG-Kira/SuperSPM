@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -293,24 +295,43 @@ fun RecordItem(
             }
 
             Text(
-                text = formatDateTime(record.startTime),
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                ),
-                modifier = Modifier.padding(top = 4.dp)
-            )
+                    text = formatDateTime(record.startTime),
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                    ),
+                    modifier = Modifier.padding(top = 4.dp)
+                )
 
-            Text(
-                text = buildSummary(record, speedUnit),
-                style = TextStyle(
-                    fontSize = 13.sp,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                ),
-                modifier = Modifier.padding(top = 4.dp)
-            )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    HistoryStatCard(
+                        value = formatSpeed(record.maxSpeed, speedUnit),
+                        label = "最高速度",
+                        unit = getSpeedUnitString(speedUnit)
+                    )
+                    HistoryStatCard(
+                        value = String.format("%.2f", record.totalDistance),
+                        label = "总里程",
+                        unit = "km"
+                    )
+                    HistoryStatCard(
+                        value = formatSpeed(record.avgSpeed, speedUnit),
+                        label = "平均速度",
+                        unit = getSpeedUnitString(speedUnit)
+                    )
+                    HistoryStatCard(
+                        value = record.dataPoints.toString(),
+                        label = "数据点",
+                        unit = ""
+                    )
+                }
 
-            Row(
+                Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 12.dp),
@@ -336,6 +357,56 @@ fun RecordItem(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun HistoryStatCard(value: String, label: String, unit: String) {
+    Card(
+        modifier = Modifier
+            .width(70.dp)
+            .height(60.dp)
+            .padding(4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = value,
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MiuixTheme.colorScheme.onSurface
+                )
+            )
+            Text(
+                text = "$label $unit",
+                style = TextStyle(
+                    fontSize = 10.sp,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                )
+            )
+        }
+    }
+}
+
+private fun formatSpeed(speed: Double, unit: SpeedUnit): String {
+    return when (unit) {
+        SpeedUnit.KMH -> String.format("%.0f", speed)
+        SpeedUnit.MS -> String.format("%.1f", speed / 3.6)
+        SpeedUnit.MPH -> String.format("%.0f", speed * 0.621371)
+    }
+}
+
+private fun getSpeedUnitString(unit: SpeedUnit): String {
+    return when (unit) {
+        SpeedUnit.KMH -> "km/h"
+        SpeedUnit.MS -> "m/s"
+        SpeedUnit.MPH -> "mph"
     }
 }
 

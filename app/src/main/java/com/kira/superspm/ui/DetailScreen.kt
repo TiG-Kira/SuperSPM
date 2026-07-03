@@ -5,10 +5,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -115,18 +117,18 @@ fun DetailScreen(
                 ) {
                     DetailStatCard(
                         value = formatSpeed(it.maxSpeed, settingsViewModel.speedUnit),
-                        label = "最高",
-                        unit = getSpeedUnitString(settingsViewModel.speedUnit)
-                    )
-                    DetailStatCard(
-                        value = formatSpeed(it.avgSpeed, settingsViewModel.speedUnit),
-                        label = "平均",
+                        label = "最高速度",
                         unit = getSpeedUnitString(settingsViewModel.speedUnit)
                     )
                     DetailStatCard(
                         value = String.format("%.2f", it.totalDistance),
                         label = "总里程",
                         unit = "km"
+                    )
+                    DetailStatCard(
+                        value = formatSpeed(it.avgSpeed, settingsViewModel.speedUnit),
+                        label = "平均速度",
+                        unit = getSpeedUnitString(settingsViewModel.speedUnit)
                     )
                     DetailStatCard(
                         value = it.dataPoints.toString(),
@@ -187,7 +189,7 @@ fun DetailScreen(
 fun DetailStatCard(value: String, label: String, unit: String) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .width(80.dp)
             .height(80.dp)
             .padding(4.dp)
     ) {
@@ -230,49 +232,93 @@ fun DetailStatCard(value: String, label: String, unit: String) {
 fun SpeedChart(points: List<LocationPoint>, unit: SpeedUnit) {
     val primaryColor = MiuixTheme.colorScheme.primary
     val onSurfaceVariantSummary = MiuixTheme.colorScheme.onSurfaceVariantSummary
+    val maxSpeed = if (points.isNotEmpty()) points.maxOf { it.speed } * 1.2 else 0.0
 
-    Canvas(modifier = Modifier.fillMaxWidth().height(150.dp)) {
-        if (points.isEmpty()) return@Canvas
+    Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            if (points.isEmpty()) return@Canvas
 
-        val width = size.width
-        val height = size.height
-        val padding = 20.dp.toPx()
+            val width = size.width
+            val height = size.height
+            val padding = 40.dp.toPx()
 
-        val maxSpeed = points.maxOf { it.speed } * 1.2
-        val minSpeed = 0.0
+            val minSpeed = 0.0
+            val chartWidth = width - padding * 2
+            val chartHeight = height - padding * 2
 
-        val xScale = (width - padding * 2) / (points.size - 1).toFloat()
-        val yScale = (height - padding * 2) / (maxSpeed - minSpeed).toFloat()
+            val xScale = if (points.size > 1) chartWidth / (points.size - 1).toFloat() else 0f
+            val yScale = if (maxSpeed > minSpeed) chartHeight / (maxSpeed - minSpeed).toFloat() else 0f
 
-        val path = Path()
-        var firstPoint = true
+            val path = Path()
+            var firstPoint = true
 
-        points.forEachIndexed { index, point ->
-            val x = padding + index * xScale
-            val y = height - padding - ((point.speed - minSpeed) * yScale).toFloat()
+            points.forEachIndexed { index, point ->
+                val x = padding + index * xScale
+                val y = height - padding - ((point.speed - minSpeed) * yScale).toFloat()
 
-            if (firstPoint) {
-                path.moveTo(x, y)
-                firstPoint = false
-            } else {
-                path.lineTo(x, y)
+                if (firstPoint) {
+                    path.moveTo(x, y)
+                    firstPoint = false
+                } else {
+                    path.lineTo(x, y)
+                }
+            }
+
+            drawPath(
+                path = path,
+                color = primaryColor,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
+            )
+
+            for (i in 0..4) {
+                val y = padding + chartHeight * i / 4f
+                drawLine(
+                    color = onSurfaceVariantSummary.copy(alpha = 0.3f),
+                    start = Offset(padding, y),
+                    end = Offset(width - padding, y),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+
+            val timeLabelCount = 5
+            for (i in 0 until timeLabelCount) {
+                val index = i * (points.size - 1) / (timeLabelCount - 1)
+                val x = padding + index * xScale
+
+                drawLine(
+                    color = onSurfaceVariantSummary.copy(alpha = 0.3f),
+                    start = Offset(x, height - padding),
+                    end = Offset(x, padding),
+                    strokeWidth = 1.dp.toPx()
+                )
             }
         }
 
-        drawPath(
-            path = path,
-            color = primaryColor,
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
-        )
+        Column(modifier = Modifier.fillMaxHeight().padding(start = 8.dp), verticalArrangement = Arrangement.SpaceEvenly) {
+            for (i in 0..4) {
+                val speedValue = maxSpeed * (4 - i) / 4
+                val formattedSpeed = when (unit) {
+                    SpeedUnit.KMH -> String.format("%.0f", speedValue)
+                    SpeedUnit.MS -> String.format("%.1f", speedValue / 3.6)
+                    SpeedUnit.MPH -> String.format("%.0f", speedValue * 0.621371)
+                }
+                Text(
+                    text = formattedSpeed,
+                    style = TextStyle(fontSize = 10.sp, color = onSurfaceVariantSummary)
+                )
+            }
+        }
 
-        for (i in 0..4) {
-            val y = padding + (height - padding * 2) * i / 4f
-            drawLine(
-                color = onSurfaceVariantSummary.copy(alpha = 0.3f),
-                start = Offset(padding, y),
-                end = Offset(width - padding, y),
-                strokeWidth = 1.dp.toPx()
-            )
+        Row(modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).padding(bottom = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+            val timeLabelCount = 5
+            for (i in 0 until timeLabelCount) {
+                val index = i * (points.size - 1) / (timeLabelCount - 1)
+                val timeValue = index * 2
+                Text(
+                    text = "${timeValue}s",
+                    style = TextStyle(fontSize = 10.sp, color = onSurfaceVariantSummary)
+                )
+            }
         }
     }
 }

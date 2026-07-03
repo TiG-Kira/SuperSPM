@@ -196,18 +196,15 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = "版本号: ${getVersionName(context)}",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                            ),
-                            modifier = Modifier.padding(bottom = 4.dp)
+                        InfoRow(
+                            title = "应用版本号",
+                            value = getVersionName(context)
                         )
                         Text(
                             text = "使用了 Trae 辅助生成了部分 AI 代码。",
@@ -218,7 +215,7 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                         Text(
-                            text = "整体用户界面采用 MiuiX 设计，详情请查看使用的开源项目。",
+                            text = "整体用户界面采用 MiuiX 设计，详情请查看使用的开源项目。此应用遵循 AGPL-3.0 许可以及 MIT 许可。",
                             style = TextStyle(
                                 fontSize = 13.sp,
                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -258,7 +255,7 @@ fun InfoRow(title: String, value: String) {
 private fun getVersionName(context: android.content.Context): String {
     return try {
         val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-        packageInfo.versionName ?: "1.0.0"
+        packageInfo?.versionName ?: "1.0.0"
     } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
         "1.0.0"
     }
