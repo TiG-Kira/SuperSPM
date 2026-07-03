@@ -106,6 +106,16 @@ fun SpeedometerScreen(
             errorMessage = message
             showErrorDialog = true
         }
+
+        if (LocationService.isRunning() && LocationService.isRecording()) {
+            viewModel.restoreFromService(
+                LocationService.getCurrentSpeed(),
+                LocationService.getMaxSpeed(),
+                LocationService.getAvgSpeed(),
+                LocationService.getTotalDistance(),
+                LocationService.getDataPoints()
+            )
+        }
     }
 
     LaunchedEffect(status, settingsViewModel.refreshTime) {
@@ -196,7 +206,9 @@ fun SpeedometerScreen(
                                 settingsViewModel.refreshTime
                             )
                             viewModel.startRecording()
-                            context.startForegroundService(android.content.Intent(context, LocationService::class.java))
+                            val intent = android.content.Intent(context, LocationService::class.java)
+                            intent.putExtra("saveRecord", false)
+                            context.startForegroundService(intent)
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
@@ -220,7 +232,9 @@ fun SpeedometerScreen(
                                 settingsViewModel.refreshTime
                             )
                             viewModel.startRecording(recordData = true)
-                            context.startForegroundService(android.content.Intent(context, LocationService::class.java))
+                            val intent = android.content.Intent(context, LocationService::class.java)
+                            intent.putExtra("saveRecord", true)
+                            context.startForegroundService(intent)
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
@@ -368,7 +382,6 @@ fun SpeedometerScreen(
             item {
                 Button(
                     onClick = {
-                        context.stopService(android.content.Intent(context, LocationService::class.java))
                         if (viewModel.isRecording) {
                             coroutineScope.launch {
                                 val record = viewModel.stopRecording()
@@ -380,6 +393,7 @@ fun SpeedometerScreen(
                         } else {
                             viewModel.reset()
                         }
+                        context.stopService(android.content.Intent(context, LocationService::class.java))
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -536,101 +550,89 @@ private suspend fun getAddress(context: android.content.Context, latitude: Doubl
 @Composable
 fun SpeedometerGauge(speed: Double) {
     val colorScheme = MiuixTheme.colorScheme
-    val gaugeSize = 280.dp
-    val startAngle = 135f
-    val sweepAngle = 270f
+    Canvas(modifier = Modifier.size(280.dp)) {
+        val center = Offset(size.width / 2, size.height / 2)
+        val radius = size.width / 2 - 20.dp.toPx()
+        val startAngle = 135f
+        val sweepAngle = 270f
 
-    Box(modifier = Modifier.size(gaugeSize)) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val center = Offset(size.width / 2, size.height / 2)
-            val radius = size.width / 2 - 20.dp.toPx()
+        drawArc(
+            color = colorScheme.onSurfaceVariantSummary.copy(alpha = 0.2f),
+            startAngle = startAngle,
+            sweepAngle = sweepAngle,
+            useCenter = false,
+            topLeft = Offset(20.dp.toPx(), 20.dp.toPx()),
+            size = Size(radius * 2, radius * 2),
+            style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
+        )
 
-            drawArc(
-                color = colorScheme.onSurfaceVariantSummary.copy(alpha = 0.2f),
-                startAngle = startAngle,
-                sweepAngle = sweepAngle,
-                useCenter = false,
-                topLeft = Offset(20.dp.toPx(), 20.dp.toPx()),
-                size = Size(radius * 2, radius * 2),
-                style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
-            )
+        val speedRatio = minOf(speed / 120.0, 1.0)
+        val activeAngle = speedRatio * sweepAngle
 
-            val speedRatio = minOf(speed / 120.0, 1.0)
-            val activeAngle = speedRatio * sweepAngle
+        drawArc(
+            color = when {
+                speedRatio < 0.3 -> Color(0xFFFF1744)
+                speedRatio < 0.6 -> Color(0xFFFFAB00)
+                else -> Color(0xFF0066FF)
+            },
+            startAngle = startAngle,
+            sweepAngle = activeAngle.toFloat(),
+            useCenter = false,
+            topLeft = Offset(20.dp.toPx(), 20.dp.toPx()),
+            size = Size(radius * 2, radius * 2),
+            style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
+        )
 
-            drawArc(
-                color = when {
-                    speedRatio < 0.3 -> Color(0xFFFF1744)
-                    speedRatio < 0.6 -> Color(0xFFFFAB00)
-                    else -> Color(0xFF0066FF)
-                },
-                startAngle = startAngle,
-                sweepAngle = activeAngle.toFloat(),
-                useCenter = false,
-                topLeft = Offset(20.dp.toPx(), 20.dp.toPx()),
-                size = Size(radius * 2, radius * 2),
-                style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
-            )
+        for (i in 0..6) {
+            val angle = startAngle + (i * sweepAngle / 6)
+            val radian = Math.toRadians(angle.toDouble()).toFloat()
+            val innerRadius = radius - 20.dp.toPx()
+            val outerRadius = radius
 
-            for (i in 0..6) {
-                val angle = startAngle + (i * sweepAngle / 6)
-                val radian = Math.toRadians(angle.toDouble()).toFloat()
-                val innerRadius = radius - 20.dp.toPx()
-                val outerRadius = radius
+            val cosValue = Math.cos(radian.toDouble())
+            val sinValue = Math.sin(radian.toDouble())
 
-                val cosValue = Math.cos(radian.toDouble())
-                val sinValue = Math.sin(radian.toDouble())
-
-                drawLine(
-                    color = colorScheme.onSurface,
-                    start = Offset(
-                        (center.x + cosValue * innerRadius).toFloat(),
-                        (center.y + sinValue * innerRadius).toFloat()
-                    ),
-                    end = Offset(
-                        (center.x + cosValue * outerRadius).toFloat(),
-                        (center.y + sinValue * outerRadius).toFloat()
-                    ),
-                    strokeWidth = 2.dp.toPx(),
-                    cap = StrokeCap.Round
-                )
-            }
-
-            val pointerAngle = startAngle + activeAngle
-            val pointerRadian = Math.toRadians(pointerAngle.toDouble()).toFloat()
-            val pointerLength = radius - 30.dp.toPx()
-            
             drawLine(
-                color = Color(0xFFFF1744),
-                start = center,
-                end = Offset(
-                    (center.x + Math.cos(pointerRadian.toDouble()) * pointerLength).toFloat(),
-                    (center.y + Math.sin(pointerRadian.toDouble()) * pointerLength).toFloat()
+                color = colorScheme.onSurface,
+                start = Offset(
+                    (center.x + cosValue * innerRadius).toFloat(),
+                    (center.y + sinValue * innerRadius).toFloat()
                 ),
-                strokeWidth = 4.dp.toPx(),
+                end = Offset(
+                    (center.x + cosValue * outerRadius).toFloat(),
+                    (center.y + sinValue * outerRadius).toFloat()
+                ),
+                strokeWidth = 2.dp.toPx(),
                 cap = StrokeCap.Round
-            )
-
-            drawCircle(
-                color = Color(0xFFFF1744),
-                center = center,
-                radius = 8.dp.toPx()
-            )
-            
-            drawCircle(
-                color = Color.White,
-                center = center,
-                radius = 4.dp.toPx()
             )
         }
 
-        Text(text = "0", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.CenterStart).padding(start = 25.dp))
-        Text(text = "20", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.BottomStart).padding(start = 60.dp, bottom = 60.dp))
-        Text(text = "40", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 30.dp))
-        Text(text = "60", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.BottomEnd).padding(end = 60.dp, bottom = 60.dp))
-        Text(text = "80", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.CenterEnd).padding(end = 25.dp))
-        Text(text = "100", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.TopEnd).padding(end = 60.dp, top = 60.dp))
-        Text(text = "120", style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurface), modifier = Modifier.align(Alignment.TopCenter).padding(top = 30.dp))
+        val pointerAngle = startAngle + activeAngle
+        val pointerRadian = Math.toRadians(pointerAngle.toDouble()).toFloat()
+        val pointerLength = radius - 30.dp.toPx()
+        
+        drawLine(
+            color = Color(0xFFFF1744),
+            start = center,
+            end = Offset(
+                (center.x + Math.cos(pointerRadian.toDouble()) * pointerLength).toFloat(),
+                (center.y + Math.sin(pointerRadian.toDouble()) * pointerLength).toFloat()
+            ),
+            strokeWidth = 4.dp.toPx(),
+            cap = StrokeCap.Round
+        )
+
+        drawCircle(
+            color = Color(0xFFFF1744),
+            center = center,
+            radius = 8.dp.toPx()
+        )
+        
+        drawCircle(
+            color = Color.White,
+            center = center,
+            radius = 4.dp.toPx()
+        )
     }
 }
 

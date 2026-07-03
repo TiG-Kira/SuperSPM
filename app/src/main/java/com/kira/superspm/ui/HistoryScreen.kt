@@ -267,14 +267,14 @@ fun RecordItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable(onClick = onItemClick)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onItemClick),
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -311,7 +311,7 @@ fun RecordItem(
                 ) {
                     HistoryStatCard(
                         value = formatSpeed(record.maxSpeed, speedUnit),
-                        label = "最高速度",
+                        label = "最高",
                         unit = getSpeedUnitString(speedUnit)
                     )
                     HistoryStatCard(
@@ -321,7 +321,7 @@ fun RecordItem(
                     )
                     HistoryStatCard(
                         value = formatSpeed(record.avgSpeed, speedUnit),
-                        label = "平均速度",
+                        label = "均速",
                         unit = getSpeedUnitString(speedUnit)
                     )
                     HistoryStatCard(

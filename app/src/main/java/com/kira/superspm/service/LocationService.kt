@@ -16,6 +16,9 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.kira.superspm.R
+import com.kira.superspm.data.model.LocationPoint
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class LocationService : Service(), LocationListener {
     private lateinit var locationManager: LocationManager
@@ -24,6 +27,27 @@ class LocationService : Service(), LocationListener {
     private var idleStartTime: Long = 0
     private var isRunning = false
     private var lastPositionUpdateTime = 0L
+
+    var currentSpeed = 0.0
+    var maxSpeed = 0.0
+    var avgSpeed = 0.0
+    var totalDistance = 0.0
+    var dataPoints = 0
+    var isRecording = false
+    var shouldSaveRecord = false
+    private val pathPoints = mutableListOf<LocationPoint>()
+    private var lastPoint: LocationPoint? = null
+    private var startTime: Long = 0
+
+    interface RecordingCallback {
+        fun onRecordSaved()
+    }
+
+    private var recordingCallback: RecordingCallback? = null
+
+    fun setRecordingCallback(callback: RecordingCallback) {
+        recordingCallback = callback
+    }
 
     companion object {
         const val CHANNEL_ID = "LocationServiceChannel"
@@ -36,6 +60,14 @@ class LocationService : Service(), LocationListener {
         var currentFastestInterval = 500L
         var positionRefreshInterval = 120000L
         private var instance: LocationService? = null
+
+        fun isRunning(): Boolean = instance?.isRunning == true
+        fun isRecording(): Boolean = instance?.isRecording == true
+        fun getCurrentSpeed(): Double = instance?.currentSpeed ?: 0.0
+        fun getMaxSpeed(): Double = instance?.maxSpeed ?: 0.0
+        fun getAvgSpeed(): Double = instance?.avgSpeed ?: 0.0
+        fun getTotalDistance(): Double = instance?.totalDistance ?: 0.0
+        fun getDataPoints(): Int = instance?.dataPoints ?: 0
 
         fun updateSettings(powerSaving: Boolean, refreshTimeSec: Int) {
             currentInterval = if (powerSaving) 10000L else 1000L
@@ -100,6 +132,7 @@ class LocationService : Service(), LocationListener {
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
         createNotificationChannel()
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
@@ -119,6 +152,11 @@ class LocationService : Service(), LocationListener {
         if (!isRunning) {
             startLocationUpdates()
             isRunning = true
+        }
+
+        val saveRecord = intent?.getBooleanExtra("saveRecord", false) ?: false
+        if (!isRecording) {
+            startRecording(saveRecord)
         }
 
         return START_STICKY
@@ -160,9 +198,108 @@ class LocationService : Service(), LocationListener {
         }
     }
 
+    fun startRecording(saveRecord: Boolean = false) {
+        isRecording = true
+        shouldSaveRecord = saveRecord
+        startTime = System.currentTimeMillis()
+        currentSpeed = 0.0
+        maxSpeed = 0.0
+        avgSpeed = 0.0
+        totalDistance = 0.0
+        dataPoints = 0
+        pathPoints.clear()
+        lastPoint = null
+        speedHistory.clear()
+        updateNotification()
+    }
+
+    fun stopRecording() {
+        isRecording = false
+    }
+
+    fun finishRecording(): com.kira.superspm.data.model.LocationRecord? {
+        if (!shouldSaveRecord || pathPoints.isEmpty()) {
+            resetRecording()
+            return null
+        }
+
+        return try {
+            val record = com.kira.superspm.data.model.LocationRecord(
+                name = generateRecordName(),
+                startTime = kotlinx.datetime.Instant.fromEpochMilliseconds(startTime),
+                endTime = kotlinx.datetime.Instant.fromEpochMilliseconds(System.currentTimeMillis()),
+                maxSpeed = maxSpeed,
+                avgSpeed = avgSpeed,
+                totalDistance = totalDistance,
+                dataPoints = dataPoints,
+                pathData = kotlinx.serialization.json.Json.encodeToString(pathPoints)
+            )
+            resetRecording()
+            recordingCallback?.onRecordSaved()
+            record
+        } catch (e: Exception) {
+            resetRecording()
+            null
+        }
+    }
+
+    private fun resetRecording() {
+        isRecording = false
+        shouldSaveRecord = false
+        startTime = 0
+        currentSpeed = 0.0
+        maxSpeed = 0.0
+        avgSpeed = 0.0
+        totalDistance = 0.0
+        dataPoints = 0
+        pathPoints.clear()
+        lastPoint = null
+        speedHistory.clear()
+    }
+
+    private fun generateRecordName(): String {
+        return "记录 ${System.currentTimeMillis()}"
+    }
+
+    private fun calculateDistance(point1: LocationPoint, point2: LocationPoint): Double {
+        val R = 6371000.0
+        val lat1 = Math.toRadians(point1.latitude)
+        val lon1 = Math.toRadians(point1.longitude)
+        val lat2 = Math.toRadians(point2.latitude)
+        val lon2 = Math.toRadians(point2.longitude)
+
+        val dLat = lat2 - lat1
+        val dLon = lon2 - lon1
+
+        val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1) * Math.cos(lat2) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2)
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+        return R * c / 1000.0
+    }
+
+    private val speedHistory = mutableListOf<Double>()
+    private val HISTORY_SIZE = 5
+
     override fun onLocationChanged(location: Location) {
-        val speed = location.speed * 3.6
-        lastSpeed = speed
+        var speed = location.speed * 3.6
+
+        speedHistory.add(speed)
+        if (speedHistory.size > HISTORY_SIZE) {
+            speedHistory.removeAt(0)
+        }
+
+        val avgHistorySpeed = speedHistory.average()
+
+        if (speed < 0.5 && lastSpeed > 5) {
+            speed = lastSpeed * 0.85
+        }
+
+        val finalSpeed = (speed * 0.6) + (avgHistorySpeed * 0.3) + (lastSpeed * 0.1)
+
+        lastSpeed = finalSpeed
+        currentSpeed = finalSpeed
 
         if (speed > 0.5) {
             idleStartTime = 0
@@ -177,6 +314,21 @@ class LocationService : Service(), LocationListener {
                 isGpsActive = false
                 onStatusChange?.invoke(false)
             }
+        }
+
+        if (isRecording) {
+            maxSpeed = maxOf(maxSpeed, finalSpeed)
+            dataPoints++
+            avgSpeed = ((avgSpeed * (dataPoints - 1)) + finalSpeed) / dataPoints
+
+            val currentPoint = LocationPoint(location.latitude, location.longitude, finalSpeed, System.currentTimeMillis())
+            if (lastPoint != null) {
+                totalDistance += calculateDistance(lastPoint!!, currentPoint)
+            }
+            pathPoints.add(currentPoint)
+            lastPoint = currentPoint
+
+            updateNotification()
         }
 
         onSpeedUpdate?.invoke(speed)
@@ -246,8 +398,9 @@ class LocationService : Service(), LocationListener {
         val channel = NotificationChannel(
             CHANNEL_ID,
             "位置服务",
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_DEFAULT
         )
+        channel.description = "显示实时测速信息"
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
     }
@@ -260,8 +413,23 @@ class LocationService : Service(), LocationListener {
             .build()
     }
 
+    fun updateNotification() {
+        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText("速度: ${String.format("%.0f", currentSpeed)} km/h | 最高: ${String.format("%.0f", maxSpeed)} km/h | 里程: ${String.format("%.2f", totalDistance)} km | 均速: ${String.format("%.0f", avgSpeed)} km/h")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
+    fun getPathPoints(): List<LocationPoint> {
+        return pathPoints.toList()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        instance = null
         isRunning = false
         try {
             locationManager.removeUpdates(this)

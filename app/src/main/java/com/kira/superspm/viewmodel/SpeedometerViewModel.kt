@@ -168,4 +168,20 @@ class SpeedometerViewModel(private val repository: RecordRepository) : ViewModel
     fun finishRecording() {
         isRecording = false
     }
+
+    fun restoreFromService(
+        currentSpeed: Double,
+        maxSpeed: Double,
+        avgSpeed: Double,
+        totalDistance: Double,
+        dataPoints: Int
+    ) {
+        status = RecordingStatus.RECORDING
+        this.currentSpeed = currentSpeed
+        this.maxSpeed = maxSpeed
+        this.avgSpeed = avgSpeed
+        this.totalDistance = totalDistance
+        this.dataPoints = dataPoints
+        this.isRecording = true
+    }
 }

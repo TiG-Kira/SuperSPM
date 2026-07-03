@@ -24,6 +24,7 @@ import org.koin.androidx.compose.getViewModel
 class MainActivity : ComponentActivity() {
     private val hasLocationPermissionState = mutableStateOf(false)
     private val hasBackgroundLocationPermissionState = mutableStateOf(false)
+    private val hasNotificationPermissionState = mutableStateOf(false)
     private val systemDarkModeState = mutableStateOf(false)
 
     private val requestLocationPermissionLauncher =
@@ -31,9 +32,16 @@ class MainActivity : ComponentActivity() {
             val fineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
             val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
             val backgroundGranted = permissions[Manifest.permission.ACCESS_BACKGROUND_LOCATION] == true
+            val notificationGranted = permissions[Manifest.permission.POST_NOTIFICATIONS] == true
             
             hasLocationPermissionState.value = fineGranted || coarseGranted
             hasBackgroundLocationPermissionState.value = backgroundGranted
+            hasNotificationPermissionState.value = notificationGranted
+        }
+
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            hasNotificationPermissionState.value = granted
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,17 +79,28 @@ class MainActivity : ComponentActivity() {
         hasBackgroundLocationPermissionState.value = ContextCompat.checkSelfPermission(
             this, Manifest.permission.ACCESS_BACKGROUND_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
+
+        hasNotificationPermissionState.value = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun requestPermissionsIfNeeded() {
-        if (!hasLocationPermissionState.value || !hasBackgroundLocationPermissionState.value) {
-            requestLocationPermissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                )
-            )
+        val permissionsToRequest = mutableListOf<String>()
+        
+        if (!hasLocationPermissionState.value) {
+            permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
+            permissionsToRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+        if (!hasBackgroundLocationPermissionState.value) {
+            permissionsToRequest.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
+        if (!hasNotificationPermissionState.value && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        
+        if (permissionsToRequest.isNotEmpty()) {
+            requestLocationPermissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
 
@@ -108,7 +127,7 @@ class MainActivity : ComponentActivity() {
         val isDark = if (followSystem) {
             systemDarkMode
         } else {
-            darkMode
+            settingsViewModel.effectiveDarkMode
         }
 
         LaunchedEffect(isDark) {
@@ -118,13 +137,13 @@ class MainActivity : ComponentActivity() {
         }
 
         SuperSPMTheme(
-            darkMode = settingsViewModel.effectiveDarkMode,
+            darkMode = isDark,
             followSystem = followSystem
         ) {
             AppNavHost(
                 hasLocationPermission = hasLocationPermission,
                 onPermissionRequest = { requestPermissions() },
-                isDark = if (followSystem) systemDarkMode else settingsViewModel.effectiveDarkMode
+                isDark = isDark
             )
         }
     }

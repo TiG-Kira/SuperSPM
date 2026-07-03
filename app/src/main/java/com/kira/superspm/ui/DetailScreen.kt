@@ -1,26 +1,25 @@
 package com.kira.superspm.ui
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -28,13 +27,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.background
 import com.kira.superspm.data.model.LocationPoint
 import com.kira.superspm.data.store.SpeedUnit
 import com.kira.superspm.viewmodel.DetailViewModel
 import com.kira.superspm.viewmodel.SettingsViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -45,7 +45,6 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailScreen(
     recordId: Long,
@@ -60,42 +59,40 @@ fun DetailScreen(
     }
 
     val record = viewModel.record
+    val scrollBehavior = MiuixScrollBehavior()
+    val backgroundColor = getPageBackgroundColor(isDark)
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(getPageBackgroundColor(isDark))
-            .padding(bottom = 80.dp)
-    ) {
-        item {
-            Row(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .padding(top = 56.dp, start = 16.dp, end = 16.dp, bottom = 0.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(width = 32.dp, height = 56.dp)
-                        .clickable { onBack() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "返回",
-                        tint = if (isDark) Color.White else Color.Black,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-            }
-        }
-
-        stickyHeader {
+    Scaffold(
+        topBar = {
             TopAppBar(
                 title = record?.name ?: "详情",
-                navigationIcon = {}
+                scrollBehavior = scrollBehavior,
+                color = backgroundColor,
+                navigationIcon = {
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .clickable { onBack() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "返回",
+                            tint = if (isDark) Color.White else Color.Black,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
             )
         }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(backgroundColor)
+                .padding(bottom = 80.dp),
+            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
+        ) {
 
         record?.let {
             item {
@@ -182,6 +179,7 @@ fun DetailScreen(
                     }
                 }
             }
+        }
         }
     }
 }
@@ -314,7 +312,7 @@ fun SpeedChart(points: List<LocationPoint>, unit: SpeedUnit) {
             val timeLabelCount = 5
             for (i in 0 until timeLabelCount) {
                 val index = i * (points.size - 1) / (timeLabelCount - 1)
-                val timeValue = index * 2
+                val timeValue = if (points.isNotEmpty()) (points[index].timestamp - points[0].timestamp) / 1000 else 0
                 Text(
                     text = "${timeValue}s",
                     style = TextStyle(fontSize = 10.sp, color = onSurfaceVariantSummary)

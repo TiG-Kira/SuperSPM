@@ -93,8 +93,8 @@ fun SettingsScreen(isDark: Boolean = false, navController: NavHostController) {
         item {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 SettingSwitchItem(
                     title = "暗色模式",
@@ -109,17 +109,19 @@ fun SettingsScreen(isDark: Boolean = false, navController: NavHostController) {
                     onCheckedChange = { viewModel.updateFollowSystem(it) },
                     enabled = !viewModel.powerSaving
                 )
-
-                SettingClickableItem(
-                    title = "速度单位",
-                    value = when (viewModel.speedUnit) {
-                        SpeedUnit.KMH -> "km/h"
-                        SpeedUnit.MS -> "m/s"
-                        SpeedUnit.MPH -> "mph"
-                    },
-                    onClick = { showSpeedUnitDialog = true }
-                )
             }
+        }
+
+        item {
+            SettingClickableItem(
+                title = "速度单位",
+                value = when (viewModel.speedUnit) {
+                    SpeedUnit.KMH -> "km/h"
+                    SpeedUnit.MS -> "m/s"
+                    SpeedUnit.MPH -> "mph"
+                },
+                onClick = { showSpeedUnitDialog = true }
+            )
         }
 
         item {
@@ -134,17 +136,19 @@ fun SettingsScreen(isDark: Boolean = false, navController: NavHostController) {
         }
 
         item {
+            SettingClickableItem(
+                title = "自定义位置刷新时间",
+                value = "${viewModel.refreshTime} 秒",
+                onClick = { showRefreshTimeDialog = true }
+            )
+        }
+
+        item {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                SettingClickableItem(
-                    title = "自定义位置刷新时间",
-                    value = "${viewModel.refreshTime} 秒",
-                    onClick = { showRefreshTimeDialog = true }
-                )
-
                 SettingSwitchItem(
                     title = "省电模式",
                     checked = viewModel.powerSaving,
@@ -166,17 +170,11 @@ fun SettingsScreen(isDark: Boolean = false, navController: NavHostController) {
         }
 
         item {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                SettingClickableItem(
-                    title = "关于",
-                    value = "v${getVersionName(context)}",
-                    onClick = { navController.navigate("about") }
-                )
-            }
+            SettingClickableItem(
+                title = "关于",
+                value = "v${getVersionName(context)}",
+                onClick = { navController.navigate("about") }
+            )
         }
 
         item {
@@ -407,14 +405,19 @@ fun SettingClickableItem(
     value: String = "",
     onClick: () -> Unit
 ) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp)
-            .clickable { onClick() },
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable(onClick = onClick)
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
         Text(
             text = title,
             style = TextStyle(
@@ -444,4 +447,5 @@ fun SettingClickableItem(
             )
         }
     }
+}
 }

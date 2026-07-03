@@ -15,8 +15,8 @@ android {
         applicationId = "com.kira.superspm"
         minSdk = Versions.minSdk
         targetSdk = Versions.targetSdk
-        versionCode = 2
-        versionName = "1.0.3"
+        versionCode = 4
+        versionName = "1.0.4"
     }
 
     buildTypes {

@@ -8,14 +8,14 @@ import top.yukonga.miuix.kmp.theme.ThemeController
 
 @Composable
 fun SuperSPMTheme(
-    darkMode: Boolean? = null,
+    darkMode: Boolean = false,
     followSystem: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val isDark = if (followSystem) {
         isSystemInDarkTheme()
     } else {
-        darkMode ?: false
+        darkMode
     }
     val mode = if (isDark) ColorSchemeMode.Dark else ColorSchemeMode.Light
     MiuixTheme(
