@@ -1,5 +1,9 @@
 [
     {
+        "merged": "com.kira.superspm.app-debug-63:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.kira.superspm.app-main-65:/drawable/ic_launcher_background.xml"
+    },
+    {
         "merged": "C:\\Users\\Kira\\.gradle\\daemon\\8.13\\com.kira.superspm.app-debug-63:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
         "source": "C:\\Users\\Kira\\.gradle\\daemon\\8.13\\com.kira.superspm.app-main-65:\\mipmap-anydpi-v26\\ic_launcher.xml"
     },
@@ -8,11 +12,19 @@
         "source": "C:\\Users\\Kira\\.gradle\\daemon\\8.13\\com.kira.superspm.app-main-65:\\drawable\\ic_launcher_foreground.xml"
     },
     {
+        "merged": "C:\\Users\\Kira\\.gradle\\daemon\\8.13\\com.kira.superspm.app-debug-63:\\drawable_ic_launcher_foreground.png.flat",
+        "source": "C:\\Users\\Kira\\.gradle\\daemon\\8.13\\com.kira.superspm.app-main-65:\\drawable\\ic_launcher_foreground.png"
+    },
+    {
         "merged": "C:\\Users\\Kira\\.gradle\\daemon\\8.13\\com.kira.superspm.app-debug-63:\\drawable_ic_launcher_background.xml.flat",
         "source": "C:\\Users\\Kira\\.gradle\\daemon\\8.13\\com.kira.superspm.app-main-65:\\drawable\\ic_launcher_background.xml"
     },
     {
         "merged": "com.kira.superspm.app-debug-63:/drawable_ic_launcher_foreground.xml.flat",
         "source": "com.kira.superspm.app-main-65:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.kira.superspm.app-debug-63:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.kira.superspm.app-main-65:/mipmap-anydpi-v26/ic_launcher.xml"
     }
 ]

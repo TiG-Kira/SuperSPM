@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:2:1-38:12
-INJECTED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:2:1-38:12
-INJECTED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:2:1-38:12
-INJECTED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:2:1-38:12
+ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:2:1-39:12
+INJECTED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:2:1-39:12
+INJECTED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:2:1-39:12
+INJECTED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:2:1-39:12
 MERGED from [androidx.navigation:navigation-common:2.8.3] C:\Users\Kira\.gradle\caches\8.13\transforms\953521ef1a914eef36cb284eb20947c1\transformed\navigation-common-2.8.3\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.navigation:navigation-runtime:2.8.3] C:\Users\Kira\.gradle\caches\8.13\transforms\64df59e359b828787046a12c87fd1c36\transformed\navigation-runtime-2.8.3\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.navigation:navigation-common-ktx:2.8.3] C:\Users\Kira\.gradle\caches\8.13\transforms\28ea0e565ad26433a32a0b19d543073c\transformed\navigation-common-ktx-2.8.3\AndroidManifest.xml:2:1-7:12
@@ -147,13 +147,17 @@ uses-permission#android.permission.POST_NOTIFICATIONS
 ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:11:5-77
 	android:name
 		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:11:22-74
-uses-feature#android.hardware.location.gps
-ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:13:5-66
+uses-permission#android.permission.POST_PROMOTED_NOTIFICATIONS
+ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:12:5-86
 	android:name
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:13:19-63
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:12:22-83
+uses-feature#android.hardware.location.gps
+ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:14:5-66
+	android:name
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:14:19-63
 application
-ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:15:5-37:19
-INJECTED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:15:5-37:19
+ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:16:5-38:19
+INJECTED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:16:5-38:19
 MERGED from [io.insert-koin:koin-android:3.5.6] C:\Users\Kira\.gradle\caches\8.13\transforms\bbdcb6d59a8c920244153db9926092a1\transformed\jetified-koin-android-3.5.6\AndroidManifest.xml:7:5-20
 MERGED from [io.insert-koin:koin-android:3.5.6] C:\Users\Kira\.gradle\caches\8.13\transforms\bbdcb6d59a8c920244153db9926092a1\transformed\jetified-koin-android-3.5.6\AndroidManifest.xml:7:5-20
 MERGED from [com.google.android.gms:play-services-location:21.4.0] C:\Users\Kira\.gradle\caches\8.13\transforms\e78ddb775e54c287233a9485aad87e57\transformed\jetified-play-services-location-21.4.0\AndroidManifest.xml:7:5-20
@@ -189,47 +193,47 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\Kira\.gradle\cache
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.13\transforms\00ff4b63c56b031c3fb02891dfbc3206\transformed\core-1.16.0\AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:20:9-35
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:21:9-35
 	android:label
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:19:9-41
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:20:9-41
 	tools:targetApi
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:22:9-29
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:23:9-29
 	android:icon
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:18:9-43
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:19:9-43
 	android:allowBackup
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:17:9-35
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:18:9-35
 	android:theme
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:21:9-46
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:22:9-46
 	android:name
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:16:9-36
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:17:9-36
 activity#com.kira.superspm.ui.MainActivity
-ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:23:9-32:20
+ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:24:9-33:20
 	android:label
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:26:13-45
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:27:13-45
 	android:exported
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:25:13-36
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:26:13-36
 	android:theme
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:27:13-50
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:28:13-50
 	android:name
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:24:13-44
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:25:13-44
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:28:13-31:29
+ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:29:13-32:29
 action#android.intent.action.MAIN
-ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:29:17-69
+ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:30:17-69
 	android:name
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:29:25-66
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:30:25-66
 category#android.intent.category.LAUNCHER
-ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:30:17-77
+ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:31:17-77
 	android:name
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:30:27-74
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:31:27-74
 service#com.kira.superspm.service.LocationService
-ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:33:9-36:40
+ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:34:9-37:40
 	android:exported
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:36:13-37
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:37:13-37
 	android:foregroundServiceType
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:35:13-53
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:36:13-53
 	android:name
-		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:34:13-52
+		ADDED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:35:13-52
 uses-sdk
 INJECTED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml

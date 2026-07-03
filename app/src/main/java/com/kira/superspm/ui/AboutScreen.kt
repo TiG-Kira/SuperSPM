@@ -3,6 +3,7 @@ package com.kira.superspm.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.*
@@ -12,6 +13,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import com.kira.superspm.R
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -64,6 +67,8 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
         )
     }
 
+    val backgroundColor = getPageBackgroundColor(isDark)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -80,7 +85,7 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
                 TopAppBar(
                     title = "关于",
                     scrollBehavior = scrollBehavior,
-                    color = Color.Transparent,
+                    color = backgroundColor,
                     navigationIcon = {
                         Box(
                             modifier = Modifier
@@ -91,7 +96,7 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
                             Icon(
                                 imageVector = Icons.Filled.ArrowBack,
                                 contentDescription = "返回",
-                                tint = if (isDark) Color.White else Color.Black,
+                                tint = MiuixTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -101,8 +106,11 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
         ) { paddingValues ->
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = paddingValues.calculateTopPadding()),
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = 80.dp
+                ),
                 verticalArrangement = Arrangement.Top
             ) {
                 item {
@@ -116,25 +124,15 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(CircleShape)
-                                .background(Color.White),
+                                .background(Color(0xFFFF69B4)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(70.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFFFF6600)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "S",
-                                    style = TextStyle(
-                                        fontSize = 36.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
-                                    )
-                                )
-                            }
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                                contentDescription = "Logo",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(60.dp)
+                            )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(

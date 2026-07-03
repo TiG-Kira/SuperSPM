@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -17,6 +18,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.kira.superspm.R
 import com.kira.superspm.data.model.LocationPoint
+import com.kira.superspm.ui.MainActivity
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -406,21 +408,75 @@ class LocationService : Service(), LocationListener {
     }
 
     private fun createNotification(): Notification {
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(getString(R.string.app_name))
+        val intent = createLaunchIntent()
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        return buildNotificationBuilder(pendingIntent)
             .setContentText(getString(R.string.recording))
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .build()
     }
 
     fun updateNotification() {
-        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(getString(R.string.app_name))
-            .setContentText("速度: ${String.format("%.0f", currentSpeed)} km/h | 最高: ${String.format("%.0f", maxSpeed)} km/h | 里程: ${String.format("%.2f", totalDistance)} km | 均速: ${String.format("%.0f", avgSpeed)} km/h")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+        val intent = createLaunchIntent()
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notificationBuilder = buildNotificationBuilder(pendingIntent)
+            .setContentText("速度: ${String.format("%.0f", currentSpeed)} km/h")
+
+        val bigText = String.format(
+            "当前速度: %.0f km/h | 最高速度: %.0f km/h\n平均速度: %.0f km/h | 总里程: %.2f km\n点击通知进入测速页。",
+            currentSpeed, maxSpeed, avgSpeed, totalDistance
+        )
+        notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
 
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
+    private fun buildNotificationBuilder(pendingIntent: PendingIntent): NotificationCompat.Builder {
+        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name) + "正在测速...")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentIntent(pendingIntent)
+            .setOngoing(true)
+
+        if (android.os.Build.VERSION.SDK_INT >= 36) {
+            notificationBuilder.setStyle(NotificationCompat.BigTextStyle())
+            
+            try {
+                val method = NotificationCompat.Builder::class.java.getMethod(
+                    "setRequestPromotedOngoing", Boolean::class.javaPrimitiveType
+                )
+                method.invoke(notificationBuilder, true)
+            } catch (e: Exception) {
+            }
+
+            try {
+                val method = NotificationCompat.Builder::class.java.getMethod(
+                    "setShortCriticalText", String::class.java
+                )
+                method.invoke(notificationBuilder, "${String.format("%.0f", currentSpeed)} km/h")
+            } catch (e: Exception) {
+            }
+        }
+
+        return notificationBuilder
+    }
+
+    private fun createLaunchIntent(): Intent {
+        val intent = packageManager.getLaunchIntentForPackage(packageName)
+        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        return intent ?: Intent(this, MainActivity::class.java)
     }
 
     fun getPathPoints(): List<LocationPoint> {

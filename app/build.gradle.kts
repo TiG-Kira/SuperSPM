@@ -15,14 +15,23 @@ android {
         applicationId = "com.kira.superspm"
         minSdk = Versions.minSdk
         targetSdk = Versions.targetSdk
-        versionCode = 4
-        versionName = "1.0.4"
+        versionCode = 5
+        versionName = "1.0.5"
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+
+    applicationVariants.all {
+        val variantName = name
+        outputs.all {
+            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            val fileName = "SuperSPM_${variantName}_${versionName}.apk"
+            output.outputFileName = fileName
         }
     }
 

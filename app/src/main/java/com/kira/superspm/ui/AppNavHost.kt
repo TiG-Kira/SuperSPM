@@ -70,19 +70,30 @@ fun AppNavHost(
             composable("about") {
                 AboutScreen(
                     isDark = isDark,
-                    onBack = { navController.popBackStack() },
+                    onBack = { 
+                        navController.navigate("settings") {
+                            popUpTo("settings") { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    },
                     onOpenSourceClick = { navController.navigate("openSource") }
                 )
             }
             composable("openSource") {
                 OpenSourceScreen(isDark = isDark) {
-                    navController.popBackStack()
+                    navController.navigate("settings") {
+                        popUpTo("settings") { inclusive = false }
+                        launchSingleTop = true
+                    }
                 }
             }
             composable("detail/{recordId}") { backStackEntry ->
                 val recordId = backStackEntry.arguments?.getString("recordId")?.toLongOrNull() ?: 0L
                 DetailScreen(recordId = recordId, onBack = {
-                    navController.popBackStack()
+                    navController.navigate("history") {
+                        popUpTo("history") { inclusive = false }
+                        launchSingleTop = true
+                    }
                 }, isDark = isDark)
             }
         }
