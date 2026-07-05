@@ -2,8 +2,12 @@ package com.kira.superspm.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +58,7 @@ import com.kira.superspm.viewmodel.SpeedometerViewModel
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -65,6 +71,9 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.rounded.CheckCircleOutline
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material.icons.rounded.ErrorOutline
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
 import androidx.compose.runtime.rememberCoroutineScope
@@ -93,6 +102,7 @@ fun SpeedometerScreen(
     val currentLatitude = viewModel.currentLatitude
     val currentLongitude = viewModel.currentLongitude
     val currentAccuracy = viewModel.currentAccuracy
+    var gpsAccuracy by remember { mutableStateOf<Float?>(null) }
 
     var secondsUntilRefresh by remember { mutableStateOf(0) }
     var showPermissionDialog by remember { mutableStateOf(false) }
@@ -113,11 +123,23 @@ fun SpeedometerScreen(
             viewModel.updateSpeed(speed)
         }
 
+        LocationService.onGpsSignalUpdate = { accuracy ->
+            gpsAccuracy = accuracy
+        }
+
+        LocationService.onServiceStopped = {
+            viewModel.reset()
+        }
+
+        LocationService.requestSingleUpdate(context)
+
         LocationService.onError = { message ->
             errorMessage = message
             showErrorDialog = true
         }
+    }
 
+    DisposableEffect(Unit) {
         if (LocationService.isRunning() && LocationService.isRecording()) {
             viewModel.restoreFromService(
                 LocationService.getCurrentSpeed(),
@@ -126,7 +148,10 @@ fun SpeedometerScreen(
                 LocationService.getTotalDistance(),
                 LocationService.getDataPoints()
             )
+        } else if (status != SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
+            viewModel.reset()
         }
+        onDispose { }
     }
 
     LaunchedEffect(status, settingsViewModel.refreshTime) {
@@ -225,17 +250,11 @@ fun SpeedometerScreen(
                         }
                         IconButton(
                             onClick = {
-                                if (viewModel.isRecording) {
-                                    coroutineScope.launch {
-                                        val record = viewModel.stopRecording()
-                                        if (record != null) {
-                                            onRecordSaved()
-                                        }
-                                        viewModel.finishRecording()
-                                    }
-                                } else {
-                                    viewModel.reset()
+                                val record = LocationService.finishRecording()
+                                if (record != null) {
+                                    onRecordSaved()
                                 }
+                                viewModel.reset()
                                 context.stopService(android.content.Intent(context, LocationService::class.java))
                             },
                             modifier = Modifier.padding(end = 8.dp)
@@ -307,31 +326,122 @@ fun SpeedometerScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        StatCard(
-                            title = context.getString(R.string.max_speed),
-                            value = formatSpeed(maxSpeed, settingsViewModel.speedUnit),
-                            unit = getSpeedUnitString(settingsViewModel.speedUnit)
-                        )
-                        StatCard(
-                            title = context.getString(R.string.total_distance),
-                            value = formatDistance(totalDistance),
-                            unit = context.getString(R.string.km)
-                        )
-                        StatCard(
-                            title = context.getString(R.string.avg_speed),
-                            value = formatSpeed(avgSpeed, settingsViewModel.speedUnit),
-                            unit = getSpeedUnitString(settingsViewModel.speedUnit)
-                        )
+                        GpsSignalCard(accuracy = gpsAccuracy)
+
+                        Column(
+                            modifier = Modifier.height(160.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth().weight(1f)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = context.getString(R.string.max_speed),
+                                            style = TextStyle(
+                                                fontSize = 11.sp,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                            )
+                                        )
+                                        Text(
+                                            text = formatSpeed(maxSpeed, settingsViewModel.speedUnit),
+                                            style = TextStyle(
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MiuixTheme.colorScheme.onSurface
+                                            )
+                                        )
+                                        Text(
+                                            text = getSpeedUnitString(settingsViewModel.speedUnit),
+                                            style = TextStyle(
+                                                fontSize = 9.sp,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                            )
+                                        )
+                                    }
+                                    Column(
+                                        modifier = Modifier.padding(8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = context.getString(R.string.avg_speed),
+                                            style = TextStyle(
+                                                fontSize = 11.sp,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                            )
+                                        )
+                                        Text(
+                                            text = formatSpeed(avgSpeed, settingsViewModel.speedUnit),
+                                            style = TextStyle(
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MiuixTheme.colorScheme.onSurface
+                                            )
+                                        )
+                                        Text(
+                                            text = getSpeedUnitString(settingsViewModel.speedUnit),
+                                            style = TextStyle(
+                                                fontSize = 9.sp,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                            Card(
+                                modifier = Modifier.fillMaxWidth().weight(1f)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = context.getString(R.string.total_distance),
+                                        style = TextStyle(
+                                            fontSize = 11.sp,
+                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                        )
+                                    )
+                                    Text(
+                                        text = formatDistance(totalDistance),
+                                        style = TextStyle(
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MiuixTheme.colorScheme.onSurface
+                                        )
+                                    )
+                                    Text(
+                                        text = context.getString(R.string.km),
+                                        style = TextStyle(
+                                            fontSize = 9.sp,
+                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                        )
+                                    )
+                                }
+                            }
+                        }
                     }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
                 item {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(horizontal = 16.dp)
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp)
@@ -378,20 +488,6 @@ fun SpeedometerScreen(
                             DividerRow(context.getString(R.string.latitude), currentLatitude?.toString() ?: "--")
                             DividerRow(context.getString(R.string.longitude), currentLongitude?.toString() ?: "--")
                             DividerRow(context.getString(R.string.accuracy), currentAccuracy?.let { "$it m" } ?: "--")
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = context.getString(R.string.gps_signal),
-                                    style = TextStyle(fontSize = 12.sp)
-                                )
-                                GpsStrengthIndicator(accuracy = currentAccuracy)
-                            }
                         }
                     }
                 }
@@ -618,42 +714,95 @@ fun SpeedometerGauge(speed: Double) {
 }
 
 @Composable
-fun GpsStrengthIndicator(accuracy: Float?) {
+fun GpsSignalCard(accuracy: Float?) {
     val strength = when {
         accuracy == null -> 0
-        accuracy < 10 -> 4
-        accuracy < 20 -> 3
+        accuracy < 10 -> 5
+        accuracy < 20 -> 4
+        accuracy < 30 -> 3
         accuracy < 50 -> 2
         else -> 1
     }
 
-    val inactiveColor = MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.3f)
+    val cardColor: Color
+    val iconColor: Color
+    val title: String
+    val summary: String
+    val showWarning: Boolean
 
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    when (strength) {
+        4, 5 -> {
+            cardColor = Color(0xFFDFFAE4)
+            iconColor = Color(0xFF36D167)
+            title = "GPS 正常"
+            summary = "信号: $strength"
+            showWarning = false
+        }
+        3 -> {
+            cardColor = Color(0xFFFFF9C4)
+            iconColor = Color(0xFFFDD835)
+            title = "GPS 信号较弱"
+            summary = "信号: $strength"
+            showWarning = false
+        }
+        else -> {
+            cardColor = Color(0xFFFFEBEE)
+            iconColor = Color(0xFFFF5252)
+            title = "GPS 信号差"
+            summary = "信号: $strength"
+            showWarning = true
+        }
+    }
+
+    Card(
+        modifier = Modifier
+            .width(180.dp)
+            .height(160.dp),
+        colors = CardDefaults.defaultColors(color = cardColor)
     ) {
-        for (i in 1..4) {
-            val color = if (i <= strength) {
-                when (strength) {
-                    1 -> Color(0xFFFF1744)
-                    2 -> Color(0xFFFFAB00)
-                    3 -> Color(0xFF00C853)
-                    else -> Color(0xFF00C853)
-                }
-            } else {
-                inactiveColor
-            }
+        Box(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier
-                    .size(8.dp)
-                    .padding(1.dp),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .offset(38.dp, 45.dp),
+                contentAlignment = Alignment.BottomEnd
             ) {
-                Canvas(modifier = Modifier.size(8.dp)) {
-                    drawRect(
-                        color = color,
-                        size = Size(8.dp.toPx(), 8.dp.toPx()),
-                        topLeft = Offset(0f, 0f)
+                Icon(
+                    modifier = Modifier.size(120.dp),
+                    imageVector = when (strength) {
+                        4, 5 -> Icons.Rounded.CheckCircleOutline
+                        3 -> Icons.Rounded.Warning
+                        else -> Icons.Rounded.ErrorOutline
+                    },
+                    tint = iconColor.copy(alpha = 0.8f),
+                    contentDescription = null
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(all = 16.dp)
+            ) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = summary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                )
+                if (showWarning) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "速度和位置测量可能不准确",
+                        fontSize = 12.sp,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                     )
                 }
             }
@@ -662,11 +811,9 @@ fun GpsStrengthIndicator(accuracy: Float?) {
 }
 
 @Composable
-fun StatCard(title: String, value: String, unit: String) {
+fun StatCard(title: String, value: String, unit: String, compact: Boolean = false) {
     Card(
         modifier = Modifier
-            .width(100.dp)
-            .height(80.dp)
             .padding(4.dp)
     ) {
         Column(
@@ -679,14 +826,14 @@ fun StatCard(title: String, value: String, unit: String) {
             Text(
                 text = title,
                 style = TextStyle(
-                    fontSize = 12.sp,
+                    fontSize = if (compact) 11.sp else 12.sp,
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                 )
             )
             Text(
                 text = value,
                 style = TextStyle(
-                    fontSize = 20.sp,
+                    fontSize = if (compact) 18.sp else 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MiuixTheme.colorScheme.onSurface
                 )
@@ -694,7 +841,7 @@ fun StatCard(title: String, value: String, unit: String) {
             Text(
                 text = unit,
                 style = TextStyle(
-                    fontSize = 10.sp,
+                    fontSize = if (compact) 9.sp else 10.sp,
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                 )
             )

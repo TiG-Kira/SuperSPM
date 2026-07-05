@@ -39,7 +39,7 @@ import kotlinx.coroutines.launch
 import com.kira.superspm.utils.UpdateChecker
 
 @Composable
-fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Unit) {
+fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit, onOpenSourceClick: () -> Unit) {
     val context = LocalContext.current
     val scrollBehavior = MiuixScrollBehavior()
     val scope = rememberCoroutineScope()
@@ -280,6 +280,10 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
                 }
 
                 item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                item {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -306,15 +310,28 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                androidx.compose.material3.CircularProgressIndicator(
-                                    modifier = Modifier.size(16.dp),
-                                    strokeWidth = 2.dp,
-                                    color = MiuixTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = if (checkingUpdate) "检查中..." else "检查更新",
-                                    style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                                )
+                                if (checkingUpdate) {
+                                    androidx.compose.material3.CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MiuixTheme.colorScheme.primary
+                                    )
+                                }
+                                Column {
+                                    Text(
+                                        text = "检查更新",
+                                        style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                    )
+                                    if (hasUpdate) {
+                                        Text(
+                                            text = "有新版本",
+                                            style = TextStyle(
+                                                fontSize = 13.sp,
+                                                color = MiuixTheme.colorScheme.error
+                                            )
+                                        )
+                                    }
+                                }
                             }
                             Icon(
                                 imageVector = Icons.Filled.ArrowRight,

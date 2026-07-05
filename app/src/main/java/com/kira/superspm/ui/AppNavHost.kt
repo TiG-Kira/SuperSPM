@@ -23,6 +23,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import com.kira.superspm.utils.UpdateChecker
+import kotlinx.coroutines.launch
 
 @Composable
 fun getPageBackgroundColor(isDark: Boolean): Color {
@@ -45,6 +53,25 @@ fun AppNavHost(
     val baseRoute = currentRoute?.split("/")?.firstOrNull() ?: currentRoute
 
     val backgroundColor = getPageBackgroundColor(isDark)
+    val scope = rememberCoroutineScope()
+
+    var hasUpdate by remember { mutableStateOf(false) }
+    var showRedDot by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        scope.launch {
+            val context = navController.context
+            val currentVersion = try {
+                val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+                packageInfo?.versionName ?: "1.0.0"
+            } catch (e: Exception) {
+                "1.0.0"
+            }
+            val result = UpdateChecker.checkForUpdates(currentVersion)
+            hasUpdate = result.hasUpdate
+            showRedDot = result.hasUpdate
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
         NavHost(
@@ -65,11 +92,18 @@ fun AppNavHost(
                 }, isDark = isDark)
             }
             composable("settings") {
-                SettingsScreen(isDark = isDark, navController = navController)
+                SettingsScreen(
+                    isDark = isDark,
+                    navController = navController,
+                    hasUpdate = hasUpdate,
+                    showRedDot = showRedDot,
+                    onRedDotConsumed = { showRedDot = false }
+                )
             }
             composable("about") {
                 AboutScreen(
                     isDark = isDark,
+                    hasUpdate = hasUpdate,
                     onBack = { 
                         navController.navigate("settings") {
                             popUpTo("settings") { inclusive = false }
@@ -81,8 +115,8 @@ fun AppNavHost(
             }
             composable("openSource") {
                 OpenSourceScreen(isDark = isDark) {
-                    navController.navigate("settings") {
-                        popUpTo("settings") { inclusive = false }
+                    navController.navigate("about") {
+                        popUpTo("about") { inclusive = false }
                         launchSingleTop = true
                     }
                 }

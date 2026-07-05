@@ -19,8 +19,14 @@ import androidx.core.content.ContextCompat
 import com.kira.superspm.R
 import com.kira.superspm.data.model.LocationPoint
 import com.kira.superspm.ui.MainActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.koin.android.ext.android.inject
 
 class LocationService : Service(), LocationListener {
     private lateinit var locationManager: LocationManager
@@ -28,6 +34,7 @@ class LocationService : Service(), LocationListener {
     private var lastSpeed = 0.0
     private var idleStartTime: Long = 0
     private var isRunning = false
+    private val recordRepository by inject<com.kira.superspm.data.repository.RecordRepository>()
     private var lastPositionUpdateTime = 0L
 
     var currentSpeed = 0.0
@@ -58,6 +65,8 @@ class LocationService : Service(), LocationListener {
         var onSpeedUpdate: ((speed: Double) -> Unit)? = null
         var onStatusChange: ((isGpsActive: Boolean) -> Unit)? = null
         var onError: ((errorMessage: String) -> Unit)? = null
+        var onGpsSignalUpdate: ((accuracy: Float) -> Unit)? = null
+        var onServiceStopped: (() -> Unit)? = null
         var currentInterval = 1000L
         var currentFastestInterval = 500L
         var positionRefreshInterval = 120000L
@@ -70,6 +79,14 @@ class LocationService : Service(), LocationListener {
         fun getAvgSpeed(): Double = instance?.avgSpeed ?: 0.0
         fun getTotalDistance(): Double = instance?.totalDistance ?: 0.0
         fun getDataPoints(): Int = instance?.dataPoints ?: 0
+
+        fun stopRecording(): com.kira.superspm.data.model.LocationRecord? {
+            return instance?.finishRecording()
+        }
+
+        fun finishRecording(): com.kira.superspm.data.model.LocationRecord? {
+            return instance?.finishRecording()
+        }
 
         fun updateSettings(powerSaving: Boolean, refreshTimeSec: Int) {
             currentInterval = if (powerSaving) 10000L else 1000L
@@ -95,6 +112,7 @@ class LocationService : Service(), LocationListener {
                                 location.speed * 3.6,
                                 location.accuracy
                             )
+                            onGpsSignalUpdate?.invoke(location.accuracy)
                         }
 
                         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
@@ -118,6 +136,7 @@ class LocationService : Service(), LocationListener {
                                 location.speed * 3.6,
                                 location.accuracy
                             )
+                            onGpsSignalUpdate?.invoke(location.accuracy)
                         }
 
                         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
@@ -140,6 +159,12 @@ class LocationService : Service(), LocationListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == "STOP_RECORDING") {
+            finishRecording()
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         startForeground(NOTIFICATION_ID, createNotification())
         
         if (!checkPermissions()) {
@@ -236,6 +261,9 @@ class LocationService : Service(), LocationListener {
                 dataPoints = dataPoints,
                 pathData = kotlinx.serialization.json.Json.encodeToString(pathPoints)
             )
+            CoroutineScope(Dispatchers.IO).launch {
+                recordRepository.insertRecord(record)
+            }
             resetRecording()
             recordingCallback?.onRecordSaved()
             record
@@ -260,7 +288,15 @@ class LocationService : Service(), LocationListener {
     }
 
     private fun generateRecordName(): String {
-        return "记录 ${System.currentTimeMillis()}"
+        return try {
+            val records = kotlinx.coroutines.runBlocking<List<com.kira.superspm.data.model.LocationRecord>> {
+                recordRepository.allRecords.first()
+            }
+            val count = records.size + 1
+            "记录 $count"
+        } catch (e: Exception) {
+            "记录 ${System.currentTimeMillis()}"
+        }
     }
 
     private fun calculateDistance(point1: LocationPoint, point2: LocationPoint): Double {
@@ -334,6 +370,7 @@ class LocationService : Service(), LocationListener {
         }
 
         onSpeedUpdate?.invoke(speed)
+        onGpsSignalUpdate?.invoke(location.accuracy)
 
         val now = System.currentTimeMillis()
         if (now - lastPositionUpdateTime >= positionRefreshInterval) {
@@ -400,9 +437,10 @@ class LocationService : Service(), LocationListener {
         val channel = NotificationChannel(
             CHANNEL_ID,
             "位置服务",
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_LOW
         )
         channel.description = "显示实时测速信息"
+        channel.setSound(null, null)
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
     }
@@ -416,8 +454,19 @@ class LocationService : Service(), LocationListener {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val stopIntent = Intent(this, LocationService::class.java).apply {
+            action = "STOP_RECORDING"
+        }
+        val stopPendingIntent = PendingIntent.getService(
+            this,
+            1,
+            stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         return buildNotificationBuilder(pendingIntent)
             .setContentText(getString(R.string.recording))
+            .addAction(0, "停止", stopPendingIntent)
             .build()
     }
 
@@ -430,8 +479,19 @@ class LocationService : Service(), LocationListener {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val stopIntent = Intent(this, LocationService::class.java).apply {
+            action = "STOP_RECORDING"
+        }
+        val stopPendingIntent = PendingIntent.getService(
+            this,
+            1,
+            stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notificationBuilder = buildNotificationBuilder(pendingIntent)
             .setContentText("速度: ${String.format("%.0f", currentSpeed)} km/h")
+            .addAction(0, "停止", stopPendingIntent)
 
         val bigText = String.format(
             "当前速度: %.0f km/h | 最高速度: %.0f km/h\n平均速度: %.0f km/h | 总里程: %.2f km\n点击通知进入测速页。",
@@ -445,7 +505,7 @@ class LocationService : Service(), LocationListener {
 
     private fun buildNotificationBuilder(pendingIntent: PendingIntent): NotificationCompat.Builder {
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(getString(R.string.app_name) + "正在测速...")
+            .setContentTitle("测速中")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -491,6 +551,7 @@ class LocationService : Service(), LocationListener {
             locationManager.removeUpdates(this)
         } catch (e: Exception) {
         }
+        onServiceStopped?.invoke()
     }
 
     override fun onBind(intent: Intent?): IBinder? {

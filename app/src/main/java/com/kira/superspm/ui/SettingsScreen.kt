@@ -49,36 +49,25 @@ import org.koin.androidx.compose.getViewModel
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.compose.ui.platform.LocalContext
-import com.kira.superspm.utils.UpdateChecker
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 
 @Composable
-fun SettingsScreen(isDark: Boolean = false, navController: NavHostController) {
+fun SettingsScreen(
+    isDark: Boolean = false,
+    navController: NavHostController,
+    hasUpdate: Boolean = false,
+    showRedDot: Boolean = false,
+    onRedDotConsumed: () -> Unit = {}
+) {
     val viewModel: SettingsViewModel = getViewModel()
     val historyViewModel: HistoryViewModel = getViewModel()
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
     var showRefreshTimeDialog by remember { mutableStateOf(false) }
     var showSpeedUnitDialog by remember { mutableStateOf(false) }
     var showClearAllDialog by remember { mutableStateOf(false) }
-    var hasUpdate by remember { mutableStateOf(false) }
-    var showRedDot by remember { mutableStateOf(false) }
 
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = getPageBackgroundColor(isDark)
-
-    LaunchedEffect(Unit) {
-        delay(500)
-        scope.launch {
-            val result = UpdateChecker.checkForUpdates(getVersionName(context))
-            hasUpdate = result.hasUpdate
-            showRedDot = result.hasUpdate
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -178,6 +167,49 @@ fun SettingsScreen(isDark: Boolean = false, navController: NavHostController) {
 
             item {
                 Text(
+                    text = "历史记录",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                    ),
+                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 8.dp)
+                )
+            }
+
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .clickable { showClearAllDialog = true }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "清空全部记录",
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MiuixTheme.colorScheme.error
+                            )
+                        )
+                        Icon(
+                            imageVector = Icons.Filled.ArrowRight,
+                            contentDescription = "箭头",
+                            tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
+
+            item {
+                Text(
                     text = "关于",
                     style = TextStyle(
                         fontSize = 14.sp,
@@ -193,7 +225,7 @@ fun SettingsScreen(isDark: Boolean = false, navController: NavHostController) {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .clickable {
-                            showRedDot = false
+                            onRedDotConsumed()
                             navController.navigate("about")
                         }
                 ) {
@@ -226,7 +258,7 @@ fun SettingsScreen(isDark: Boolean = false, navController: NavHostController) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            if (hasUpdate) {
+                            if (hasUpdate && showRedDot) {
                                 Box(
                                     modifier = Modifier
                                         .size(8.dp)
@@ -241,38 +273,6 @@ fun SettingsScreen(isDark: Boolean = false, navController: NavHostController) {
                                 modifier = Modifier.size(24.dp)
                             )
                         }
-                    }
-                }
-            }
-
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clickable { showClearAllDialog = true }
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "清空全部记录",
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MiuixTheme.colorScheme.error
-                            )
-                        )
-                        Icon(
-                            imageVector = Icons.Filled.ArrowRight,
-                            contentDescription = "箭头",
-                            tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                            modifier = Modifier.size(24.dp)
-                        )
                     }
                 }
             }

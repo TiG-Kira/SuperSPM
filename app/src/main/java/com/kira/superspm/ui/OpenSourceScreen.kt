@@ -60,7 +60,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
                 .fillMaxSize()
                 .background(backgroundColor)
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding(), bottom = 80.dp)
+            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding(), bottom = 120.dp)
         ) {
             item {
                 OpenSourceCard(
