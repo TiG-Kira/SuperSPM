@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.kira.superspm.app-mergeDebugResources-61:/values-v30/values-v30.xml",
+            "outputFile": "com.kira.superspm.app-mergeDebugResources-2:/values-v30/values-v30.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.13\\transforms\\e56f32ec8d77632cd3d92493fa63a90a\\transformed\\jetified-material3\\res\\values-v30\\values-v30.xml",
+                    "source": "D:\\Programs\\gradle-9.6.0\\caches\\8.13\\transforms\\e56f32ec8d77632cd3d92493fa63a90a\\transformed\\jetified-material3\\res\\values-v30\\values-v30.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

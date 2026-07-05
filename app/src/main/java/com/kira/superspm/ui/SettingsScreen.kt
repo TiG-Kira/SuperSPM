@@ -2,6 +2,7 @@ package com.kira.superspm.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,26 +30,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
 import androidx.navigation.NavHostController
-import com.kira.superspm.data.store.SpeedUnit
-import com.kira.superspm.viewmodel.HistoryViewModel
 import com.kira.superspm.viewmodel.SettingsViewModel
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import androidx.compose.ui.window.Dialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowRight
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
-import android.content.Context
-import android.content.pm.PackageManager
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun SettingsScreen(
@@ -59,12 +56,6 @@ fun SettingsScreen(
     onRedDotConsumed: () -> Unit = {}
 ) {
     val viewModel: SettingsViewModel = getViewModel()
-    val historyViewModel: HistoryViewModel = getViewModel()
-    val context = LocalContext.current
-
-    var showRefreshTimeDialog by remember { mutableStateOf(false) }
-    var showSpeedUnitDialog by remember { mutableStateOf(false) }
-    var showClearAllDialog by remember { mutableStateOf(false) }
 
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = getPageBackgroundColor(isDark)
@@ -87,495 +78,116 @@ fun SettingsScreen(
         ) {
 
             item {
-                Text(
-                    text = "外观",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                    ),
-                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 8.dp)
+                SettingNavItem(
+                    icon = Icons.Filled.Palette,
+                    title = "外观",
+                    subtitle = "暗色模式、速度单位显示",
+                    onClick = { navController.navigate("settings/appearance") }
                 )
             }
 
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    SettingSwitchItem(
-                        title = "暗色模式",
-                        checked = viewModel.effectiveDarkMode,
-                        onCheckedChange = { viewModel.updateDarkMode(it) },
-                        enabled = !viewModel.followSystem && !viewModel.powerSaving
-                    )
-
-                    SettingSwitchItem(
-                        title = "跟随系统",
-                        checked = viewModel.followSystem,
-                        onCheckedChange = { viewModel.updateFollowSystem(it) },
-                        enabled = !viewModel.powerSaving
-                    )
-                }
-            }
-
-            item {
-                SettingClickableItem(
-                    title = "速度单位",
-                    value = when (viewModel.speedUnit) {
-                        SpeedUnit.KMH -> "km/h"
-                        SpeedUnit.MS -> "m/s"
-                        SpeedUnit.MPH -> "mph"
-                    },
-                    onClick = { showSpeedUnitDialog = true }
+                SettingNavItem(
+                    icon = Icons.Filled.LocationOn,
+                    title = "位置",
+                    subtitle = "位置刷新、省电模式",
+                    onClick = { navController.navigate("settings/location") }
                 )
             }
 
             item {
-                Text(
-                    text = "位置",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                    ),
-                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 8.dp)
+                SettingNavItem(
+                    icon = Icons.Filled.History,
+                    title = "历史记录",
+                    subtitle = "记录管理、数据统计",
+                    onClick = { navController.navigate("settings/history") }
                 )
             }
 
             item {
-                SettingClickableItem(
-                    title = "自定义位置刷新时间",
-                    value = "${viewModel.refreshTime} 秒",
-                    onClick = { showRefreshTimeDialog = true }
-                )
-            }
-
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    SettingSwitchItem(
-                        title = "省电模式",
-                        checked = viewModel.powerSaving,
-                        onCheckedChange = { viewModel.updatePowerSaving(it) },
-                        description = if (viewModel.powerSaving) "暗色模式自动启用，刷新间隔延长" else null
-                    )
-                }
-            }
-
-            item {
-                Text(
-                    text = "历史记录",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                    ),
-                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 8.dp)
-                )
-            }
-
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clickable { showClearAllDialog = true }
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "清空全部记录",
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MiuixTheme.colorScheme.error
-                            )
-                        )
-                        Icon(
-                            imageVector = Icons.Filled.ArrowRight,
-                            contentDescription = "箭头",
-                            tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                            modifier = Modifier.size(24.dp)
-                        )
+                SettingNavItem(
+                    icon = Icons.Filled.Info,
+                    title = "关于",
+                    subtitle = if (hasUpdate) "发现新版本" else "应用信息、开源项目",
+                    hasRedDot = hasUpdate && showRedDot,
+                    onClick = {
+                        onRedDotConsumed()
+                        navController.navigate("about")
                     }
-                }
-            }
-
-            item {
-                Text(
-                    text = "关于",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                    ),
-                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 8.dp)
                 )
             }
 
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clickable {
-                            onRedDotConsumed()
-                            navController.navigate("about")
-                        }
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "关于",
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MiuixTheme.colorScheme.onSurface
-                                )
-                            )
-                            if (hasUpdate) {
-                                Text(
-                                    text = "发现新版本",
-                                    style = TextStyle(
-                                        fontSize = 13.sp,
-                                        color = MiuixTheme.colorScheme.error
-                                    )
-                                )
-                            }
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (hasUpdate && showRedDot) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .background(Color(0xFFFF1744))
-                                        .clip(CircleShape)
-                                )
-                            }
-                            Icon(
-                                imageVector = Icons.Filled.ArrowRight,
-                                contentDescription = "箭头",
-                                tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-                }
-            }
-
-            item {
-                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(80.dp))
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(120.dp))
             }
         }
-    }
-
-    if (showRefreshTimeDialog) {
-        Dialog(
-            onDismissRequest = { showRefreshTimeDialog = false }
-        ) {
-            Card {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "设置刷新时间",
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MiuixTheme.colorScheme.onSurface
-                        ),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    Column(
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    ) {
-                        listOf(30, 60, 120, 300).forEach { time ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp)
-                                    .clickable {
-                                        viewModel.updateRefreshTime(time)
-                                        showRefreshTimeDialog = false
-                                    },
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "$time 秒",
-                                    style = TextStyle(
-                                        fontSize = 16.sp,
-                                        color = MiuixTheme.colorScheme.onSurface
-                                    )
-                                )
-                                if (viewModel.refreshTime == time) {
-                                    Text(
-                                        text = "✓",
-                                        style = TextStyle(
-                                            fontSize = 18.sp,
-                                            color = MiuixTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    Button(
-                        onClick = { showRefreshTimeDialog = false },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            color = MiuixTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Text(text = "取消")
-                    }
-                }
-            }
-        }
-    }
-
-    if (showSpeedUnitDialog) {
-        Dialog(
-            onDismissRequest = { showSpeedUnitDialog = false }
-        ) {
-            Card {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "选择速度单位",
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MiuixTheme.colorScheme.onSurface
-                        ),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    Column(
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    ) {
-                        listOf(SpeedUnit.KMH, SpeedUnit.MS, SpeedUnit.MPH).forEach { unit ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp)
-                                    .clickable {
-                                        viewModel.updateSpeedUnit(unit)
-                                        showSpeedUnitDialog = false
-                                    },
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = when (unit) {
-                                        SpeedUnit.KMH -> "km/h"
-                                        SpeedUnit.MS -> "m/s"
-                                        SpeedUnit.MPH -> "mph"
-                                    },
-                                    style = TextStyle(
-                                        fontSize = 16.sp,
-                                        color = MiuixTheme.colorScheme.onSurface
-                                    )
-                                )
-                                if (viewModel.speedUnit == unit) {
-                                    Text(
-                                        text = "✓",
-                                        style = TextStyle(
-                                            fontSize = 18.sp,
-                                            color = MiuixTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    Button(
-                        onClick = { showSpeedUnitDialog = false },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            color = MiuixTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Text(text = "取消")
-                    }
-                }
-            }
-        }
-    }
-
-    if (showClearAllDialog) {
-        Dialog(
-            onDismissRequest = { showClearAllDialog = false }
-        ) {
-            Card {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "清空全部记录",
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MiuixTheme.colorScheme.onSurface
-                        ),
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Text(
-                        text = "确定清空所有历史记录？此操作无法撤销。",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                        ),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Button(
-                            onClick = { showClearAllDialog = false },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                color = MiuixTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Text(text = "取消")
-                        }
-                        Button(
-                            onClick = {
-                                historyViewModel.deleteAllRecords()
-                                showClearAllDialog = false
-                            },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                color = MiuixTheme.colorScheme.error
-                            )
-                        ) {
-                            Text(text = "清空")
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun getVersionName(context: Context): String {
-    return try {
-        val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-        packageInfo?.versionName ?: "1.0.0"
-    } catch (e: PackageManager.NameNotFoundException) {
-        "1.0.0"
     }
 }
 
 @Composable
-fun SettingSwitchItem(
+fun SettingNavItem(
+    icon: ImageVector,
     title: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    enabled: Boolean = true,
-    description: String? = null
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = title,
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MiuixTheme.colorScheme.onSurface
-                    )
-                )
-                description?.let {
-                    Text(
-                        text = it,
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                        ),
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-            }
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-                enabled = enabled
-            )
-        }
-
-        androidx.compose.foundation.layout.Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.1f))
-        )
-    }
-}
-
-@Composable
-fun SettingClickableItem(
-    title: String,
-    value: String = "",
+    subtitle: String,
+    hasRedDot: Boolean = false,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = title,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MiuixTheme.colorScheme.onSurface
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MiuixTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
                 )
-            )
+                Column(
+                    modifier = Modifier.padding(start = 16.dp)
+                ) {
+                    Text(
+                        text = title,
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MiuixTheme.colorScheme.onSurface
+                        )
+                    )
+                    Text(
+                        text = subtitle,
+                        style = TextStyle(
+                            fontSize = 13.sp,
+                            color = if (subtitle == "发现新版本") MiuixTheme.colorScheme.error else MiuixTheme.colorScheme.onSurfaceVariantSummary
+                        ),
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (value.isNotEmpty()) {
-                    Text(
-                        text = value,
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                        ),
-                        modifier = Modifier.padding(end = 8.dp)
+                if (hasRedDot) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(Color(0xFFFF1744))
+                            .clip(CircleShape)
                     )
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(8.dp))
                 }
                 Icon(
                     imageVector = Icons.Filled.ArrowRight,

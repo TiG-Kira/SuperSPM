@@ -25,6 +25,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -92,7 +93,7 @@ fun DetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(backgroundColor)
-                .padding(bottom = 80.dp)
+                .padding(bottom = 120.dp)
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
         ) {
@@ -327,8 +328,6 @@ fun SpeedChart(points: List<LocationPoint>, unit: SpeedUnit) {
 
 @Composable
 fun TrackMap(points: List<LocationPoint>) {
-    val primaryColor = MiuixTheme.colorScheme.primary
-
     Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             if (points.isEmpty()) return@Canvas
@@ -344,32 +343,47 @@ fun TrackMap(points: List<LocationPoint>) {
 
             val latRange = maxLat - minLat
             val lonRange = maxLon - minLon
-            val scale = minOf((width - padding * 2) / lonRange.toFloat(), (height - padding * 2) / latRange.toFloat())
+            val scale = if (latRange == 0.0 && lonRange == 0.0) 1f else
+                minOf((width - padding * 2) / lonRange.toFloat().coerceAtLeast(0.0001f),
+                    (height - padding * 2) / latRange.toFloat().coerceAtLeast(0.0001f))
 
-            val path = Path()
-            var firstPoint = true
+            val maxSpeed = if (points.isNotEmpty()) points.maxOf { it.speed } else 0.0
+            val strokeWidth = 3.dp.toPx()
+
+            fun getSpeedColor(speed: Double): Color {
+                val ratio = if (maxSpeed > 0) (speed / maxSpeed).toFloat() else 0f
+                return when {
+                    ratio < 0.3f -> Color(0xFF00C853)
+                    ratio < 0.6f -> Color(0xFFFFAB00)
+                    else -> Color(0xFFFF1744)
+                }
+            }
 
             points.forEachIndexed { index, point ->
                 val x = padding + ((point.longitude - minLon) * scale).toFloat()
                 val y = height - padding - ((point.latitude - minLat) * scale).toFloat()
 
-                if (firstPoint) {
-                    path.moveTo(x, y)
-                    firstPoint = false
+                if (index > 0) {
+                    val prevPoint = points[index - 1]
+                    val prevX = padding + ((prevPoint.longitude - minLon) * scale).toFloat()
+                    val prevY = height - padding - ((prevPoint.latitude - minLat) * scale).toFloat()
+
+                    val avgSpeed = (prevPoint.speed + point.speed) / 2.0
+                    drawLine(
+                        color = getSpeedColor(avgSpeed),
+                        start = Offset(prevX, prevY),
+                        end = Offset(x, y),
+                        strokeWidth = strokeWidth,
+                        cap = StrokeCap.Round
+                    )
+                }
+
+                if (index == 0) {
                     drawCircle(color = Color(0xFF00C853), center = Offset(x, y), radius = 6.dp.toPx())
-                } else {
-                    path.lineTo(x, y)
-                    if (index == points.lastIndex) {
-                        drawCircle(color = Color(0xFFFF1744), center = Offset(x, y), radius = 6.dp.toPx())
-                    }
+                } else if (index == points.lastIndex) {
+                    drawCircle(color = Color(0xFFFF1744), center = Offset(x, y), radius = 6.dp.toPx())
                 }
             }
-
-            drawPath(
-                path = path,
-                color = primaryColor,
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3.dp.toPx())
-            )
         }
 
         Column(
@@ -380,19 +394,19 @@ fun TrackMap(points: List<LocationPoint>) {
                 Canvas(modifier = Modifier.size(12.dp)) {
                     drawCircle(Color(0xFF00C853))
                 }
-                Text(text = "低速", style = TextStyle(fontSize = 10.sp))
+                Text(text = "低速", style = TextStyle(fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurface))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Canvas(modifier = Modifier.size(12.dp)) {
                     drawCircle(Color(0xFFFFAB00))
                 }
-                Text(text = "中速", style = TextStyle(fontSize = 10.sp))
+                Text(text = "中速", style = TextStyle(fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurface))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Canvas(modifier = Modifier.size(12.dp)) {
                     drawCircle(Color(0xFFFF1744))
                 }
-                Text(text = "高速", style = TextStyle(fontSize = 10.sp))
+                Text(text = "高速", style = TextStyle(fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurface))
             }
         }
     }

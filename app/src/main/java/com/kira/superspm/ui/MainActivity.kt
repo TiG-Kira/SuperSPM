@@ -120,6 +120,7 @@ class MainActivity : ComponentActivity() {
         
         val darkMode by settingsViewModel::darkMode
         val followSystem by settingsViewModel::followSystem
+        val powerSaving by settingsViewModel::powerSaving
         val systemDarkMode by remember { systemDarkModeState }
 
         val hasLocationPermission by remember { hasLocationPermissionState }
@@ -127,7 +128,13 @@ class MainActivity : ComponentActivity() {
         val isDark = if (followSystem) {
             systemDarkMode
         } else {
-            settingsViewModel.effectiveDarkMode
+            powerSaving || darkMode
+        }
+
+        LaunchedEffect(followSystem, systemDarkMode) {
+            if (followSystem) {
+                settingsViewModel.syncSystemDarkMode(systemDarkMode)
+            }
         }
 
         LaunchedEffect(isDark) {

@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -121,7 +123,7 @@ fun HistoryScreen(
                     }
 
                     item {
-                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(80.dp))
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(120.dp))
                     }
                 }
             }
@@ -250,6 +252,7 @@ fun RecordItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(20.dp))
             .clickable(onClick = onItemClick)
     ) {
         Column(

@@ -1,0 +1,4 @@
+com.kira.superspm.test.app-androidTest-0 D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\build\generated\res\resValues\androidTest\debug
+com.kira.superspm.test.app-mergeDebugAndroidTestResources-1 D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
+com.kira.superspm.test.app-mergeDebugAndroidTestResources-2 D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
+com.kira.superspm.test.app-debugAndroidTest-3 D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\build\intermediates\merged_res\debugAndroidTest\mergeDebugAndroidTestResources

@@ -91,7 +91,7 @@ class LocationService : Service(), LocationListener {
         fun updateSettings(powerSaving: Boolean, refreshTimeSec: Int) {
             currentInterval = if (powerSaving) 10000L else 1000L
             currentFastestInterval = currentInterval / 2
-            positionRefreshInterval = refreshTimeSec * 1000L
+            positionRefreshInterval = if (refreshTimeSec == 0) currentInterval else refreshTimeSec * 1000L
         }
 
         fun requestSingleUpdate(context: Context) {

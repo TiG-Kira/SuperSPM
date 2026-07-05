@@ -66,6 +66,12 @@ class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewMod
         }
     }
 
+    fun syncSystemDarkMode(systemDark: Boolean) {
+        if (darkMode != systemDark) {
+            darkMode = systemDark
+        }
+    }
+
     fun updateSpeedUnit(value: SpeedUnit) {
         speedUnit = value
         viewModelScope.launch {

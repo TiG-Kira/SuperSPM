@@ -100,6 +100,24 @@ fun AppNavHost(
                     onRedDotConsumed = { showRedDot = false }
                 )
             }
+            composable("settings/appearance") {
+                AppearanceSettingsScreen(
+                    isDark = isDark,
+                    navController = navController
+                )
+            }
+            composable("settings/location") {
+                LocationSettingsScreen(
+                    isDark = isDark,
+                    navController = navController
+                )
+            }
+            composable("settings/history") {
+                HistorySettingsScreen(
+                    isDark = isDark,
+                    navController = navController
+                )
+            }
             composable("about") {
                 AboutScreen(
                     isDark = isDark,
