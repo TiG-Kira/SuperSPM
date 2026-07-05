@@ -24,4 +24,7 @@ interface LocationRecordDao {
 
     @Delete
     suspend fun deleteRecord(record: LocationRecord)
+
+    @Query("DELETE FROM location_records")
+    suspend fun deleteAllRecords()
 }

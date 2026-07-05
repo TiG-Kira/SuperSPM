@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -42,6 +41,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Circle
 import com.kira.superspm.R
 import com.kira.superspm.data.store.SpeedUnit
 import com.kira.superspm.service.LocationService
@@ -50,10 +53,18 @@ import com.kira.superspm.viewmodel.SpeedometerViewModel
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import androidx.compose.ui.window.Dialog
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Circle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
 import androidx.compose.runtime.rememberCoroutineScope
@@ -97,11 +108,11 @@ fun SpeedometerScreen(
                 addressText = getAddress(context, lat, lon)
             }
         }
-        
+
         LocationService.onSpeedUpdate = { speed ->
             viewModel.updateSpeed(speed)
         }
-        
+
         LocationService.onError = { message ->
             errorMessage = message
             showErrorDialog = true
@@ -138,334 +149,311 @@ fun SpeedometerScreen(
             TopAppBar(
                 title = context.getString(R.string.title_speedometer),
                 scrollBehavior = scrollBehavior,
-                color = backgroundColor
+                color = backgroundColor,
+                actions = {
+                    if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
+                        IconButton(
+                            onClick = {
+                                if (!hasLocationPermission) {
+                                    showPermissionDialog = true
+                                    return@IconButton
+                                }
+                                LocationService.updateSettings(
+                                    settingsViewModel.powerSaving,
+                                    settingsViewModel.refreshTime
+                                )
+                                viewModel.startRecording()
+                                val intent = android.content.Intent(context, LocationService::class.java)
+                                intent.putExtra("saveRecord", false)
+                                context.startForegroundService(intent)
+                            },
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = "开始",
+                                tint = MiuixTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                if (!hasLocationPermission) {
+                                    showPermissionDialog = true
+                                    return@IconButton
+                                }
+                                LocationService.updateSettings(
+                                    settingsViewModel.powerSaving,
+                                    settingsViewModel.refreshTime
+                                )
+                                viewModel.startRecording(recordData = true)
+                                val intent = android.content.Intent(context, LocationService::class.java)
+                                intent.putExtra("saveRecord", true)
+                                context.startForegroundService(intent)
+                            },
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Circle,
+                                contentDescription = "记录并开始",
+                                tint = MiuixTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = {
+                                when (status) {
+                                    SpeedometerViewModel.RecordingStatus.RECORDING -> {
+                                        viewModel.pauseRecording()
+                                    }
+                                    SpeedometerViewModel.RecordingStatus.PAUSED -> {
+                                        viewModel.resumeRecording()
+                                        context.startForegroundService(android.content.Intent(context, LocationService::class.java))
+                                    }
+                                    else -> {}
+                                }
+                            },
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (status == SpeedometerViewModel.RecordingStatus.RECORDING) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                                contentDescription = if (status == SpeedometerViewModel.RecordingStatus.RECORDING) "暂停" else "继续",
+                                tint = MiuixTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                if (viewModel.isRecording) {
+                                    coroutineScope.launch {
+                                        val record = viewModel.stopRecording()
+                                        if (record != null) {
+                                            onRecordSaved()
+                                        }
+                                        viewModel.finishRecording()
+                                    }
+                                } else {
+                                    viewModel.reset()
+                                }
+                                context.stopService(android.content.Intent(context, LocationService::class.java))
+                            },
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Stop,
+                                contentDescription = "停止",
+                                tint = MiuixTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                }
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(backgroundColor)
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
         ) {
-
-        item {
-            Box(
+            LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(280.dp),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .background(backgroundColor)
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
             ) {
-                SpeedometerGauge(currentSpeed)
-            }
-        }
 
-        item {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = formatSpeed(currentSpeed, settingsViewModel.speedUnit),
-                    style = TextStyle(
-                        fontSize = 48.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MiuixTheme.colorScheme.onSurface
-                    )
-                )
-                Text(
-                    text = getSpeedUnitString(settingsViewModel.speedUnit),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                    )
-                )
-            }
-        }
-
-        item {
-            if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            if (!hasLocationPermission) {
-                                showPermissionDialog = true
-                                return@Button
-                            }
-                            LocationService.updateSettings(
-                                settingsViewModel.powerSaving,
-                                settingsViewModel.refreshTime
-                            )
-                            viewModel.startRecording()
-                            val intent = android.content.Intent(context, LocationService::class.java)
-                            intent.putExtra("saveRecord", false)
-                            context.startForegroundService(intent)
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            color = MiuixTheme.colorScheme.primary
-                        )
-                    ) {
-                        Text(
-                            text = context.getString(R.string.start),
-                            style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
-                        )
-                    }
-
-                    Button(
-                        onClick = {
-                            if (!hasLocationPermission) {
-                                showPermissionDialog = true
-                                return@Button
-                            }
-                            LocationService.updateSettings(
-                                settingsViewModel.powerSaving,
-                                settingsViewModel.refreshTime
-                            )
-                            viewModel.startRecording(recordData = true)
-                            val intent = android.content.Intent(context, LocationService::class.java)
-                            intent.putExtra("saveRecord", true)
-                            context.startForegroundService(intent)
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            color = Color(0xFF00C853)
-                        )
-                    ) {
-                        Text(text = "记录并开始", style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold))
-                    }
-                }
-            } else {
-                Button(
-                    onClick = {
-                        when (status) {
-                            SpeedometerViewModel.RecordingStatus.RECORDING -> {
-                                viewModel.pauseRecording()
-                            }
-                            SpeedometerViewModel.RecordingStatus.PAUSED -> {
-                                viewModel.resumeRecording()
-                                context.startForegroundService(android.content.Intent(context, LocationService::class.java))
-                            }
-                            else -> {}
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        color = when (status) {
-                            SpeedometerViewModel.RecordingStatus.RECORDING -> Color(0xFFFFAB00)
-                            else -> MiuixTheme.colorScheme.primary
-                        }
-                    )
-                ) {
-                    Text(
-                        text = when (status) {
-                            SpeedometerViewModel.RecordingStatus.RECORDING -> context.getString(R.string.pause)
-                            SpeedometerViewModel.RecordingStatus.PAUSED -> context.getString(R.string.resume)
-                            else -> ""
-                        },
-                        style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
-                    )
-                }
-            }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                StatCard(
-                    title = context.getString(R.string.max_speed),
-                    value = formatSpeed(maxSpeed, settingsViewModel.speedUnit),
-                    unit = getSpeedUnitString(settingsViewModel.speedUnit)
-                )
-                StatCard(
-                    title = context.getString(R.string.total_distance),
-                    value = formatDistance(totalDistance),
-                    unit = context.getString(R.string.km)
-                )
-                StatCard(
-                    title = context.getString(R.string.avg_speed),
-                    value = formatSpeed(avgSpeed, settingsViewModel.speedUnit),
-                    unit = getSpeedUnitString(settingsViewModel.speedUnit)
-                )
-            }
-        }
-
-        item {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    ) {
-                        Text(
-                            text = context.getString(R.string.current_location),
-                            style = TextStyle(fontWeight = FontWeight.Medium)
-                        )
-                    }
-
-                    Text(
-                        text = addressText.ifEmpty { "获取地址中..." },
-                        style = TextStyle(color = MiuixTheme.colorScheme.onSurface)
-                    )
-
-                    Row(
+                item {
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .height(280.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        SpeedometerGauge(currentSpeed)
+                    }
+                }
+
+                item {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
                     ) {
                         Text(
-                            text = context.getString(R.string.seconds_until_refresh, secondsUntilRefresh),
+                            text = formatSpeed(currentSpeed, settingsViewModel.speedUnit),
                             style = TextStyle(
-                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                fontSize = 12.sp
+                                fontSize = 48.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MiuixTheme.colorScheme.onSurface
                             )
                         )
                         Text(
-                            text = context.getString(R.string.refresh_now),
-                            style = TextStyle(color = MiuixTheme.colorScheme.primary, fontSize = 12.sp),
-                            modifier = Modifier.clickable {
-                                secondsUntilRefresh = settingsViewModel.refreshTime
-                                LocationService.requestSingleUpdate(context)
-                            }
+                            text = getSpeedUnitString(settingsViewModel.speedUnit),
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            )
                         )
                     }
+                }
 
-                    DividerRow(context.getString(R.string.latitude), currentLatitude?.toString() ?: "--")
-                    DividerRow(context.getString(R.string.longitude), currentLongitude?.toString() ?: "--")
-                    DividerRow(context.getString(R.string.accuracy), currentAccuracy?.let { "$it m" } ?: "--")
-
+                item {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Text(
-                            text = context.getString(R.string.gps_signal),
-                            style = TextStyle(fontSize = 12.sp)
+                        StatCard(
+                            title = context.getString(R.string.max_speed),
+                            value = formatSpeed(maxSpeed, settingsViewModel.speedUnit),
+                            unit = getSpeedUnitString(settingsViewModel.speedUnit)
                         )
-                        GpsStrengthIndicator(accuracy = currentAccuracy)
+                        StatCard(
+                            title = context.getString(R.string.total_distance),
+                            value = formatDistance(totalDistance),
+                            unit = context.getString(R.string.km)
+                        )
+                        StatCard(
+                            title = context.getString(R.string.avg_speed),
+                            value = formatSpeed(avgSpeed, settingsViewModel.speedUnit),
+                            unit = getSpeedUnitString(settingsViewModel.speedUnit)
+                        )
                     }
                 }
-            }
-        }
 
-        if (status != SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
-            item {
-                Button(
-                    onClick = {
-                        if (viewModel.isRecording) {
-                            coroutineScope.launch {
-                                val record = viewModel.stopRecording()
-                                if (record != null) {
-                                    onRecordSaved()
-                                }
-                                viewModel.finishRecording()
+                item {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            ) {
+                                Text(
+                                    text = context.getString(R.string.current_location),
+                                    style = TextStyle(fontWeight = FontWeight.Medium)
+                                )
                             }
-                        } else {
-                            viewModel.reset()
+
+                            Text(
+                                text = addressText.ifEmpty { "获取地址中..." },
+                                style = TextStyle(color = MiuixTheme.colorScheme.onSurface)
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = context.getString(R.string.seconds_until_refresh, secondsUntilRefresh),
+                                    style = TextStyle(
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                        fontSize = 12.sp
+                                    )
+                                )
+                                Text(
+                                    text = context.getString(R.string.refresh_now),
+                                    style = TextStyle(color = MiuixTheme.colorScheme.primary, fontSize = 12.sp),
+                                    modifier = Modifier.clickable {
+                                        secondsUntilRefresh = settingsViewModel.refreshTime
+                                        LocationService.requestSingleUpdate(context)
+                                    }
+                                )
+                            }
+
+                            DividerRow(context.getString(R.string.latitude), currentLatitude?.toString() ?: "--")
+                            DividerRow(context.getString(R.string.longitude), currentLongitude?.toString() ?: "--")
+                            DividerRow(context.getString(R.string.accuracy), currentAccuracy?.let { "$it m" } ?: "--")
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = context.getString(R.string.gps_signal),
+                                    style = TextStyle(fontSize = 12.sp)
+                                )
+                                GpsStrengthIndicator(accuracy = currentAccuracy)
+                            }
                         }
-                        context.stopService(android.content.Intent(context, LocationService::class.java))
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        color = Color(0xFFFF1744)
-                    )
-                ) {
-                    Text(text = context.getString(R.string.stop), style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold))
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(80.dp))
-        }
         }
     }
 
     if (showPermissionDialog) {
-        DialogOverlay {
-            AnimatedDialogContent {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
+        Dialog(
+            onDismissRequest = { showPermissionDialog = false }
+        ) {
+            Card {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = context.getString(R.string.permission_required),
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MiuixTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = context.getString(R.string.permission_description),
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                        ),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(
-                            text = context.getString(R.string.permission_required),
-                            style = TextStyle(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium
-                            ),
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        Text(
-                            text = context.getString(R.string.permission_description),
-                            style = TextStyle(color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-                        )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            horizontalArrangement = Arrangement.End
+                        Button(
+                            onClick = { showPermissionDialog = false },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                color = MiuixTheme.colorScheme.surfaceVariant
+                            )
                         ) {
-                            Button(
-                                onClick = { showPermissionDialog = false },
-                                colors = ButtonDefaults.buttonColors(
-                                    color = MiuixTheme.colorScheme.surfaceVariant
-                                ),
-                                modifier = Modifier.padding(end = 8.dp)
-                            ) {
-                                Text(text = context.getString(R.string.cancel))
-                            }
-                            Button(
-                                onClick = {
-                                    showPermissionDialog = false
-                                    val intent = android.content.Intent(
-                                        android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                        android.net.Uri.fromParts("package", context.packageName, null)
-                                    )
-                                    context.startActivity(intent)
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    color = MiuixTheme.colorScheme.primary
+                            Text(text = context.getString(R.string.cancel))
+                        }
+                        Button(
+                            onClick = {
+                                showPermissionDialog = false
+                                val intent = android.content.Intent(
+                                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    android.net.Uri.fromParts("package", context.packageName, null)
                                 )
-                            ) {
-                                Text(text = context.getString(R.string.grant_permission))
-                            }
+                                context.startActivity(intent)
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                color = MiuixTheme.colorScheme.primary
+                            )
+                        ) {
+                            Text(text = context.getString(R.string.grant_permission))
                         }
                     }
                 }
@@ -474,43 +462,36 @@ fun SpeedometerScreen(
     }
 
     if (showErrorDialog) {
-        DialogOverlay {
-            AnimatedDialogContent {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
+        Dialog(
+            onDismissRequest = { showErrorDialog = false }
+        ) {
+            Card {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = context.getString(R.string.error),
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MiuixTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = errorMessage,
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                        ),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Button(
+                        onClick = { showErrorDialog = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            color = MiuixTheme.colorScheme.primary
+                        )
                     ) {
-                        Text(
-                            text = context.getString(R.string.error),
-                            style = TextStyle(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium
-                            ),
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        Text(
-                            text = errorMessage,
-                            style = TextStyle(color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-                        )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Button(
-                                onClick = { showErrorDialog = false },
-                                colors = ButtonDefaults.buttonColors(
-                                    color = MiuixTheme.colorScheme.primary
-                                )
-                            ) {
-                                Text(text = context.getString(R.string.ok))
-                            }
-                        }
+                        Text(text = context.getString(R.string.ok))
                     }
                 }
             }
@@ -610,7 +591,7 @@ fun SpeedometerGauge(speed: Double) {
         val pointerAngle = startAngle + activeAngle
         val pointerRadian = Math.toRadians(pointerAngle.toDouble()).toFloat()
         val pointerLength = radius - 30.dp.toPx()
-        
+
         drawLine(
             color = Color(0xFFFF1744),
             start = center,
@@ -627,7 +608,7 @@ fun SpeedometerGauge(speed: Double) {
             center = center,
             radius = 8.dp.toPx()
         )
-        
+
         drawCircle(
             color = Color.White,
             center = center,

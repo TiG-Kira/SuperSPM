@@ -22,4 +22,8 @@ class RecordRepository(private val dao: LocationRecordDao) {
     suspend fun deleteRecord(record: LocationRecord) {
         dao.deleteRecord(record)
     }
+
+    suspend fun deleteAllRecords() {
+        dao.deleteAllRecords()
+    }
 }

@@ -42,8 +42,11 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import androidx.compose.ui.window.Dialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowRight
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
 import kotlinx.datetime.Instant
@@ -66,24 +69,24 @@ fun HistoryScreen(
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = getPageBackgroundColor(isDark)
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundColor)
-    ) {
-        if (records.isEmpty()) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = "历史记录",
-                        color = backgroundColor
-                    )
-                }
-            ) { paddingValues ->
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = "历史记录",
+                scrollBehavior = scrollBehavior,
+                color = backgroundColor
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(backgroundColor)
+        ) {
+            if (records.isEmpty()) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(backgroundColor)
                         .padding(top = paddingValues.calculateTopPadding()),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -96,17 +99,7 @@ fun HistoryScreen(
                         )
                     )
                 }
-            }
-        } else {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = "历史记录",
-                        scrollBehavior = scrollBehavior,
-                        color = backgroundColor
-                    )
-                }
-            ) { paddingValues ->
+            } else {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -132,121 +125,111 @@ fun HistoryScreen(
                     }
                 }
             }
-        }
 
-        if (editingId != null) {
-            DialogOverlay {
-                AnimatedDialogContent {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .widthIn(max = 280.dp)
-                            .padding(16.dp)
-                            .align(Alignment.Center)
+        }
+    }
+
+    if (editingId != null) {
+        Dialog(
+            onDismissRequest = { editingId = null }
+        ) {
+            Card {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "重命名记录",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MiuixTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    TextField(
+                        value = editingName,
+                        onValueChange = { editingName = it },
+                        label = "输入名称",
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
+                        Button(
+                            onClick = { editingId = null },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                color = MiuixTheme.colorScheme.surfaceVariant
+                            )
                         ) {
-                            Text(
-                                text = "重命名记录",
-                                style = TextStyle(
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
-                            TextField(
-                                value = editingName,
-                                onValueChange = { editingName = it },
-                                label = "输入名称"
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 16.dp),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                Button(
-                                    onClick = { editingId = null },
-                                    modifier = Modifier.padding(end = 8.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        color = MiuixTheme.colorScheme.surfaceVariant
-                                    )
-                                ) {
-                                    Text(text = "取消")
+                            Text(text = "取消")
+                        }
+                        Button(
+                            onClick = {
+                                records.find { it.id == editingId }?.let {
+                                    viewModel.renameRecord(it, editingName)
                                 }
-                                Button(
-                                    onClick = {
-                                        records.find { it.id == editingId }?.let {
-                                            viewModel.renameRecord(it, editingName)
-                                        }
-                                        editingId = null
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        color = MiuixTheme.colorScheme.primary
-                                    )
-                                ) {
-                                    Text(text = "保存")
-                                }
-                            }
+                                editingId = null
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                color = MiuixTheme.colorScheme.primary
+                            )
+                        ) {
+                            Text(text = "保存")
                         }
                     }
                 }
             }
         }
+    }
 
-        if (deletingRecord != null) {
-            DialogOverlay {
-                AnimatedDialogContent {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .widthIn(max = 280.dp)
-                            .padding(16.dp)
-                            .align(Alignment.Center)
+    if (deletingRecord != null) {
+        Dialog(
+            onDismissRequest = { deletingRecord = null }
+        ) {
+            Card {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "删除记录",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MiuixTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = "确定删除此记录？",
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                        ),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
+                        Button(
+                            onClick = { deletingRecord = null },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                color = MiuixTheme.colorScheme.surfaceVariant
+                            )
                         ) {
-                            Text(
-                                text = "删除记录",
-                                style = TextStyle(
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                modifier = Modifier.padding(bottom = 16.dp)
+                            Text(text = "取消")
+                        }
+                        Button(
+                            onClick = {
+                                deletingRecord?.let { viewModel.deleteRecord(it) }
+                                deletingRecord = null
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                color = MiuixTheme.colorScheme.error
                             )
-                            Text(
-                                text = "确定删除此记录？",
-                                style = TextStyle(color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 16.dp),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                Button(
-                                    onClick = { deletingRecord = null },
-                                    modifier = Modifier.padding(end = 8.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        color = MiuixTheme.colorScheme.surfaceVariant
-                                    )
-                                ) {
-                                    Text(text = "取消")
-                                }
-                                Button(
-                                    onClick = {
-                                        deletingRecord?.let { viewModel.deleteRecord(it) }
-                                        deletingRecord = null
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        color = MiuixTheme.colorScheme.error
-                                    )
-                                ) {
-                                    Text(text = "删除")
-                                }
-                            }
+                        ) {
+                            Text(text = "删除")
                         }
                     }
                 }
@@ -295,65 +278,73 @@ fun RecordItem(
             }
 
             Text(
-                    text = formatDateTime(record.startTime),
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                    ),
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                text = formatDateTime(record.startTime),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                ),
+                modifier = Modifier.padding(top = 4.dp)
+            )
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    HistoryStatCard(
-                        value = formatSpeed(record.maxSpeed, speedUnit),
-                        label = "最高",
-                        unit = getSpeedUnitString(speedUnit)
-                    )
-                    HistoryStatCard(
-                        value = String.format("%.2f", record.totalDistance),
-                        label = "总里程",
-                        unit = "km"
-                    )
-                    HistoryStatCard(
-                        value = formatSpeed(record.avgSpeed, speedUnit),
-                        label = "均速",
-                        unit = getSpeedUnitString(speedUnit)
-                    )
-                    HistoryStatCard(
-                        value = record.dataPoints.toString(),
-                        label = "数据点",
-                        unit = ""
-                    )
-                }
-
-                Row(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 12.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
+                HistoryStatCard(
+                    value = formatSpeed(record.maxSpeed, speedUnit),
+                    label = "最高",
+                    unit = getSpeedUnitString(speedUnit)
+                )
+                HistoryStatCard(
+                    value = String.format("%.2f", record.totalDistance),
+                    label = "总里程",
+                    unit = "km"
+                )
+                HistoryStatCard(
+                    value = formatSpeed(record.avgSpeed, speedUnit),
+                    label = "均速",
+                    unit = getSpeedUnitString(speedUnit)
+                )
+                HistoryStatCard(
+                    value = record.dataPoints.toString(),
+                    label = "数据点",
+                    unit = ""
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
                 Button(
                     onClick = onEditClick,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(end = 8.dp),
                     colors = ButtonDefaults.buttonColors(
                         color = MiuixTheme.colorScheme.surfaceVariant
                     )
                 ) {
-                    Text(text = "编辑名称")
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "编辑",
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
                 Button(
                     onClick = onDeleteClick,
-                    modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
                         color = MiuixTheme.colorScheme.error.copy(alpha = 0.1f)
                     )
                 ) {
-                    Text(text = "删除")
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "删除",
+                        tint = MiuixTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
@@ -408,26 +399,6 @@ private fun getSpeedUnitString(unit: SpeedUnit): String {
         SpeedUnit.MS -> "m/s"
         SpeedUnit.MPH -> "mph"
     }
-}
-
-private fun buildSummary(record: LocationRecord, unit: SpeedUnit): String {
-    val unitStr = when (unit) {
-        SpeedUnit.KMH -> "km/h"
-        SpeedUnit.MS -> "m/s"
-        SpeedUnit.MPH -> "mph"
-    }
-    val maxSpeed = when (unit) {
-        SpeedUnit.KMH -> record.maxSpeed
-        SpeedUnit.MS -> record.maxSpeed / 3.6
-        SpeedUnit.MPH -> record.maxSpeed * 0.621371
-    }
-    val avgSpeed = when (unit) {
-        SpeedUnit.KMH -> record.avgSpeed
-        SpeedUnit.MS -> record.avgSpeed / 3.6
-        SpeedUnit.MPH -> record.avgSpeed * 0.621371
-    }
-
-    return "最高 ${String.format("%.0f", maxSpeed)} $unitStr · 平均 ${String.format("%.0f", avgSpeed)} $unitStr · ${String.format("%.2f", record.totalDistance)} km · ${record.dataPoints} 个点"
 }
 
 private fun formatDateTime(instant: Instant): String {

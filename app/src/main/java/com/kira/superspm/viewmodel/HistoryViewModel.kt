@@ -20,4 +20,10 @@ class HistoryViewModel(private val repository: RecordRepository) : ViewModel() {
             repository.updateRecord(record.copy(name = newName))
         }
     }
+
+    fun deleteAllRecords() {
+        viewModelScope.launch {
+            repository.deleteAllRecords()
+        }
+    }
 }

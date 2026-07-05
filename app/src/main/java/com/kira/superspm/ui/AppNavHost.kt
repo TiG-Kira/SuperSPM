@@ -102,20 +102,27 @@ fun AppNavHost(
             NavigationBar(
                 modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
             ) {
+                val parentRoute = when (currentRoute) {
+                    "detail" -> "history"
+                    "about" -> "settings"
+                    "openSource" -> "settings"
+                    else -> baseRoute
+                }
+
                 NavigationBarItem(
-                    selected = currentRoute == "speedometer",
+                    selected = parentRoute == "speedometer",
                     onClick = { navController.navigate("speedometer") { launchSingleTop = true; restoreState = true } },
                     icon = Icons.Filled.Speed,
                     label = "码表"
                 )
                 NavigationBarItem(
-                    selected = currentRoute == "history",
+                    selected = parentRoute == "history",
                     onClick = { navController.navigate("history") { launchSingleTop = true; restoreState = true } },
                     icon = Icons.Filled.History,
                     label = "历史"
                 )
                 NavigationBarItem(
-                    selected = currentRoute == "settings",
+                    selected = parentRoute == "settings",
                     onClick = { navController.navigate("settings") { launchSingleTop = true; restoreState = true } },
                     icon = Icons.Filled.Settings,
                     label = "设置"

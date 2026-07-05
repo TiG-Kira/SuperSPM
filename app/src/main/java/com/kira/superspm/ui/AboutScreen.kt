@@ -2,6 +2,7 @@ package com.kira.superspm.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -20,6 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -32,6 +36,7 @@ import androidx.compose.material.icons.filled.ArrowRight
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.kira.superspm.utils.UpdateChecker
 
 @Composable
 fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Unit) {
@@ -40,6 +45,9 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
     val scope = rememberCoroutineScope()
 
     var gradientOffset by remember { mutableFloatStateOf(0f) }
+    var checkingUpdate by remember { mutableStateOf(false) }
+    var updateResult by remember { mutableStateOf<UpdateChecker.UpdateResult?>(null) }
+    var showUpdateDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         scope.launch {
@@ -106,7 +114,8 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
         ) { paddingValues ->
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
                 contentPadding = PaddingValues(
                     top = paddingValues.calculateTopPadding(),
                     bottom = 80.dp
@@ -274,6 +283,53 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .clickable {
+                                if (!checkingUpdate) {
+                                    checkingUpdate = true
+                                    scope.launch {
+                                        updateResult = UpdateChecker.checkForUpdates(getVersionName(context))
+                                        showUpdateDialog = true
+                                        checkingUpdate = false
+                                    }
+                                }
+                            }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                androidx.compose.material3.CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MiuixTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = if (checkingUpdate) "检查中..." else "检查更新",
+                                    style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Filled.ArrowRight,
+                                contentDescription = "箭头",
+                                tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 16.dp)
                     ) {
                         Column(
@@ -299,6 +355,80 @@ fun AboutScreen(isDark: Boolean, onBack: () -> Unit, onOpenSourceClick: () -> Un
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                 )
                             )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showUpdateDialog && updateResult != null) {
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { showUpdateDialog = false }
+        ) {
+            Card {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = if (updateResult!!.hasUpdate) "发现新版本" else "已是最新版本",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MiuixTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = if (updateResult!!.hasUpdate) {
+                            "当前版本: v${updateResult!!.currentVersion}\n最新版本: v${updateResult!!.latestVersion}"
+                        } else {
+                            "当前版本: v${updateResult!!.currentVersion} 已是最新"
+                        },
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                        ),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = if (updateResult!!.hasUpdate) Arrangement.SpaceBetween else Arrangement.Center
+                    ) {
+                        if (updateResult!!.hasUpdate) {
+                            Button(
+                                onClick = { showUpdateDialog = false },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    color = MiuixTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Text(text = "稍后")
+                            }
+                            Button(
+                                onClick = {
+                                    val intent = android.content.Intent(
+                                        android.content.Intent.ACTION_VIEW,
+                                        android.net.Uri.parse(updateResult!!.releaseUrl)
+                                    )
+                                    context.startActivity(intent)
+                                    showUpdateDialog = false
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    color = MiuixTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text(text = "去下载")
+                            }
+                        } else {
+                            Button(
+                                onClick = { showUpdateDialog = false },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    color = MiuixTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text(text = "确定")
+                            }
                         }
                     }
                 }

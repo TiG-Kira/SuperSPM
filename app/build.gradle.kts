@@ -15,8 +15,8 @@ android {
         applicationId = "com.kira.superspm"
         minSdk = Versions.minSdk
         targetSdk = Versions.targetSdk
-        versionCode = 5
-        versionName = "1.0.5"
+        versionCode = 6
+        versionName = "1.0.6"
     }
 
     buildTypes {
@@ -94,4 +94,7 @@ dependencies {
     implementation(Dependencies.koinCompose)
 
     implementation(Dependencies.coilCompose)
+
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 }
