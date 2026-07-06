@@ -80,6 +80,34 @@ class LocationService : Service(), LocationListener {
         fun getTotalDistance(): Double = instance?.totalDistance ?: 0.0
         fun getDataPoints(): Int = instance?.dataPoints ?: 0
 
+        fun updateNotificationSpeed(speed: Double) {
+            instance?.let { service ->
+                service.currentSpeed = speed
+                service.maxSpeed = maxOf(service.maxSpeed, speed)
+                service.dataPoints++
+                service.avgSpeed = ((service.avgSpeed * (service.dataPoints - 1)) + speed) / service.dataPoints
+                service.updateNotification()
+            }
+        }
+
+        fun updateNotificationDistance(distance: Double) {
+            instance?.let { service ->
+                service.totalDistance += distance
+                service.updateNotification()
+            }
+        }
+
+        fun updateWithAccelerometerData(speed: Double, distance: Double) {
+            instance?.let { service ->
+                service.currentSpeed = speed
+                service.maxSpeed = maxOf(service.maxSpeed, speed)
+                service.dataPoints++
+                service.avgSpeed = ((service.avgSpeed * (service.dataPoints - 1)) + speed) / service.dataPoints
+                service.totalDistance += distance
+                service.updateNotification()
+            }
+        }
+
         fun stopRecording(): com.kira.superspm.data.model.LocationRecord? {
             return instance?.finishRecording()
         }
@@ -176,8 +204,11 @@ class LocationService : Service(), LocationListener {
             onError?.invoke("GPS 未开启")
         }
 
+        val useGps = intent?.getBooleanExtra("useGps", true) ?: true
         if (!isRunning) {
-            startLocationUpdates()
+            if (useGps) {
+                startLocationUpdates()
+            }
             isRunning = true
         }
 
@@ -220,6 +251,19 @@ class LocationService : Service(), LocationListener {
                 0f,
                 this
             )
+        } catch (e: SecurityException) {
+        } catch (e: Exception) {
+        }
+
+        try {
+            val lastKnownGpsLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            if (lastKnownGpsLocation != null) {
+                onGpsSignalUpdate?.invoke(lastKnownGpsLocation.accuracy)
+            }
+            val lastKnownNetworkLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            if (lastKnownNetworkLocation != null) {
+                onGpsSignalUpdate?.invoke(lastKnownNetworkLocation.accuracy)
+            }
         } catch (e: SecurityException) {
         } catch (e: Exception) {
         }
@@ -369,7 +413,7 @@ class LocationService : Service(), LocationListener {
             updateNotification()
         }
 
-        onSpeedUpdate?.invoke(speed)
+        onSpeedUpdate?.invoke(currentSpeed)
         onGpsSignalUpdate?.invoke(location.accuracy)
 
         val now = System.currentTimeMillis()

@@ -44,6 +44,8 @@ import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.LocationOn
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
+import com.kira.superspm.service.AccelerometerService
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun LocationSettingsScreen(
@@ -51,8 +53,10 @@ fun LocationSettingsScreen(
     navController: NavHostController
 ) {
     val viewModel: SettingsViewModel = getViewModel()
+    val context = LocalContext.current
 
     var showRefreshTimeDialog by remember { mutableStateOf(false) }
+    val hasAccelerometer = remember { AccelerometerService.hasSensor(context) }
 
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = getPageBackgroundColor(isDark)
@@ -186,8 +190,19 @@ fun LocationSettingsScreen(
                         title = "使用加速度计辅助测速",
                         checked = viewModel.accelerometerEnabled,
                         onCheckedChange = { viewModel.updateAccelerometerEnabled(it) },
-                        description = "通过加速度数据计算并预测速度，弥补GPS信号过差的情况"
+                        description = if (hasAccelerometer) "通过加速度数据计算并预测速度，弥补GPS信号过差的情况" else "设备不支持加速度计",
+                        enabled = hasAccelerometer
                     )
+                    if (!hasAccelerometer) {
+                        Text(
+                            text = "设备不支持此功能",
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                color = Color(0xFFF44336)
+                            ),
+                            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                        )
+                    }
                 }
             }
 

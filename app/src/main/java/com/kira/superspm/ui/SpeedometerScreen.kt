@@ -76,6 +76,7 @@ import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
 import androidx.compose.runtime.rememberCoroutineScope
@@ -119,20 +120,52 @@ fun SpeedometerScreen(
     
     val coroutineScope = rememberCoroutineScope()
 
+    var lastAccUpdateTime by remember { mutableStateOf(0L) }
+    var isGpsWeak by remember { mutableStateOf(false) }
+    var weakSignalStartTime by remember { mutableStateOf(0L) }
+    var weakSignalSpeedSum by remember { mutableStateOf(0.0) }
+    var weakSignalSpeedCount by remember { mutableStateOf(0) }
+    var ignoreWeakSignalDistance by remember { mutableStateOf(false) }
+    var showWeakSignalCard by remember { mutableStateOf(false) }
+    var weakSignalCardIgnored by remember { mutableStateOf(false) }
+
+    var powerSavingLastUpdateTime by remember { mutableStateOf(0L) }
+    var powerSavingSpeedSum by remember { mutableStateOf(0.0) }
+    var powerSavingSpeedCount by remember { mutableStateOf(0) }
+
     LaunchedEffect(Unit) {
         LocationService.onLocationUpdate = { lat, lon, speed, accuracy ->
-            viewModel.updateLocation(lat, lon, speed, accuracy)
+            var finalSpeed = speed
+            if (settingsViewModel.accelerometerEnabled && accuracy != null) {
+                val gpsLevel2OrWorse = accuracy >= 30
+                val speedDiff = kotlin.math.abs(speed - accEstimatedSpeed)
+                val largeDiff = speedDiff > 10
+                if (gpsLevel2OrWorse && largeDiff) {
+                    finalSpeed = accEstimatedSpeed
+                }
+            }
+            viewModel.updateLocation(lat, lon, finalSpeed, accuracy)
             coroutineScope.launch {
                 addressText = getAddress(context, lat, lon)
             }
         }
 
         LocationService.onSpeedUpdate = { speed ->
-            viewModel.updateSpeed(speed)
+            var finalSpeed = speed
+            if (settingsViewModel.accelerometerEnabled && gpsAccuracy != null) {
+                val gpsLevel2OrWorse = gpsAccuracy!! >= 30
+                val speedDiff = kotlin.math.abs(speed - accEstimatedSpeed)
+                val largeDiff = speedDiff > 10
+                if (gpsLevel2OrWorse && largeDiff) {
+                    finalSpeed = accEstimatedSpeed
+                }
+            }
+            viewModel.updateSpeed(finalSpeed)
         }
 
         LocationService.onGpsSignalUpdate = { accuracy ->
             gpsAccuracy = accuracy
+            viewModel.updateGpsSignal(accuracy)
         }
 
         LocationService.onServiceStopped = {
@@ -152,7 +185,7 @@ fun SpeedometerScreen(
         }
     }
 
-    LaunchedEffect(settingsViewModel.accelerometerEnabled) {
+    LaunchedEffect(settingsViewModel.accelerometerEnabled, status) {
         if (settingsViewModel.accelerometerEnabled && status != SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
             AccelerometerService.start(context)
             AccelerometerService.onAccelerationUpdate = { x, y, z ->
@@ -162,9 +195,62 @@ fun SpeedometerScreen(
             }
             AccelerometerService.onSpeedEstimateUpdate = { speed ->
                 accEstimatedSpeed = speed
+
+                if (settingsViewModel.powerSaving) {
+                        val currentTime = System.currentTimeMillis()
+                        powerSavingSpeedSum += speed
+                        powerSavingSpeedCount++
+
+                        if (powerSavingLastUpdateTime == 0L) {
+                            powerSavingLastUpdateTime = currentTime
+                        }
+
+                        if (currentTime - powerSavingLastUpdateTime >= 10000) {
+                            val avgSpeed = powerSavingSpeedSum / powerSavingSpeedCount
+                            val distance = avgSpeed / 3.6 * 10 / 1000.0
+                            viewModel.updateSpeed(avgSpeed)
+                            viewModel.addDistance(distance)
+                            viewModel.addWeakSignalSpeed(avgSpeed)
+                            LocationService.updateWithAccelerometerData(avgSpeed, distance)
+                            powerSavingLastUpdateTime = currentTime
+                            powerSavingSpeedSum = 0.0
+                            powerSavingSpeedCount = 0
+                        } else {
+                            viewModel.addWeakSignalSpeed(speed)
+                        }
+                    } else {
+                    viewModel.addWeakSignalSpeed(speed)
+
+                    val currentTime = System.currentTimeMillis()
+                    val gpsInterval = if (settingsViewModel.refreshTime == 0) 1000 else settingsViewModel.refreshTime * 1000
+
+                    if (lastAccUpdateTime == 0L) {
+                        lastAccUpdateTime = currentTime
+                    }
+
+                    if (currentTime - lastAccUpdateTime >= gpsInterval) {
+                        val useAccelerometer = gpsAccuracy != null && gpsAccuracy!! >= 30
+                        val speedDiff = kotlin.math.abs(viewModel.currentSpeed - speed)
+                        if (useAccelerometer && speedDiff > 10) {
+                            viewModel.updateSpeed(speed)
+                            val distance = speed / 3.6 * gpsInterval / 1000.0 / 1000.0
+                            viewModel.addDistance(distance)
+                            LocationService.updateWithAccelerometerData(speed, distance)
+                        }
+                        lastAccUpdateTime = currentTime
+                    }
+                }
+            }
+            AccelerometerService.onError = { message ->
+                errorMessage = message
+                showErrorDialog = true
             }
         } else {
             AccelerometerService.stop()
+            lastAccUpdateTime = 0L
+            powerSavingLastUpdateTime = 0L
+            powerSavingSpeedSum = 0.0
+            powerSavingSpeedCount = 0
         }
     }
 
@@ -217,15 +303,14 @@ fun SpeedometerScreen(
                                     return@IconButton
                                 }
                                 viewModel.startRecording()
-                                if (!settingsViewModel.powerSaving || !settingsViewModel.accelerometerEnabled) {
-                                    LocationService.updateSettings(
-                                        settingsViewModel.powerSaving,
-                                        settingsViewModel.refreshTime
-                                    )
-                                    val intent = android.content.Intent(context, LocationService::class.java)
-                                    intent.putExtra("saveRecord", false)
-                                    context.startForegroundService(intent)
-                                }
+                                LocationService.updateSettings(
+                                    settingsViewModel.powerSaving,
+                                    settingsViewModel.refreshTime
+                                )
+                                val intent = android.content.Intent(context, LocationService::class.java)
+                                intent.putExtra("saveRecord", false)
+                                intent.putExtra("useGps", !settingsViewModel.powerSaving || !settingsViewModel.accelerometerEnabled)
+                                context.startForegroundService(intent)
                             },
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
@@ -236,31 +321,31 @@ fun SpeedometerScreen(
                                 modifier = Modifier.size(28.dp)
                             )
                         }
-                        if (!settingsViewModel.powerSaving) {
-                            IconButton(
-                                onClick = {
-                                    if (!hasLocationPermission) {
-                                        showPermissionDialog = true
-                                        return@IconButton
-                                    }
-                                    LocationService.updateSettings(
-                                        settingsViewModel.powerSaving,
-                                        settingsViewModel.refreshTime
-                                    )
-                                    viewModel.startRecording(recordData = true)
-                                    val intent = android.content.Intent(context, LocationService::class.java)
-                                    intent.putExtra("saveRecord", true)
-                                    context.startForegroundService(intent)
-                                },
-                                modifier = Modifier.padding(end = 8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Circle,
-                                    contentDescription = "记录并开始",
-                                    tint = MiuixTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(24.dp)
+                        IconButton(
+                            onClick = {
+                                if (!hasLocationPermission) {
+                                    showPermissionDialog = true
+                                    return@IconButton
+                                }
+                                LocationService.updateSettings(
+                                    settingsViewModel.powerSaving,
+                                    settingsViewModel.refreshTime
                                 )
-                            }
+                                viewModel.startRecording(recordData = true)
+                                val intent = android.content.Intent(context, LocationService::class.java)
+                                intent.putExtra("saveRecord", true)
+                                intent.putExtra("useGps", !settingsViewModel.powerSaving || !settingsViewModel.accelerometerEnabled)
+                                context.startForegroundService(intent)
+                            },
+                            modifier = Modifier.padding(end = 8.dp),
+                            enabled = !settingsViewModel.powerSaving
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Circle,
+                                contentDescription = "记录并开始",
+                                tint = MiuixTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(24.dp)
+                            )
                         }
                     } else {
                         IconButton(
@@ -289,6 +374,8 @@ fun SpeedometerScreen(
                         }
                         IconButton(
                             onClick = {
+                                viewModel.applyWeakSignalDistance()
+
                                 if (!settingsViewModel.powerSaving || !settingsViewModel.accelerometerEnabled) {
                                     val record = LocationService.finishRecording()
                                     if (record != null) {
@@ -513,6 +600,52 @@ fun SpeedometerScreen(
                                             )
                                         )
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    if (viewModel.showWeakSignalCard && settingsViewModel.accelerometerEnabled) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            colors = CardDefaults.defaultColors(color = if (isDark) Color(0xFF3D3514) else Color(0xFFFFF9C4))
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Info,
+                                        contentDescription = null,
+                                        tint = Color(0xFFFDD835),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Text(
+                                        text = "正在计算弱信号期间的大致里程，GPS信号恢复后将计入总里程",
+                                        style = TextStyle(
+                                            fontSize = 13.sp,
+                                            color = if (isDark) Color.White else Color.Black
+                                        ),
+                                        modifier = Modifier.padding(start = 8.dp)
+                                    )
+                                }
+                                Button(
+                                    onClick = {
+                                        viewModel.ignoreWeakSignalDistance()
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        color = MiuixTheme.colorScheme.surfaceVariant
+                                    )
+                                ) {
+                                    Text(text = "不计入", fontWeight = FontWeight.Bold)
                                 }
                             }
                         }

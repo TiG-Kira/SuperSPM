@@ -17,9 +17,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import com.kira.superspm.service.AccelerometerService
+import com.kira.superspm.service.LocationService
 import com.kira.superspm.ui.theme.SuperSPMTheme
 import com.kira.superspm.viewmodel.SettingsViewModel
+import com.kira.superspm.viewmodel.SpeedometerViewModel
 import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
     private val hasLocationPermissionState = mutableStateOf(false)
@@ -49,6 +53,7 @@ class MainActivity : ComponentActivity() {
         checkPermissions()
         updateSystemDarkMode()
         requestPermissionsIfNeeded()
+        registerServiceCallbacks()
         setContent {
             MainApp()
         }
@@ -163,6 +168,41 @@ class MainActivity : ComponentActivity() {
                     ContextCompat.checkSelfPermission(
                         context, Manifest.permission.ACCESS_COARSE_LOCATION
                     ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    private val speedometerViewModel: SpeedometerViewModel by viewModel()
+    private val settingsViewModel: SettingsViewModel by viewModel()
+
+    private var powerSavingSpeedSum = 0.0
+    private var powerSavingSpeedCount = 0
+    private var powerSavingLastUpdateTime = 0L
+
+    private fun registerServiceCallbacks() {
+        AccelerometerService.onSpeedEstimateUpdate = { speed ->
+            if (settingsViewModel.powerSaving) {
+                val currentTime = System.currentTimeMillis()
+                powerSavingSpeedSum += speed
+                powerSavingSpeedCount++
+
+                if (powerSavingLastUpdateTime == 0L) {
+                    powerSavingLastUpdateTime = currentTime
+                }
+
+                if (currentTime - powerSavingLastUpdateTime >= 10000) {
+                    val avgSpeed = powerSavingSpeedSum / powerSavingSpeedCount
+                    val distance = avgSpeed / 3.6 * 10 / 1000.0
+                    speedometerViewModel.updateSpeed(avgSpeed)
+                    speedometerViewModel.addDistance(distance)
+                    speedometerViewModel.addWeakSignalSpeed(avgSpeed)
+                    LocationService.updateWithAccelerometerData(avgSpeed, distance)
+                    powerSavingLastUpdateTime = currentTime
+                    powerSavingSpeedSum = 0.0
+                    powerSavingSpeedCount = 0
+                }
+            } else {
+                speedometerViewModel.addWeakSignalSpeed(speed)
+            }
         }
     }
 }
