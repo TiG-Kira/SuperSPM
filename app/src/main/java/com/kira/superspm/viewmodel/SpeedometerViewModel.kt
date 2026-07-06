@@ -38,15 +38,6 @@ class SpeedometerViewModel(private val repository: RecordRepository) : ViewModel
         private set
     var currentAccuracy by mutableStateOf<Float?>(null)
         private set
-    var isGpsWeak by mutableStateOf(false)
-        private set
-    var showWeakSignalCard by mutableStateOf(false)
-        private set
-
-    private var weakSignalStartTime = 0L
-    private var weakSignalSpeedSum = 0.0
-    private var weakSignalSpeedCount = 0
-    private var ignoreWeakSignalDistance = false
 
     private val pathPoints = mutableListOf<LocationPoint>()
     private var lastPoint: LocationPoint? = null
@@ -66,7 +57,6 @@ class SpeedometerViewModel(private val repository: RecordRepository) : ViewModel
         dataPoints = 0
         pathPoints.clear()
         lastPoint = null
-        resetWeakSignalState()
     }
 
     fun pauseRecording() {
@@ -144,79 +134,10 @@ class SpeedometerViewModel(private val repository: RecordRepository) : ViewModel
         }
     }
 
-    fun updateSpeedAndDistance(speed: Double, distance: Double) {
-        currentSpeed = speed
-        if (status == RecordingStatus.RECORDING) {
-            totalDistance += distance
-            maxSpeed = maxOf(maxSpeed, speed)
-            dataPoints++
-            avgSpeed = ((avgSpeed * (dataPoints - 1)) + speed) / dataPoints
-        }
-    }
-
     fun addDistance(distance: Double) {
         if (status == RecordingStatus.RECORDING) {
             totalDistance += distance
         }
-    }
-
-    fun updateGpsSignal(accuracy: Float?) {
-        val wasWeak = isGpsWeak
-        isGpsWeak = accuracy?.let { it >= 30 } == true
-
-        if (isGpsWeak && !wasWeak && status != RecordingStatus.NOT_STARTED) {
-            weakSignalStartTime = System.currentTimeMillis()
-            weakSignalSpeedSum = 0.0
-            weakSignalSpeedCount = 0
-            ignoreWeakSignalDistance = false
-            showWeakSignalCard = true
-        } else if (!isGpsWeak && wasWeak) {
-            showWeakSignalCard = false
-            if (!ignoreWeakSignalDistance && weakSignalSpeedCount > 0) {
-                val avgSpeed = weakSignalSpeedSum / weakSignalSpeedCount
-                val duration = (System.currentTimeMillis() - weakSignalStartTime) / 1000.0
-                val distance = avgSpeed / 3.6 * duration / 1000.0
-                if (distance > 0) {
-                    addDistance(distance)
-                }
-            }
-            weakSignalSpeedSum = 0.0
-            weakSignalSpeedCount = 0
-        }
-    }
-
-    fun addWeakSignalSpeed(speed: Double) {
-        if (isGpsWeak && !ignoreWeakSignalDistance) {
-            weakSignalSpeedSum += speed
-            weakSignalSpeedCount++
-        }
-    }
-
-    fun ignoreWeakSignalDistance() {
-        ignoreWeakSignalDistance = true
-    }
-
-    fun applyWeakSignalDistance() {
-        if (isGpsWeak && !ignoreWeakSignalDistance && weakSignalSpeedCount > 0) {
-            val avgSpeed = weakSignalSpeedSum / weakSignalSpeedCount
-            val duration = (System.currentTimeMillis() - weakSignalStartTime) / 1000.0
-            val distance = avgSpeed / 3.6 * duration / 1000.0
-            if (distance > 0) {
-                addDistance(distance)
-            }
-        }
-        weakSignalSpeedSum = 0.0
-        weakSignalSpeedCount = 0
-        showWeakSignalCard = false
-    }
-
-    private fun resetWeakSignalState() {
-        weakSignalStartTime = 0L
-        weakSignalSpeedSum = 0.0
-        weakSignalSpeedCount = 0
-        ignoreWeakSignalDistance = false
-        isGpsWeak = false
-        showWeakSignalCard = false
     }
 
     private fun calculateDistance(point1: LocationPoint, point2: LocationPoint): Double {

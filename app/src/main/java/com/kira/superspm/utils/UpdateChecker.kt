@@ -20,7 +20,9 @@ object UpdateChecker {
         val hasUpdate: Boolean,
         val latestVersion: String,
         val currentVersion: String,
-        val releaseUrl: String
+        val releaseUrl: String,
+        val apkDownloadUrl: String,
+        val releaseNotes: String
     )
 
     suspend fun checkForUpdates(currentVersion: String): UpdateResult {
@@ -37,7 +39,9 @@ object UpdateChecker {
                             hasUpdate = false,
                             latestVersion = currentVersion,
                             currentVersion = currentVersion,
-                            releaseUrl = GITHUB_RELEASE_PAGE_URL
+                            releaseUrl = GITHUB_RELEASE_PAGE_URL,
+                            apkDownloadUrl = "",
+                            releaseNotes = ""
                         )
                     }
 
@@ -45,6 +49,23 @@ object UpdateChecker {
                     val json = JSONObject(body)
                     val latestVersion = json.optString("tag_name", currentVersion)
                         .removePrefix("v")
+                    val releaseNotes = json.optString("body", "")
+
+                    val assets = json.optJSONArray("assets")
+                    var apkUrl = ""
+                    if (assets != null && assets.length() > 0) {
+                        for (i in 0 until assets.length()) {
+                            val asset = assets.getJSONObject(i)
+                            val name = asset.optString("name", "")
+                            if (name.endsWith(".apk")) {
+                                apkUrl = asset.optString("browser_download_url", "")
+                                break
+                            }
+                        }
+                    }
+                    if (apkUrl.isEmpty()) {
+                        apkUrl = GITHUB_RELEASE_PAGE_URL
+                    }
 
                     val hasUpdate = compareVersions(latestVersion, currentVersion) > 0
 
@@ -52,7 +73,9 @@ object UpdateChecker {
                         hasUpdate = hasUpdate,
                         latestVersion = latestVersion,
                         currentVersion = currentVersion,
-                        releaseUrl = GITHUB_RELEASE_PAGE_URL
+                        releaseUrl = GITHUB_RELEASE_PAGE_URL,
+                        apkDownloadUrl = apkUrl,
+                        releaseNotes = releaseNotes
                     )
                 }
             } catch (e: Exception) {
@@ -60,7 +83,9 @@ object UpdateChecker {
                     hasUpdate = false,
                     latestVersion = currentVersion,
                     currentVersion = currentVersion,
-                    releaseUrl = GITHUB_RELEASE_PAGE_URL
+                    releaseUrl = GITHUB_RELEASE_PAGE_URL,
+                    apkDownloadUrl = "",
+                    releaseNotes = ""
                 )
             }
         }

@@ -965,6 +965,7 @@ com.kira.superspm:id/add = 0x7f08003a
 com.kira.superspm:interpolator/btn_checkbox_unchecked_mtrl_animation_interpolator_1 = 0x7f0a0003
 com.kira.superspm:id/tabMode = 0x7f0800b5
 com.kira.superspm:dimen/abc_action_bar_default_padding_end_material = 0x7f060003
+com.kira.superspm:xml/file_paths = 0x7f100000
 com.kira.superspm:id/accessibility_custom_action_10 = 0x7f080009
 com.kira.superspm:dimen/abc_action_bar_content_inset_with_nav = 0x7f060001
 com.kira.superspm:drawable/abc_ic_ab_back_material = 0x7f070015

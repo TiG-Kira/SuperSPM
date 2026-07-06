@@ -2,6 +2,8 @@ package com.kira.superspm.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,6 +39,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.kira.superspm.utils.UpdateChecker
+import com.kira.superspm.utils.ApkDownloader
 
 @Composable
 fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit, onOpenSourceClick: () -> Unit) {
@@ -48,6 +51,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
     var checkingUpdate by remember { mutableStateOf(false) }
     var updateResult by remember { mutableStateOf<UpdateChecker.UpdateResult?>(null) }
     var showUpdateDialog by remember { mutableStateOf(false) }
+    var downloadingApk by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         scope.launch {
@@ -404,8 +408,51 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                             fontSize = 14.sp,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                         ),
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        modifier = Modifier.padding(bottom = 12.dp)
                     )
+                    if (updateResult!!.hasUpdate && updateResult!!.releaseNotes.isNotBlank()) {
+                        Text(
+                            text = "更新日志",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MiuixTheme.colorScheme.onSurface
+                            ),
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        Text(
+                            text = updateResult!!.releaseNotes,
+                            style = TextStyle(
+                                fontSize = 13.sp,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            ),
+                            modifier = Modifier
+                                .padding(bottom = 16.dp)
+                                .heightIn(max = 200.dp)
+                                .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                        )
+                    }
+                    if (downloadingApk) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            androidx.compose.material3.CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp,
+                                color = MiuixTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "正在下载...",
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                )
+                            )
+                        }
+                    }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = if (updateResult!!.hasUpdate) Arrangement.SpaceBetween else Arrangement.Center
@@ -416,7 +463,8 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(
                                     color = MiuixTheme.colorScheme.surfaceVariant
-                                )
+                                ),
+                                enabled = !downloadingApk
                             ) {
                                 Text(text = "稍后", fontWeight = FontWeight.Bold)
                             }
@@ -431,10 +479,39 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                 },
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(
-                                    color = MiuixTheme.colorScheme.primary
-                                )
+                                    color = MiuixTheme.colorScheme.surfaceVariant
+                                ),
+                                enabled = !downloadingApk
                             ) {
-                                Text(text = "去下载", fontWeight = FontWeight.Bold, color = Color.White)
+                                Text(text = "手动下载", fontWeight = FontWeight.Bold)
+                            }
+                            Button(
+                                onClick = {
+                                    downloadingApk = true
+                                    scope.launch {
+                                        val result = ApkDownloader.downloadAndInstall(
+                                            context,
+                                            updateResult!!.apkDownloadUrl,
+                                            updateResult!!.latestVersion
+                                        )
+                                        downloadingApk = false
+                                        if (result.isFailure) {
+                                            val intent = android.content.Intent(
+                                                android.content.Intent.ACTION_VIEW,
+                                                android.net.Uri.parse(updateResult!!.releaseUrl)
+                                            )
+                                            context.startActivity(intent)
+                                        }
+                                        showUpdateDialog = false
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    color = MiuixTheme.colorScheme.primary
+                                ),
+                                enabled = !downloadingApk
+                            ) {
+                                Text(text = "立即下载", fontWeight = FontWeight.Bold, color = Color.White)
                             }
                         } else {
                             Button(

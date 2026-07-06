@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Science
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -101,6 +102,15 @@ fun SettingsScreen(
                     title = "历史记录",
                     subtitle = "记录管理、数据统计",
                     onClick = { navController.navigate("settings/history") }
+                )
+            }
+
+            item {
+                SettingNavItem(
+                    icon = Icons.Filled.Science,
+                    title = "实验室",
+                    subtitle = "SuperSPM 的实验功能",
+                    onClick = { navController.navigate("settings/lab") }
                 )
             }
 
@@ -183,9 +193,8 @@ fun SettingNavItem(
                 if (hasRedDot) {
                     Box(
                         modifier = Modifier
-                            .size(8.dp)
-                            .background(Color(0xFFFF1744))
-                            .clip(CircleShape)
+                            .size(10.dp)
+                            .background(Color(0xFFFF1744), CircleShape)
                     )
                     androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(8.dp))
                 }

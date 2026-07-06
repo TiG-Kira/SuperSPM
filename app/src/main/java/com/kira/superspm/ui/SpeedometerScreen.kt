@@ -66,6 +66,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import androidx.compose.ui.window.Dialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
@@ -76,7 +77,6 @@ import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
 import androidx.compose.runtime.rememberCoroutineScope
@@ -84,6 +84,10 @@ import kotlinx.coroutines.launch
 import android.location.Geocoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
+enum class SpeedMode {
+    GPS, SENSOR
+}
 
 @Composable
 fun SpeedometerScreen(
@@ -121,51 +125,23 @@ fun SpeedometerScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var lastAccUpdateTime by remember { mutableStateOf(0L) }
-    var isGpsWeak by remember { mutableStateOf(false) }
-    var weakSignalStartTime by remember { mutableStateOf(0L) }
-    var weakSignalSpeedSum by remember { mutableStateOf(0.0) }
-    var weakSignalSpeedCount by remember { mutableStateOf(0) }
-    var ignoreWeakSignalDistance by remember { mutableStateOf(false) }
-    var showWeakSignalCard by remember { mutableStateOf(false) }
-    var weakSignalCardIgnored by remember { mutableStateOf(false) }
 
-    var powerSavingLastUpdateTime by remember { mutableStateOf(0L) }
-    var powerSavingSpeedSum by remember { mutableStateOf(0.0) }
-    var powerSavingSpeedCount by remember { mutableStateOf(0) }
+    var selectedMode by remember { mutableStateOf(SpeedMode.GPS) }
 
     LaunchedEffect(Unit) {
         LocationService.onLocationUpdate = { lat, lon, speed, accuracy ->
-            var finalSpeed = speed
-            if (settingsViewModel.accelerometerEnabled && accuracy != null) {
-                val gpsLevel2OrWorse = accuracy >= 30
-                val speedDiff = kotlin.math.abs(speed - accEstimatedSpeed)
-                val largeDiff = speedDiff > 10
-                if (gpsLevel2OrWorse && largeDiff) {
-                    finalSpeed = accEstimatedSpeed
-                }
-            }
-            viewModel.updateLocation(lat, lon, finalSpeed, accuracy)
+            viewModel.updateLocation(lat, lon, speed, accuracy)
             coroutineScope.launch {
                 addressText = getAddress(context, lat, lon)
             }
         }
 
         LocationService.onSpeedUpdate = { speed ->
-            var finalSpeed = speed
-            if (settingsViewModel.accelerometerEnabled && gpsAccuracy != null) {
-                val gpsLevel2OrWorse = gpsAccuracy!! >= 30
-                val speedDiff = kotlin.math.abs(speed - accEstimatedSpeed)
-                val largeDiff = speedDiff > 10
-                if (gpsLevel2OrWorse && largeDiff) {
-                    finalSpeed = accEstimatedSpeed
-                }
-            }
-            viewModel.updateSpeed(finalSpeed)
+            viewModel.updateSpeed(speed)
         }
 
         LocationService.onGpsSignalUpdate = { accuracy ->
             gpsAccuracy = accuracy
-            viewModel.updateGpsSignal(accuracy)
         }
 
         LocationService.onServiceStopped = {
@@ -178,68 +154,35 @@ fun SpeedometerScreen(
         }
     }
 
-    LaunchedEffect(status) {
-        if (status != SpeedometerViewModel.RecordingStatus.NOT_STARTED &&
-            !(settingsViewModel.powerSaving && settingsViewModel.accelerometerEnabled)) {
+    LaunchedEffect(status, selectedMode) {
+        if (status != SpeedometerViewModel.RecordingStatus.NOT_STARTED && selectedMode == SpeedMode.GPS) {
             LocationService.requestSingleUpdate(context)
         }
     }
 
-    LaunchedEffect(settingsViewModel.accelerometerEnabled, status) {
-        if (settingsViewModel.accelerometerEnabled && status != SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
+    LaunchedEffect(status, selectedMode) {
+        if (selectedMode == SpeedMode.SENSOR && status != SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
             AccelerometerService.start(context)
             AccelerometerService.onAccelerationUpdate = { x, y, z ->
                 accX = x
                 accY = y
                 accZ = z
             }
-            AccelerometerService.onSpeedEstimateUpdate = { speed ->
+            AccelerometerService.onSpeedEstimateUpdate = lambda@{ speed ->
                 accEstimatedSpeed = speed
 
-                if (settingsViewModel.powerSaving) {
-                        val currentTime = System.currentTimeMillis()
-                        powerSavingSpeedSum += speed
-                        powerSavingSpeedCount++
-
-                        if (powerSavingLastUpdateTime == 0L) {
-                            powerSavingLastUpdateTime = currentTime
-                        }
-
-                        if (currentTime - powerSavingLastUpdateTime >= 10000) {
-                            val avgSpeed = powerSavingSpeedSum / powerSavingSpeedCount
-                            val distance = avgSpeed / 3.6 * 10 / 1000.0
-                            viewModel.updateSpeed(avgSpeed)
-                            viewModel.addDistance(distance)
-                            viewModel.addWeakSignalSpeed(avgSpeed)
-                            LocationService.updateWithAccelerometerData(avgSpeed, distance)
-                            powerSavingLastUpdateTime = currentTime
-                            powerSavingSpeedSum = 0.0
-                            powerSavingSpeedCount = 0
-                        } else {
-                            viewModel.addWeakSignalSpeed(speed)
-                        }
-                    } else {
-                    viewModel.addWeakSignalSpeed(speed)
-
-                    val currentTime = System.currentTimeMillis()
-                    val gpsInterval = if (settingsViewModel.refreshTime == 0) 1000 else settingsViewModel.refreshTime * 1000
-
-                    if (lastAccUpdateTime == 0L) {
-                        lastAccUpdateTime = currentTime
-                    }
-
-                    if (currentTime - lastAccUpdateTime >= gpsInterval) {
-                        val useAccelerometer = gpsAccuracy != null && gpsAccuracy!! >= 30
-                        val speedDiff = kotlin.math.abs(viewModel.currentSpeed - speed)
-                        if (useAccelerometer && speedDiff > 10) {
-                            viewModel.updateSpeed(speed)
-                            val distance = speed / 3.6 * gpsInterval / 1000.0 / 1000.0
-                            viewModel.addDistance(distance)
-                            LocationService.updateWithAccelerometerData(speed, distance)
-                        }
-                        lastAccUpdateTime = currentTime
-                    }
+                val currentTime = System.currentTimeMillis()
+                if (lastAccUpdateTime == 0L) {
+                    lastAccUpdateTime = currentTime
+                    return@lambda
                 }
+                val deltaTime = (currentTime - lastAccUpdateTime) / 1000.0
+                lastAccUpdateTime = currentTime
+
+                viewModel.updateSpeed(speed)
+                val distance = speed / 3.6 * deltaTime / 1000.0
+                viewModel.addDistance(distance)
+                LocationService.updateWithSensorData(speed, distance)
             }
             AccelerometerService.onError = { message ->
                 errorMessage = message
@@ -248,9 +191,6 @@ fun SpeedometerScreen(
         } else {
             AccelerometerService.stop()
             lastAccUpdateTime = 0L
-            powerSavingLastUpdateTime = 0L
-            powerSavingSpeedSum = 0.0
-            powerSavingSpeedCount = 0
         }
     }
 
@@ -298,7 +238,7 @@ fun SpeedometerScreen(
                     if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
                         IconButton(
                             onClick = {
-                                if (!hasLocationPermission) {
+                                if (selectedMode == SpeedMode.GPS && !hasLocationPermission) {
                                     showPermissionDialog = true
                                     return@IconButton
                                 }
@@ -309,7 +249,7 @@ fun SpeedometerScreen(
                                 )
                                 val intent = android.content.Intent(context, LocationService::class.java)
                                 intent.putExtra("saveRecord", false)
-                                intent.putExtra("useGps", !settingsViewModel.powerSaving || !settingsViewModel.accelerometerEnabled)
+                                intent.putExtra("sensorMode", selectedMode == SpeedMode.SENSOR)
                                 context.startForegroundService(intent)
                             },
                             modifier = Modifier.padding(end = 8.dp)
@@ -323,7 +263,7 @@ fun SpeedometerScreen(
                         }
                         IconButton(
                             onClick = {
-                                if (!hasLocationPermission) {
+                                if (selectedMode == SpeedMode.GPS && !hasLocationPermission) {
                                     showPermissionDialog = true
                                     return@IconButton
                                 }
@@ -334,11 +274,11 @@ fun SpeedometerScreen(
                                 viewModel.startRecording(recordData = true)
                                 val intent = android.content.Intent(context, LocationService::class.java)
                                 intent.putExtra("saveRecord", true)
-                                intent.putExtra("useGps", !settingsViewModel.powerSaving || !settingsViewModel.accelerometerEnabled)
+                                intent.putExtra("sensorMode", selectedMode == SpeedMode.SENSOR)
                                 context.startForegroundService(intent)
                             },
                             modifier = Modifier.padding(end = 8.dp),
-                            enabled = !settingsViewModel.powerSaving
+                            enabled = selectedMode == SpeedMode.SENSOR || !settingsViewModel.powerSaving
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Circle,
@@ -356,9 +296,9 @@ fun SpeedometerScreen(
                                     }
                                     SpeedometerViewModel.RecordingStatus.PAUSED -> {
                                         viewModel.resumeRecording()
-                                        if (!settingsViewModel.powerSaving || !settingsViewModel.accelerometerEnabled) {
-                                            context.startForegroundService(android.content.Intent(context, LocationService::class.java))
-                                        }
+                                        val intent = android.content.Intent(context, LocationService::class.java)
+                                        intent.putExtra("sensorMode", selectedMode == SpeedMode.SENSOR)
+                                        context.startForegroundService(intent)
                                     }
                                     else -> {}
                                 }
@@ -374,13 +314,9 @@ fun SpeedometerScreen(
                         }
                         IconButton(
                             onClick = {
-                                viewModel.applyWeakSignalDistance()
-
-                                if (!settingsViewModel.powerSaving || !settingsViewModel.accelerometerEnabled) {
-                                    val record = LocationService.finishRecording()
-                                    if (record != null) {
-                                        onRecordSaved()
-                                    }
+                                val record = LocationService.finishRecording()
+                                if (record != null) {
+                                    onRecordSaved()
                                 }
                                 viewModel.reset()
                                 context.stopService(android.content.Intent(context, LocationService::class.java))
@@ -413,6 +349,26 @@ fun SpeedometerScreen(
             ) {
 
                 item {
+                    if (settingsViewModel.accelerometerEnabled) {
+                        val tabs = listOf("GPS", "传感器")
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            TabRowWithContour(
+                                tabs = tabs,
+                                selectedTabIndex = if (selectedMode == SpeedMode.GPS) 0 else 1,
+                                onTabSelected = { index ->
+                                    if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
+                                        selectedMode = if (index == 0) SpeedMode.GPS else SpeedMode.SENSOR
+                                    }
+                                },
+                                modifier = Modifier.align(Alignment.CenterStart)
+                            )
+                        }
+                    }
+
                     if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
                         Box(
                             modifier = Modifier
@@ -479,27 +435,43 @@ fun SpeedometerScreen(
                 }
 
                 item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
-                            GpsSignalCard(
-                                accuracy = gpsAccuracy,
-                                isDark = isDark,
-                                powerSaving = settingsViewModel.powerSaving,
-                                accelerometerEnabled = settingsViewModel.accelerometerEnabled,
-                                isNotStarted = true
-                            )
-                        } else {
-                            GpsSignalCard(
-                                accuracy = gpsAccuracy,
-                                isDark = isDark,
-                                powerSaving = settingsViewModel.powerSaving,
-                                accelerometerEnabled = settingsViewModel.accelerometerEnabled
-                            )
+                    if (selectedMode == SpeedMode.SENSOR && status != SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Card(
+                                modifier = Modifier
+                                    .width(180.dp)
+                                    .height(160.dp),
+                                colors = CardDefaults.defaultColors(color = if (isDark) Color(0xFF1A3825) else Color(0xFFDFFAE4))
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(all = 16.dp)
+                                    ) {
+                                        Text(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            text = "使用传感器",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = if (isDark) Color.White else Color.Black
+                                        )
+                                        Spacer(Modifier.height(2.dp))
+                                        Text(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            text = "当前未使用GPS",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = if (isDark) Color.White else Color.Black
+                                        )
+                                    }
+                                }
+                            }
 
                             Column(
                                 modifier = Modifier.height(160.dp),
@@ -603,49 +575,129 @@ fun SpeedometerScreen(
                                 }
                             }
                         }
-                    }
-                }
-
-                item {
-                    if (viewModel.showWeakSignalCard && settingsViewModel.accelerometerEnabled) {
-                        Card(
+                    } else if (selectedMode == SpeedMode.GPS) {
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                            colors = CardDefaults.defaultColors(color = if (isDark) Color(0xFF3D3514) else Color(0xFFFFF9C4))
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
+                            if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
+                                GpsSignalCard(
+                                    accuracy = gpsAccuracy,
+                                    isDark = isDark,
+                                    powerSaving = settingsViewModel.powerSaving,
+                                    accelerometerEnabled = false,
+                                    isNotStarted = true
+                                )
+                            } else {
+                                GpsSignalCard(
+                                    accuracy = gpsAccuracy,
+                                    isDark = isDark,
+                                    powerSaving = settingsViewModel.powerSaving,
+                                    accelerometerEnabled = false
+                                )
+
+                                Column(
+                                    modifier = Modifier.height(160.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Info,
-                                        contentDescription = null,
-                                        tint = Color(0xFFFDD835),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Text(
-                                        text = "正在计算弱信号期间的大致里程，GPS信号恢复后将计入总里程",
-                                        style = TextStyle(
-                                            fontSize = 13.sp,
-                                            color = if (isDark) Color.White else Color.Black
-                                        ),
-                                        modifier = Modifier.padding(start = 8.dp)
-                                    )
-                                }
-                                Button(
-                                    onClick = {
-                                        viewModel.ignoreWeakSignalDistance()
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        color = MiuixTheme.colorScheme.surfaceVariant
-                                    )
-                                ) {
-                                    Text(text = "不计入", fontWeight = FontWeight.Bold)
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth().weight(1f)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(8.dp),
+                                            horizontalArrangement = Arrangement.SpaceEvenly,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center
+                                            ) {
+                                                Text(
+                                                    text = context.getString(R.string.max_speed),
+                                                    style = TextStyle(
+                                                        fontSize = 11.sp,
+                                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                                    )
+                                                )
+                                                Text(
+                                                    text = formatSpeed(maxSpeed, settingsViewModel.speedUnit),
+                                                    style = TextStyle(
+                                                        fontSize = 18.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MiuixTheme.colorScheme.onSurface
+                                                    )
+                                                )
+                                                Text(
+                                                    text = getSpeedUnitString(settingsViewModel.speedUnit),
+                                                    style = TextStyle(
+                                                        fontSize = 9.sp,
+                                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                                    )
+                                                )
+                                            }
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center
+                                            ) {
+                                                Text(
+                                                    text = context.getString(R.string.avg_speed),
+                                                    style = TextStyle(
+                                                        fontSize = 11.sp,
+                                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                                    )
+                                                )
+                                                Text(
+                                                    text = formatSpeed(avgSpeed, settingsViewModel.speedUnit),
+                                                    style = TextStyle(
+                                                        fontSize = 18.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MiuixTheme.colorScheme.onSurface
+                                                    )
+                                                )
+                                                Text(
+                                                    text = getSpeedUnitString(settingsViewModel.speedUnit),
+                                                    style = TextStyle(
+                                                        fontSize = 9.sp,
+                                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth().weight(1f)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.fillMaxSize(),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Text(
+                                                text = context.getString(R.string.total_distance),
+                                                style = TextStyle(
+                                                    fontSize = 11.sp,
+                                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                                )
+                                            )
+                                            Text(
+                                                text = formatDistance(totalDistance),
+                                                style = TextStyle(
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MiuixTheme.colorScheme.onSurface
+                                                )
+                                            )
+                                            Text(
+                                                text = context.getString(R.string.km),
+                                                style = TextStyle(
+                                                    fontSize = 9.sp,
+                                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                                )
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -653,71 +705,31 @@ fun SpeedometerScreen(
                 }
 
                 item {
-                    if (status != SpeedometerViewModel.RecordingStatus.NOT_STARTED && 
-                        settingsViewModel.accelerometerEnabled) {
+                    if (status != SpeedometerViewModel.RecordingStatus.NOT_STARTED &&
+                        selectedMode == SpeedMode.SENSOR) {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
-                            colors = CardDefaults.defaultColors(color = if (isDark) Color(0xFF1A237E) else Color(0xFFE3F2FD))
+                            colors = CardDefaults.defaultColors(color = if (isDark) Color(0xFF1A1A1A) else Color(0xFFF0F0F0))
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "加速度计数据",
+                                    text = "欢迎使用传感器测速",
                                     style = TextStyle(
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = MiuixTheme.colorScheme.onSurface
                                     )
                                 )
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                                    horizontalArrangement = Arrangement.SpaceEvenly
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Text(
-                                            text = "X",
-                                            style = TextStyle(fontSize = 12.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-                                        )
-                                        Text(
-                                            text = String.format("%.2f", accX),
-                                            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MiuixTheme.colorScheme.onSurface)
-                                        )
-                                    }
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Text(
-                                            text = "Y",
-                                            style = TextStyle(fontSize = 12.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-                                        )
-                                        Text(
-                                            text = String.format("%.2f", accY),
-                                            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MiuixTheme.colorScheme.onSurface)
-                                        )
-                                    }
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Text(
-                                            text = "Z",
-                                            style = TextStyle(fontSize = 12.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-                                        )
-                                        Text(
-                                            text = String.format("%.2f", accZ),
-                                            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MiuixTheme.colorScheme.onSurface)
-                                        )
-                                    }
-                                }
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = "估算速度",
-                                        style = TextStyle(fontSize = 12.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-                                    )
-                                    Text(
-                                        text = "${formatSpeed(accEstimatedSpeed, settingsViewModel.speedUnit)} ${getSpeedUnitString(settingsViewModel.speedUnit)}",
-                                        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MiuixTheme.colorScheme.onSurface)
-                                    )
-                                }
+                                Text(
+                                    text = "传感器测速主要利用手机的加速度计来估算速度数值，更省电。但传感器测速无法计算相对静止场景，如测算车辆、航空器等的速度，因为设备为相对静止状态。您可以使用此功能测量步速等设备有移动加速度的场景。",
+                                    style = TextStyle(
+                                        fontSize = 13.sp,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                    ),
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
                             }
                         }
                     }
@@ -728,7 +740,8 @@ fun SpeedometerScreen(
                 }
 
                 item {
-                    if (settingsViewModel.powerSaving) {
+                    if (selectedMode == SpeedMode.GPS) {
+                        if (settingsViewModel.powerSaving) {
                     } else if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
                         Card(
                             modifier = Modifier
@@ -864,6 +877,7 @@ fun SpeedometerScreen(
                                 }
                             }
                         }
+                    }
                     }
                 }
 

@@ -118,6 +118,12 @@ fun AppNavHost(
                     navController = navController
                 )
             }
+            composable("settings/lab") {
+                LabSettingsScreen(
+                    isDark = isDark,
+                    navController = navController
+                )
+            }
             composable("about") {
                 AboutScreen(
                     isDark = isDark,

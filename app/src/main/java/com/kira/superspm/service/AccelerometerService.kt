@@ -5,12 +5,12 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import kotlin.math.abs
 
 object AccelerometerService : SensorEventListener {
     private var sensorManager: SensorManager? = null
     private var accelerometer: Sensor? = null
     private var isRunning = false
-    private var hasSensor = false
 
     private var currentAccelerationX = 0.0
     private var currentAccelerationY = 0.0
@@ -26,49 +26,18 @@ object AccelerometerService : SensorEventListener {
     var onDistanceUpdate: ((Double) -> Unit)? = null
     var onError: ((String) -> Unit)? = null
 
-    fun hasSensor(context: Context): Boolean {
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val linearAccel = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
-        if (linearAccel != null) return true
-        val accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        return accel != null
-    }
-
     fun start(context: Context) {
-        if (isRunning) {
-            sensorManager?.unregisterListener(this)
-        }
+        if (isRunning) return
 
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
-
         if (accelerometer == null) {
-            accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+            onError?.invoke("设备不支持加速度计传感器")
+            return
         }
-
-        if (accelerometer != null) {
-            hasSensor = true
-            try {
-                val registered = sensorManager?.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME)
-                if (registered == true) {
-                    isRunning = true
-                    lastUpdateTime = 0L
-                    speedAccumulator = 0.0
-                } else {
-                    isRunning = false
-                    onError?.invoke("传感器注册失败")
-                }
-            } catch (e: SecurityException) {
-                isRunning = false
-                onError?.invoke("传感器权限被拒绝")
-            } catch (e: Exception) {
-                isRunning = false
-                onError?.invoke("启动传感器失败: ${e.message}")
-            }
-        } else {
-            hasSensor = false
-            isRunning = false
-            onError?.invoke("设备不支持加速度计")
+        accelerometer?.let {
+            sensorManager?.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME)
+            isRunning = true
         }
     }
 

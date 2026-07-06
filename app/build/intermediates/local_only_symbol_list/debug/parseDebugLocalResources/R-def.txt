@@ -56,3 +56,4 @@ string title_settings
 string title_speedometer
 string total_distance
 style Theme.SuperSPM
+xml file_paths

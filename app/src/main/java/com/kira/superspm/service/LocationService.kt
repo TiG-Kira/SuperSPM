@@ -34,6 +34,7 @@ class LocationService : Service(), LocationListener {
     private var lastSpeed = 0.0
     private var idleStartTime: Long = 0
     private var isRunning = false
+    private var isSensorMode = false
     private val recordRepository by inject<com.kira.superspm.data.repository.RecordRepository>()
     private var lastPositionUpdateTime = 0L
 
@@ -80,34 +81,6 @@ class LocationService : Service(), LocationListener {
         fun getTotalDistance(): Double = instance?.totalDistance ?: 0.0
         fun getDataPoints(): Int = instance?.dataPoints ?: 0
 
-        fun updateNotificationSpeed(speed: Double) {
-            instance?.let { service ->
-                service.currentSpeed = speed
-                service.maxSpeed = maxOf(service.maxSpeed, speed)
-                service.dataPoints++
-                service.avgSpeed = ((service.avgSpeed * (service.dataPoints - 1)) + speed) / service.dataPoints
-                service.updateNotification()
-            }
-        }
-
-        fun updateNotificationDistance(distance: Double) {
-            instance?.let { service ->
-                service.totalDistance += distance
-                service.updateNotification()
-            }
-        }
-
-        fun updateWithAccelerometerData(speed: Double, distance: Double) {
-            instance?.let { service ->
-                service.currentSpeed = speed
-                service.maxSpeed = maxOf(service.maxSpeed, speed)
-                service.dataPoints++
-                service.avgSpeed = ((service.avgSpeed * (service.dataPoints - 1)) + speed) / service.dataPoints
-                service.totalDistance += distance
-                service.updateNotification()
-            }
-        }
-
         fun stopRecording(): com.kira.superspm.data.model.LocationRecord? {
             return instance?.finishRecording()
         }
@@ -120,6 +93,10 @@ class LocationService : Service(), LocationListener {
             currentInterval = if (powerSaving) 10000L else 1000L
             currentFastestInterval = currentInterval / 2
             positionRefreshInterval = if (refreshTimeSec == 0) currentInterval else refreshTimeSec * 1000L
+        }
+
+        fun updateWithSensorData(speed: Double, distanceDelta: Double) {
+            instance?.updateWithSensorData(speed, distanceDelta)
         }
 
         fun requestSingleUpdate(context: Context) {
@@ -193,20 +170,28 @@ class LocationService : Service(), LocationListener {
             return START_NOT_STICKY
         }
 
-        startForeground(NOTIFICATION_ID, createNotification())
-        
-        if (!checkPermissions()) {
-            onError?.invoke("位置权限未授予")
-            return START_STICKY
+        val sensorMode = intent?.getBooleanExtra("sensorMode", false) ?: false
+        isSensorMode = sensorMode
+
+        val serviceType = if (isSensorMode)
+            android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        else
+            android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+        startForeground(NOTIFICATION_ID, createNotification(), serviceType)
+
+        if (!isSensorMode) {
+            if (!checkPermissions()) {
+                onError?.invoke("位置权限未授予")
+                return START_STICKY
+            }
+
+            if (!isGpsEnabled()) {
+                onError?.invoke("GPS 未开启")
+            }
         }
 
-        if (!isGpsEnabled()) {
-            onError?.invoke("GPS 未开启")
-        }
-
-        val useGps = intent?.getBooleanExtra("useGps", true) ?: true
         if (!isRunning) {
-            if (useGps) {
+            if (!isSensorMode) {
                 startLocationUpdates()
             }
             isRunning = true
@@ -254,19 +239,6 @@ class LocationService : Service(), LocationListener {
         } catch (e: SecurityException) {
         } catch (e: Exception) {
         }
-
-        try {
-            val lastKnownGpsLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            if (lastKnownGpsLocation != null) {
-                onGpsSignalUpdate?.invoke(lastKnownGpsLocation.accuracy)
-            }
-            val lastKnownNetworkLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-            if (lastKnownNetworkLocation != null) {
-                onGpsSignalUpdate?.invoke(lastKnownNetworkLocation.accuracy)
-            }
-        } catch (e: SecurityException) {
-        } catch (e: Exception) {
-        }
     }
 
     fun startRecording(saveRecord: Boolean = false) {
@@ -289,7 +261,7 @@ class LocationService : Service(), LocationListener {
     }
 
     fun finishRecording(): com.kira.superspm.data.model.LocationRecord? {
-        if (!shouldSaveRecord || pathPoints.isEmpty()) {
+        if (!shouldSaveRecord || (pathPoints.isEmpty() && !isSensorMode)) {
             resetRecording()
             return null
         }
@@ -413,7 +385,7 @@ class LocationService : Service(), LocationListener {
             updateNotification()
         }
 
-        onSpeedUpdate?.invoke(currentSpeed)
+        onSpeedUpdate?.invoke(speed)
         onGpsSignalUpdate?.invoke(location.accuracy)
 
         val now = System.currentTimeMillis()
@@ -447,6 +419,20 @@ class LocationService : Service(), LocationListener {
             isGpsActive = true
             onStatusChange?.invoke(true)
             startLocationUpdates()
+        }
+    }
+
+    fun updateWithSensorData(speed: Double, distanceDelta: Double) {
+        if (!isSensorMode) return
+        
+        currentSpeed = speed
+        
+        if (isRecording) {
+            maxSpeed = maxOf(maxSpeed, speed)
+            dataPoints++
+            avgSpeed = if (dataPoints > 0) ((avgSpeed * (dataPoints - 1)) + speed) / dataPoints else speed
+            totalDistance += distanceDelta
+            updateNotification()
         }
     }
 
@@ -548,8 +534,9 @@ class LocationService : Service(), LocationListener {
     }
 
     private fun buildNotificationBuilder(pendingIntent: PendingIntent): NotificationCompat.Builder {
+        val notificationTitle = if (isSensorMode) "使用传感器测速中" else "使用 GPS 测速中"
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("测速中")
+            .setContentTitle(notificationTitle)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -591,6 +578,7 @@ class LocationService : Service(), LocationListener {
         super.onDestroy()
         instance = null
         isRunning = false
+        isSensorMode = false
         try {
             locationManager.removeUpdates(this)
         } catch (e: Exception) {
