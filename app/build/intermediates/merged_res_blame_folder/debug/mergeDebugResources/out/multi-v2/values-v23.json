@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.kira.superspm.app-mergeDebugResources-2:/values-v23/values-v23.xml",
+            "outputFile": "com.kira.superspm.app-mergeDebugResources-61:/values-v23/values-v23.xml",
             "map": [
                 {
-                    "source": "D:\\Programs\\gradle-9.6.0\\caches\\8.13\\transforms\\2e5d67a599a0b7e8aa65443a00f646fa\\transformed\\appcompat-1.6.1\\res\\values-v23\\values-v23.xml",
+                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.11.1\\transforms\\02e42023adc521d2bd5d23a460d77447\\transformed\\appcompat-1.6.1\\res\\values-v23\\values-v23.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,20,34,35,36,39,43,44,45,46",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4",

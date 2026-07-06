@@ -418,7 +418,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                     color = MiuixTheme.colorScheme.surfaceVariant
                                 )
                             ) {
-                                Text(text = "稍后")
+                                Text(text = "稍后", fontWeight = FontWeight.Bold)
                             }
                             Button(
                                 onClick = {
@@ -434,7 +434,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                     color = MiuixTheme.colorScheme.primary
                                 )
                             ) {
-                                Text(text = "去下载")
+                                Text(text = "去下载", fontWeight = FontWeight.Bold, color = Color.White)
                             }
                         } else {
                             Button(
@@ -444,7 +444,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                     color = MiuixTheme.colorScheme.primary
                                 )
                             ) {
-                                Text(text = "确定")
+                                Text(text = "确定", fontWeight = FontWeight.Bold, color = Color.White)
                             }
                         }
                     }

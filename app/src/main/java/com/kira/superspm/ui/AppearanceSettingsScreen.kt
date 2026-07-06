@@ -112,7 +112,7 @@ fun AppearanceSettingsScreen(
                             modifier = Modifier.padding(start = 16.dp)
                         ) {
                             Text(
-                                text = "外观",
+                                text = "本页说明",
                                 style = TextStyle(
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
@@ -120,7 +120,7 @@ fun AppearanceSettingsScreen(
                                 )
                             )
                             Text(
-                                text = "暗色模式、速度单位显示",
+                                text = "本页面可对外观进行修改。包括暗色模式开关、跟随系统开关、速度单位选择。",
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -151,10 +151,21 @@ fun AppearanceSettingsScreen(
                 ) {
                     SettingSwitchItem(
                         title = "暗色模式",
-                        checked = viewModel.effectiveDarkMode,
+                        checked = viewModel.darkMode,
                         onCheckedChange = { viewModel.updateDarkMode(it) },
                         enabled = !viewModel.followSystem && !viewModel.powerSaving
                     )
+
+                    if (!viewModel.followSystem && !viewModel.powerSaving) {
+                        Text(
+                            text = "重启应用后生效",
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                color = Color(0xFFF44336)
+                            ),
+                            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                        )
+                    }
 
                     SettingSwitchItem(
                         title = "跟随系统开/关暗色模式",
@@ -244,7 +255,7 @@ fun AppearanceSettingsScreen(
                             color = MiuixTheme.colorScheme.surfaceVariant
                         )
                     ) {
-                        Text(text = "取消")
+                        Text(text = "取消", fontWeight = FontWeight.Bold)
                     }
                 }
             }

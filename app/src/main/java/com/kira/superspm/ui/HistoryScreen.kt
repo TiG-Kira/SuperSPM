@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
 import com.kira.superspm.data.model.LocationRecord
 import com.kira.superspm.data.store.SpeedUnit
 import com.kira.superspm.viewmodel.HistoryViewModel
@@ -163,7 +164,7 @@ fun HistoryScreen(
                                 color = MiuixTheme.colorScheme.surfaceVariant
                             )
                         ) {
-                            Text(text = "取消")
+                            Text(text = "取消", fontWeight = FontWeight.Bold)
                         }
                         Button(
                             onClick = {
@@ -177,7 +178,7 @@ fun HistoryScreen(
                                 color = MiuixTheme.colorScheme.primary
                             )
                         ) {
-                            Text(text = "保存")
+                            Text(text = "保存", fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }
@@ -219,7 +220,7 @@ fun HistoryScreen(
                                 color = MiuixTheme.colorScheme.surfaceVariant
                             )
                         ) {
-                            Text(text = "取消")
+                            Text(text = "取消", fontWeight = FontWeight.Bold)
                         }
                         Button(
                             onClick = {
@@ -231,7 +232,7 @@ fun HistoryScreen(
                                 color = MiuixTheme.colorScheme.error
                             )
                         ) {
-                            Text(text = "删除")
+                            Text(text = "删除", fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }

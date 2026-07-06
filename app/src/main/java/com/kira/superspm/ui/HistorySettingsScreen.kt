@@ -118,7 +118,7 @@ fun HistorySettingsScreen(
                             modifier = Modifier.padding(start = 16.dp)
                         ) {
                             Text(
-                                text = "历史记录",
+                                text = "本页说明",
                                 style = TextStyle(
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
@@ -126,7 +126,7 @@ fun HistorySettingsScreen(
                                 )
                             )
                             Text(
-                                text = "记录管理、数据统计",
+                                text = "本页面可对历史记录进行修改。包括查看记录统计、清空全部记录。",
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -301,7 +301,7 @@ fun HistorySettingsScreen(
                                 color = MiuixTheme.colorScheme.surfaceVariant
                             )
                         ) {
-                            Text(text = "取消")
+                            Text(text = "取消", fontWeight = FontWeight.Bold)
                         }
                         Button(
                             onClick = {
@@ -313,7 +313,7 @@ fun HistorySettingsScreen(
                                 color = MiuixTheme.colorScheme.error
                             )
                         ) {
-                            Text(text = "清空")
+                            Text(text = "清空", fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }

@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.Circle
 import com.kira.superspm.R
 import com.kira.superspm.data.store.SpeedUnit
 import com.kira.superspm.service.LocationService
+import com.kira.superspm.service.AccelerometerService
 import com.kira.superspm.viewmodel.SettingsViewModel
 import com.kira.superspm.viewmodel.SpeedometerViewModel
 import top.yukonga.miuix.kmp.basic.Button
@@ -110,6 +111,12 @@ fun SpeedometerScreen(
     var showErrorDialog by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var addressText by remember { mutableStateOf("") }
+    
+    var accX by remember { mutableStateOf(0.0) }
+    var accY by remember { mutableStateOf(0.0) }
+    var accZ by remember { mutableStateOf(0.0) }
+    var accEstimatedSpeed by remember { mutableStateOf(0.0) }
+    
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -132,11 +139,32 @@ fun SpeedometerScreen(
             viewModel.reset()
         }
 
-        LocationService.requestSingleUpdate(context)
-
         LocationService.onError = { message ->
             errorMessage = message
             showErrorDialog = true
+        }
+    }
+
+    LaunchedEffect(status) {
+        if (status != SpeedometerViewModel.RecordingStatus.NOT_STARTED &&
+            !(settingsViewModel.powerSaving && settingsViewModel.accelerometerEnabled)) {
+            LocationService.requestSingleUpdate(context)
+        }
+    }
+
+    LaunchedEffect(settingsViewModel.accelerometerEnabled) {
+        if (settingsViewModel.accelerometerEnabled && status != SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
+            AccelerometerService.start(context)
+            AccelerometerService.onAccelerationUpdate = { x, y, z ->
+                accX = x
+                accY = y
+                accZ = z
+            }
+            AccelerometerService.onSpeedEstimateUpdate = { speed ->
+                accEstimatedSpeed = speed
+            }
+        } else {
+            AccelerometerService.stop()
         }
     }
 
@@ -188,14 +216,16 @@ fun SpeedometerScreen(
                                     showPermissionDialog = true
                                     return@IconButton
                                 }
-                                LocationService.updateSettings(
-                                    settingsViewModel.powerSaving,
-                                    settingsViewModel.refreshTime
-                                )
                                 viewModel.startRecording()
-                                val intent = android.content.Intent(context, LocationService::class.java)
-                                intent.putExtra("saveRecord", false)
-                                context.startForegroundService(intent)
+                                if (!settingsViewModel.powerSaving || !settingsViewModel.accelerometerEnabled) {
+                                    LocationService.updateSettings(
+                                        settingsViewModel.powerSaving,
+                                        settingsViewModel.refreshTime
+                                    )
+                                    val intent = android.content.Intent(context, LocationService::class.java)
+                                    intent.putExtra("saveRecord", false)
+                                    context.startForegroundService(intent)
+                                }
                             },
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
@@ -206,29 +236,31 @@ fun SpeedometerScreen(
                                 modifier = Modifier.size(28.dp)
                             )
                         }
-                        IconButton(
-                            onClick = {
-                                if (!hasLocationPermission) {
-                                    showPermissionDialog = true
-                                    return@IconButton
-                                }
-                                LocationService.updateSettings(
-                                    settingsViewModel.powerSaving,
-                                    settingsViewModel.refreshTime
+                        if (!settingsViewModel.powerSaving) {
+                            IconButton(
+                                onClick = {
+                                    if (!hasLocationPermission) {
+                                        showPermissionDialog = true
+                                        return@IconButton
+                                    }
+                                    LocationService.updateSettings(
+                                        settingsViewModel.powerSaving,
+                                        settingsViewModel.refreshTime
+                                    )
+                                    viewModel.startRecording(recordData = true)
+                                    val intent = android.content.Intent(context, LocationService::class.java)
+                                    intent.putExtra("saveRecord", true)
+                                    context.startForegroundService(intent)
+                                },
+                                modifier = Modifier.padding(end = 8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Circle,
+                                    contentDescription = "记录并开始",
+                                    tint = MiuixTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(24.dp)
                                 )
-                                viewModel.startRecording(recordData = true)
-                                val intent = android.content.Intent(context, LocationService::class.java)
-                                intent.putExtra("saveRecord", true)
-                                context.startForegroundService(intent)
-                            },
-                            modifier = Modifier.padding(end = 8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Circle,
-                                contentDescription = "记录并开始",
-                                tint = MiuixTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(24.dp)
-                            )
+                            }
                         }
                     } else {
                         IconButton(
@@ -239,7 +271,9 @@ fun SpeedometerScreen(
                                     }
                                     SpeedometerViewModel.RecordingStatus.PAUSED -> {
                                         viewModel.resumeRecording()
-                                        context.startForegroundService(android.content.Intent(context, LocationService::class.java))
+                                        if (!settingsViewModel.powerSaving || !settingsViewModel.accelerometerEnabled) {
+                                            context.startForegroundService(android.content.Intent(context, LocationService::class.java))
+                                        }
                                     }
                                     else -> {}
                                 }
@@ -255,9 +289,11 @@ fun SpeedometerScreen(
                         }
                         IconButton(
                             onClick = {
-                                val record = LocationService.finishRecording()
-                                if (record != null) {
-                                    onRecordSaved()
+                                if (!settingsViewModel.powerSaving || !settingsViewModel.accelerometerEnabled) {
+                                    val record = LocationService.finishRecording()
+                                    if (record != null) {
+                                        onRecordSaved()
+                                    }
                                 }
                                 viewModel.reset()
                                 context.stopService(android.content.Intent(context, LocationService::class.java))
@@ -290,39 +326,68 @@ fun SpeedometerScreen(
             ) {
 
                 item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(280.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        SpeedometerGauge(currentSpeed)
-                    }
-                }
+                    if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(280.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "未开始",
+                                    style = TextStyle(
+                                        fontSize = 48.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MiuixTheme.colorScheme.onSurface
+                                    )
+                                )
+                                Text(
+                                    text = "选择一种模式来开始测速",
+                                    style = TextStyle(
+                                        fontSize = 16.sp,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                    ),
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(280.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            SpeedometerGauge(currentSpeed)
+                        }
 
-                item {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    ) {
-                        Text(
-                            text = formatSpeed(currentSpeed, settingsViewModel.speedUnit),
-                            style = TextStyle(
-                                fontSize = 48.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MiuixTheme.colorScheme.onSurface
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp)
+                        ) {
+                            Text(
+                                text = formatSpeed(currentSpeed, settingsViewModel.speedUnit),
+                                style = TextStyle(
+                                    fontSize = 48.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MiuixTheme.colorScheme.onSurface
+                                )
                             )
-                        )
-                        Text(
-                            text = getSpeedUnitString(settingsViewModel.speedUnit),
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            Text(
+                                text = getSpeedUnitString(settingsViewModel.speedUnit),
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                )
                             )
-                        )
+                        }
                     }
                 }
 
@@ -333,32 +398,107 @@ fun SpeedometerScreen(
                             .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        GpsSignalCard(accuracy = gpsAccuracy, isDark = isDark)
+                        if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
+                            GpsSignalCard(
+                                accuracy = gpsAccuracy,
+                                isDark = isDark,
+                                powerSaving = settingsViewModel.powerSaving,
+                                accelerometerEnabled = settingsViewModel.accelerometerEnabled,
+                                isNotStarted = true
+                            )
+                        } else {
+                            GpsSignalCard(
+                                accuracy = gpsAccuracy,
+                                isDark = isDark,
+                                powerSaving = settingsViewModel.powerSaving,
+                                accelerometerEnabled = settingsViewModel.accelerometerEnabled
+                            )
 
-                        Column(
-                            modifier = Modifier.height(160.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Card(
-                                modifier = Modifier.fillMaxWidth().weight(1f)
+                            Column(
+                                modifier = Modifier.height(160.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().weight(1f)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(8.dp),
+                                        horizontalArrangement = Arrangement.SpaceEvenly,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Text(
+                                                text = context.getString(R.string.max_speed),
+                                                style = TextStyle(
+                                                    fontSize = 11.sp,
+                                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                                )
+                                            )
+                                            Text(
+                                                text = formatSpeed(maxSpeed, settingsViewModel.speedUnit),
+                                                style = TextStyle(
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MiuixTheme.colorScheme.onSurface
+                                                )
+                                            )
+                                            Text(
+                                                text = getSpeedUnitString(settingsViewModel.speedUnit),
+                                                style = TextStyle(
+                                                    fontSize = 9.sp,
+                                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                                )
+                                            )
+                                        }
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Text(
+                                                text = context.getString(R.string.avg_speed),
+                                                style = TextStyle(
+                                                    fontSize = 11.sp,
+                                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                                )
+                                            )
+                                            Text(
+                                                text = formatSpeed(avgSpeed, settingsViewModel.speedUnit),
+                                                style = TextStyle(
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MiuixTheme.colorScheme.onSurface
+                                                )
+                                            )
+                                            Text(
+                                                text = getSpeedUnitString(settingsViewModel.speedUnit),
+                                                style = TextStyle(
+                                                    fontSize = 9.sp,
+                                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().weight(1f)
                                 ) {
                                     Column(
-                                        modifier = Modifier.padding(8.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                        modifier = Modifier.fillMaxSize(),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
                                     ) {
                                         Text(
-                                            text = context.getString(R.string.max_speed),
+                                            text = context.getString(R.string.total_distance),
                                             style = TextStyle(
                                                 fontSize = 11.sp,
                                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                             )
                                         )
                                         Text(
-                                            text = formatSpeed(maxSpeed, settingsViewModel.speedUnit),
+                                            text = formatDistance(totalDistance),
                                             style = TextStyle(
                                                 fontSize = 18.sp,
                                                 fontWeight = FontWeight.Bold,
@@ -366,34 +506,7 @@ fun SpeedometerScreen(
                                             )
                                         )
                                         Text(
-                                            text = getSpeedUnitString(settingsViewModel.speedUnit),
-                                            style = TextStyle(
-                                                fontSize = 9.sp,
-                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                                            )
-                                        )
-                                    }
-                                    Column(
-                                        modifier = Modifier.padding(8.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(
-                                            text = context.getString(R.string.avg_speed),
-                                            style = TextStyle(
-                                                fontSize = 11.sp,
-                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                                            )
-                                        )
-                                        Text(
-                                            text = formatSpeed(avgSpeed, settingsViewModel.speedUnit),
-                                            style = TextStyle(
-                                                fontSize = 18.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = MiuixTheme.colorScheme.onSurface
-                                            )
-                                        )
-                                        Text(
-                                            text = getSpeedUnitString(settingsViewModel.speedUnit),
+                                            text = context.getString(R.string.km),
                                             style = TextStyle(
                                                 fontSize = 9.sp,
                                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -402,35 +515,74 @@ fun SpeedometerScreen(
                                     }
                                 }
                             }
-                            Card(
-                                modifier = Modifier.fillMaxWidth().weight(1f)
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
+                        }
+                    }
+                }
+
+                item {
+                    if (status != SpeedometerViewModel.RecordingStatus.NOT_STARTED && 
+                        settingsViewModel.accelerometerEnabled) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            colors = CardDefaults.defaultColors(color = if (isDark) Color(0xFF1A237E) else Color(0xFFE3F2FD))
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = "加速度计数据",
+                                    style = TextStyle(
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MiuixTheme.colorScheme.onSurface
+                                    )
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "X",
+                                            style = TextStyle(fontSize = 12.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                                        )
+                                        Text(
+                                            text = String.format("%.2f", accX),
+                                            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MiuixTheme.colorScheme.onSurface)
+                                        )
+                                    }
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "Y",
+                                            style = TextStyle(fontSize = 12.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                                        )
+                                        Text(
+                                            text = String.format("%.2f", accY),
+                                            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MiuixTheme.colorScheme.onSurface)
+                                        )
+                                    }
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "Z",
+                                            style = TextStyle(fontSize = 12.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                                        )
+                                        Text(
+                                            text = String.format("%.2f", accZ),
+                                            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MiuixTheme.colorScheme.onSurface)
+                                        )
+                                    }
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = context.getString(R.string.total_distance),
-                                        style = TextStyle(
-                                            fontSize = 11.sp,
-                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                                        )
+                                        text = "估算速度",
+                                        style = TextStyle(fontSize = 12.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
                                     )
                                     Text(
-                                        text = formatDistance(totalDistance),
-                                        style = TextStyle(
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MiuixTheme.colorScheme.onSurface
-                                        )
-                                    )
-                                    Text(
-                                        text = context.getString(R.string.km),
-                                        style = TextStyle(
-                                            fontSize = 9.sp,
-                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                                        )
+                                        text = "${formatSpeed(accEstimatedSpeed, settingsViewModel.speedUnit)} ${getSpeedUnitString(settingsViewModel.speedUnit)}",
+                                        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MiuixTheme.colorScheme.onSurface)
                                     )
                                 }
                             }
@@ -443,65 +595,141 @@ fun SpeedometerScreen(
                 }
 
                 item {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
+                    if (settingsViewModel.powerSaving) {
+                    } else if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            colors = CardDefaults.defaultColors(color = if (isDark) Color(0xFF1A1A1A) else Color(0xFFF0F0F0))
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 8.dp)
+                                    .padding(16.dp)
                             ) {
                                 Text(
-                                    text = context.getString(R.string.current_location),
-                                    style = TextStyle(fontWeight = FontWeight.Medium)
+                                    text = "开始测速后获取位置和经纬度",
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                    ),
+                                    modifier = Modifier.align(Alignment.Center)
                                 )
                                 Icon(
-                                    imageVector = Icons.Filled.Refresh,
-                                    contentDescription = "刷新",
-                                    tint = MiuixTheme.colorScheme.primary,
+                                    imageVector = Icons.Rounded.Warning,
+                                    contentDescription = "提示",
+                                    tint = MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.5f),
                                     modifier = Modifier
                                         .size(20.dp)
-                                        .clickable {
-                                            if (settingsViewModel.refreshTime > 0) {
-                                                secondsUntilRefresh = settingsViewModel.refreshTime
-                                            }
-                                            LocationService.requestSingleUpdate(context)
-                                        }
+                                        .align(Alignment.BottomEnd)
                                 )
                             }
+                        }
+                    } else {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 8.dp)
+                                ) {
+                                    Text(
+                                        text = context.getString(R.string.current_location),
+                                        style = TextStyle(fontWeight = FontWeight.Medium)
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Filled.Refresh,
+                                        contentDescription = "刷新",
+                                        tint = MiuixTheme.colorScheme.primary,
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .clickable {
+                                                if (settingsViewModel.refreshTime > 0) {
+                                                    secondsUntilRefresh = settingsViewModel.refreshTime
+                                                }
+                                                LocationService.requestSingleUpdate(context)
+                                            }
+                                    )
+                                }
 
-                            Text(
-                                text = addressText.ifEmpty { "获取地址中..." },
-                                style = TextStyle(color = MiuixTheme.colorScheme.onSurface)
-                            )
+                                Text(
+                                    text = addressText.ifEmpty { "获取地址中..." },
+                                    style = TextStyle(color = MiuixTheme.colorScheme.onSurface)
+                                )
 
-                            if (settingsViewModel.refreshTime > 0) {
+                                if (settingsViewModel.refreshTime > 0) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 8.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = context.getString(R.string.seconds_until_refresh, secondsUntilRefresh),
+                                            style = TextStyle(
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                                fontSize = 12.sp
+                                            )
+                                        )
+                                    }
+                                }
+
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(top = 8.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(
-                                        text = context.getString(R.string.seconds_until_refresh, secondsUntilRefresh),
-                                        style = TextStyle(
-                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                            fontSize = 12.sp
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = context.getString(R.string.latitude),
+                                            style = TextStyle(
+                                                fontSize = 12.sp,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                            )
                                         )
-                                    )
+                                        Text(
+                                            text = currentLatitude?.toString() ?: "--",
+                                            style = TextStyle(
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MiuixTheme.colorScheme.onSurface,
+                                                textAlign = TextAlign.Start
+                                            ),
+                                            modifier = Modifier.padding(top = 2.dp)
+                                        )
+                                    }
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = context.getString(R.string.longitude),
+                                            style = TextStyle(
+                                                fontSize = 12.sp,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                            )
+                                        )
+                                        Text(
+                                            text = currentLongitude?.toString() ?: "--",
+                                            style = TextStyle(
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MiuixTheme.colorScheme.onSurface,
+                                                textAlign = TextAlign.End
+                                            ),
+                                            modifier = Modifier.padding(top = 2.dp)
+                                        )
+                                    }
                                 }
                             }
-
-                            DividerRow(context.getString(R.string.latitude), currentLatitude?.toString() ?: "--")
-                            DividerRow(context.getString(R.string.longitude), currentLongitude?.toString() ?: "--")
                         }
                     }
                 }
@@ -547,7 +775,10 @@ fun SpeedometerScreen(
                                 color = MiuixTheme.colorScheme.surfaceVariant
                             )
                         ) {
-                            Text(text = context.getString(R.string.cancel))
+                            Text(
+                                text = context.getString(R.string.cancel),
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                         Button(
                             onClick = {
@@ -563,7 +794,11 @@ fun SpeedometerScreen(
                                 color = MiuixTheme.colorScheme.primary
                             )
                         ) {
-                            Text(text = context.getString(R.string.grant_permission))
+                            Text(
+                                text = context.getString(R.string.grant_permission),
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
                         }
                     }
                 }
@@ -601,7 +836,11 @@ fun SpeedometerScreen(
                             color = MiuixTheme.colorScheme.primary
                         )
                     ) {
-                        Text(text = context.getString(R.string.ok))
+                        Text(
+                            text = context.getString(R.string.ok),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
                     }
                 }
             }
@@ -728,45 +967,98 @@ fun SpeedometerGauge(speed: Double) {
 }
 
 @Composable
-fun GpsSignalCard(accuracy: Float?, isDark: Boolean = false) {
-    val strength = when {
-        accuracy == null -> 0
-        accuracy < 10 -> 5
-        accuracy < 20 -> 4
-        accuracy < 30 -> 3
-        accuracy < 50 -> 2
-        else -> 1
-    }
-
-    val accuracyText = accuracy?.let { String.format("%.1f", it) + "m" } ?: "--"
-
+fun GpsSignalCard(
+    accuracy: Float?,
+    isDark: Boolean = false,
+    powerSaving: Boolean = false,
+    accelerometerEnabled: Boolean = false,
+    isNotStarted: Boolean = false
+) {
     val cardColor: Color
     val iconColor: Color
     val title: String
     val summary: String
-    val showWarning: Boolean
+    val warning: String?
 
-    when (strength) {
-        4, 5 -> {
-            cardColor = if (isDark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
-            iconColor = Color(0xFF36D167)
-            title = "GPS 正常"
-            summary = "精度: $accuracyText | 信号 ${strength}级"
-            showWarning = false
+    if (powerSaving && accelerometerEnabled) {
+        cardColor = if (isDark) Color(0xFF3D3514) else Color(0xFFFFF9C4)
+        iconColor = Color(0xFFFDD835)
+        title = "已打开省电模式"
+        summary = "使用加速度计辅助测速"
+        warning = "计算数据可能有实际偏差, 记录功能不可用"
+    } else if (powerSaving) {
+        val strength = when {
+            accuracy == null -> 0
+            accuracy < 10 -> 5
+            accuracy < 20 -> 4
+            accuracy < 30 -> 3
+            accuracy < 50 -> 2
+            else -> 1
         }
-        3 -> {
-            cardColor = if (isDark) Color(0xFF3D3514) else Color(0xFFFFF9C4)
-            iconColor = Color(0xFFFDD835)
-            title = "GPS 信号较弱"
-            summary = "精度: $accuracyText | 信号 ${strength}级"
-            showWarning = false
+        val accuracyText = accuracy?.let { String.format("%.1f", it) + "m" } ?: "--"
+
+        when (strength) {
+            4, 5 -> {
+                cardColor = if (isDark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
+                iconColor = Color(0xFF36D167)
+                title = "GPS 正常"
+                summary = "精度: $accuracyText | 信号 ${strength}级"
+                warning = "已开启省电模式，采集间隔延长，记录功能不可用"
+            }
+            3 -> {
+                cardColor = if (isDark) Color(0xFF3D3514) else Color(0xFFFFF9C4)
+                iconColor = Color(0xFFFDD835)
+                title = "GPS 信号较弱"
+                summary = "精度: $accuracyText | 信号 ${strength}级"
+                warning = "已开启省电模式，采集间隔延长，记录功能不可用"
+            }
+            else -> {
+                cardColor = if (isDark) Color(0xFF3B1414) else Color(0xFFFFEBEE)
+                iconColor = Color(0xFFFF5252)
+                title = "GPS 信号差"
+                summary = "精度: $accuracyText | 信号 ${strength}级"
+                warning = "已开启省电模式，采集间隔延长，记录功能不可用"
+            }
         }
-        else -> {
-            cardColor = if (isDark) Color(0xFF3B1414) else Color(0xFFFFEBEE)
-            iconColor = Color(0xFFFF5252)
-            title = "GPS 信号差"
-            summary = "精度: $accuracyText | 信号 ${strength}级"
-            showWarning = true
+    } else if (isNotStarted) {
+        cardColor = if (isDark) Color(0xFF1A1A1A) else Color(0xFFF0F0F0)
+        iconColor = if (isDark) Color(0xFF666666) else Color(0xFFCCCCCC)
+        title = "GPS 未启动"
+        summary = "开始测速后自动获取GPS信号"
+        warning = null
+    } else {
+        val strength = when {
+            accuracy == null -> 0
+            accuracy < 10 -> 5
+            accuracy < 20 -> 4
+            accuracy < 30 -> 3
+            accuracy < 50 -> 2
+            else -> 1
+        }
+        val accuracyText = accuracy?.let { String.format("%.1f", it) + "m" } ?: "--"
+
+        when (strength) {
+            4, 5 -> {
+                cardColor = if (isDark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
+                iconColor = Color(0xFF36D167)
+                title = "GPS 正常"
+                summary = "精度: $accuracyText | 信号 ${strength}级"
+                warning = null
+            }
+            3 -> {
+                cardColor = if (isDark) Color(0xFF3D3514) else Color(0xFFFFF9C4)
+                iconColor = Color(0xFFFDD835)
+                title = "GPS 信号较弱"
+                summary = "精度: $accuracyText | 信号 ${strength}级"
+                warning = null
+            }
+            else -> {
+                cardColor = if (isDark) Color(0xFF3B1414) else Color(0xFFFFEBEE)
+                iconColor = Color(0xFFFF5252)
+                title = "GPS 信号差"
+                summary = "精度: $accuracyText | 信号 ${strength}级"
+                warning = "速度和位置测量可能不准确"
+            }
         }
     }
 
@@ -774,7 +1066,7 @@ fun GpsSignalCard(accuracy: Float?, isDark: Boolean = false) {
 
     Card(
         modifier = Modifier
-            .width(180.dp)
+            .then(if (isNotStarted) Modifier.fillMaxWidth() else Modifier.width(180.dp))
             .height(160.dp),
         colors = CardDefaults.defaultColors(color = cardColor)
     ) {
@@ -787,9 +1079,13 @@ fun GpsSignalCard(accuracy: Float?, isDark: Boolean = false) {
             ) {
                 Icon(
                     modifier = Modifier.size(120.dp),
-                    imageVector = when (strength) {
-                        4, 5 -> Icons.Rounded.CheckCircleOutline
-                        3 -> Icons.Rounded.Warning
+                    imageVector = when {
+                        powerSaving && accelerometerEnabled -> Icons.Rounded.Warning
+                        powerSaving -> Icons.Rounded.Warning
+                        isNotStarted -> Icons.Rounded.ErrorOutline
+                        accuracy == null -> Icons.Rounded.ErrorOutline
+                        accuracy < 30 -> Icons.Rounded.CheckCircleOutline
+                        accuracy < 50 -> Icons.Rounded.Warning
                         else -> Icons.Rounded.ErrorOutline
                     },
                     tint = iconColor.copy(alpha = 0.8f),
@@ -816,11 +1112,11 @@ fun GpsSignalCard(accuracy: Float?, isDark: Boolean = false) {
                     fontWeight = FontWeight.Medium,
                     color = textColor
                 )
-                if (showWarning) {
+                warning?.let {
                     Spacer(Modifier.height(4.dp))
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = "速度和位置测量可能不准确",
+                        text = it,
                         fontSize = 12.sp,
                         color = textColor.copy(alpha = 0.7f)
                     )

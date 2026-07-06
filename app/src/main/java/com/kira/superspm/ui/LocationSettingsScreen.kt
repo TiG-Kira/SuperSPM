@@ -111,7 +111,7 @@ fun LocationSettingsScreen(
                             modifier = Modifier.padding(start = 16.dp)
                         ) {
                             Text(
-                                text = "位置",
+                                text = "本页说明",
                                 style = TextStyle(
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
@@ -119,7 +119,7 @@ fun LocationSettingsScreen(
                                 )
                             )
                             Text(
-                                text = "位置刷新、省电模式",
+                                text = "本页面可对位置进行修改。包括自定义位置刷新时间设置、省电模式开关、加速度计辅助测速开关。",
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -162,6 +162,59 @@ fun LocationSettingsScreen(
                         onCheckedChange = { viewModel.updatePowerSaving(it) },
                         description = if (viewModel.powerSaving) "暗色模式自动启用，刷新间隔延长" else null
                     )
+                }
+            }
+
+            item {
+                Text(
+                    text = "实验性功能",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                    ),
+                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 8.dp)
+                )
+            }
+
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    SettingSwitchItem(
+                        title = "使用加速度计辅助测速",
+                        checked = viewModel.accelerometerEnabled,
+                        onCheckedChange = { viewModel.updateAccelerometerEnabled(it) },
+                        description = "通过加速度数据计算并预测速度，弥补GPS信号过差的情况"
+                    )
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "⚠️ 功能说明",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MiuixTheme.colorScheme.error
+                            )
+                        )
+                        Text(
+                            text = "此功能为实验性功能，用于弥补GPS信号过差的情况。GPS过差时可能会记录速度，但无法准确记录轨迹，且速度计算可能与实际速度有一定偏差。",
+                            style = TextStyle(
+                                fontSize = 13.sp,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            ),
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
                 }
             }
 
@@ -228,7 +281,7 @@ fun LocationSettingsScreen(
                             color = MiuixTheme.colorScheme.surfaceVariant
                         )
                     ) {
-                        Text(text = "取消")
+                        Text(text = "取消", fontWeight = FontWeight.Bold)
                     }
                 }
             }

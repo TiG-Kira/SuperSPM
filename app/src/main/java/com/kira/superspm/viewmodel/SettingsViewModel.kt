@@ -26,6 +26,8 @@ class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewMod
         private set
     var powerSaving by mutableStateOf(false)
         private set
+    var accelerometerEnabled by mutableStateOf(false)
+        private set
 
     val effectiveDarkMode: Boolean
         get() = if (powerSaving) true else darkMode
@@ -45,6 +47,7 @@ class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewMod
             speedUnit = SpeedUnit.valueOf(prefs[stringPreferencesKey("speed_unit")] ?: "KMH")
             refreshTime = prefs[intPreferencesKey("refresh_time")] ?: 120
             powerSaving = prefs[booleanPreferencesKey("power_saving")] ?: false
+            accelerometerEnabled = prefs[booleanPreferencesKey("accelerometer_enabled")] ?: false
         }
     }
 
@@ -100,6 +103,13 @@ class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewMod
             viewModelScope.launch {
                 dataStore.edit { it[booleanPreferencesKey("power_saving")] = false }
             }
+        }
+    }
+
+    fun updateAccelerometerEnabled(value: Boolean) {
+        accelerometerEnabled = value
+        viewModelScope.launch {
+            dataStore.edit { it[booleanPreferencesKey("accelerometer_enabled")] = value }
         }
     }
 }
