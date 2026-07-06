@@ -449,6 +449,19 @@ fun SpeedometerScreen(
                                 colors = CardDefaults.defaultColors(color = if (isDark) Color(0xFF1A3825) else Color(0xFFDFFAE4))
                             ) {
                                 Box(modifier = Modifier.fillMaxSize()) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .offset(38.dp, 45.dp),
+                                        contentAlignment = Alignment.BottomEnd
+                                    ) {
+                                        Icon(
+                                            modifier = Modifier.size(120.dp),
+                                            imageVector = Icons.Rounded.CheckCircleOutline,
+                                            tint = Color(0xFF36D167).copy(alpha = 0.8f),
+                                            contentDescription = null
+                                        )
+                                    }
                                     Column(
                                         modifier = Modifier
                                             .fillMaxSize()
@@ -705,8 +718,7 @@ fun SpeedometerScreen(
                 }
 
                 item {
-                    if (status != SpeedometerViewModel.RecordingStatus.NOT_STARTED &&
-                        selectedMode == SpeedMode.SENSOR) {
+                    if (selectedMode == SpeedMode.SENSOR) {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1357,3 +1369,4 @@ private fun getSpeedUnitString(unit: SpeedUnit): String {
         SpeedUnit.MPH -> "mph"
     }
 }
+

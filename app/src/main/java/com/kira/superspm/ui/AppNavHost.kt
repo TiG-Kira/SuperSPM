@@ -124,6 +124,30 @@ fun AppNavHost(
                     navController = navController
                 )
             }
+            composable("settings/lab/plugins") {
+                PluginScreen(
+                    isDark = isDark,
+                    navController = navController
+                )
+            }
+            composable("plugin_web/{dirName}/{pluginName}") { backStackEntry ->
+                val dirName = backStackEntry.arguments?.getString("dirName") ?: ""
+                val pluginName = backStackEntry.arguments?.getString("pluginName") ?: "插件"
+                PluginWebPage(
+                    pluginDirName = dirName,
+                    pluginName = pluginName,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable("plugin_native/{dirName}/{pluginName}") { backStackEntry ->
+                val dirName = backStackEntry.arguments?.getString("dirName") ?: ""
+                val pluginName = backStackEntry.arguments?.getString("pluginName") ?: "插件"
+                PluginNativePage(
+                    pluginDirName = dirName,
+                    pluginName = pluginName,
+                    onBack = { navController.popBackStack() }
+                )
+            }
             composable("about") {
                 AboutScreen(
                     isDark = isDark,
@@ -156,7 +180,7 @@ fun AppNavHost(
             }
         }
 
-        if (baseRoute in listOf("speedometer", "history", "settings", "detail", "about", "openSource")) {
+        if (baseRoute in listOf("speedometer", "history", "settings", "detail", "about", "openSource", "plugin_web", "plugin_native")) {
             NavigationBar(
                 modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
             ) {
@@ -164,6 +188,8 @@ fun AppNavHost(
                     "detail" -> "history"
                     "about" -> "settings"
                     "openSource" -> "settings"
+                    "plugin_web" -> "settings"
+                    "plugin_native" -> "settings"
                     else -> baseRoute
                 }
 

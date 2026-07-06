@@ -45,6 +45,12 @@ class LocationService : Service(), LocationListener {
     var dataPoints = 0
     var isRecording = false
     var shouldSaveRecord = false
+    var currentLatitude = 0.0
+    var currentLongitude = 0.0
+    var currentAccuracy = 0f
+    var sensorAcceleration = 0.0
+    var sensorVelocity = 0.0
+    var recordingStartTime = 0L
     private val pathPoints = mutableListOf<LocationPoint>()
     private var lastPoint: LocationPoint? = null
     private var startTime: Long = 0
@@ -75,11 +81,23 @@ class LocationService : Service(), LocationListener {
 
         fun isRunning(): Boolean = instance?.isRunning == true
         fun isRecording(): Boolean = instance?.isRecording == true
+        fun isSensorMode(): Boolean = instance?.isSensorMode == true
         fun getCurrentSpeed(): Double = instance?.currentSpeed ?: 0.0
         fun getMaxSpeed(): Double = instance?.maxSpeed ?: 0.0
         fun getAvgSpeed(): Double = instance?.avgSpeed ?: 0.0
         fun getTotalDistance(): Double = instance?.totalDistance ?: 0.0
         fun getDataPoints(): Int = instance?.dataPoints ?: 0
+        fun getCurrentLatitude(): Double = instance?.currentLatitude ?: 0.0
+        fun getCurrentLongitude(): Double = instance?.currentLongitude ?: 0.0
+        fun getCurrentAccuracy(): Float = instance?.currentAccuracy ?: 0f
+        fun getSensorAcceleration(): Double = instance?.sensorAcceleration ?: 0.0
+        fun getSensorVelocity(): Double = instance?.sensorVelocity ?: 0.0
+        fun getRecordingStartTime(): Long = instance?.recordingStartTime ?: 0L
+        fun getRecordingDuration(): Long {
+            if (instance?.isRecording == false) return 0L
+            val start = instance?.recordingStartTime ?: System.currentTimeMillis()
+            return System.currentTimeMillis() - start
+        }
 
         fun stopRecording(): com.kira.superspm.data.model.LocationRecord? {
             return instance?.finishRecording()
@@ -354,6 +372,9 @@ class LocationService : Service(), LocationListener {
 
         lastSpeed = finalSpeed
         currentSpeed = finalSpeed
+        currentLatitude = location.latitude
+        currentLongitude = location.longitude
+        currentAccuracy = location.accuracy
 
         if (speed > 0.5) {
             idleStartTime = 0

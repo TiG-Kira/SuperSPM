@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>步速测量</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>步速测量</h1>
+            <p class="subtitle">基于传感器数据的运动分析</p>
+        </div>
+
+        <div class="mode-indicator">
+            <span class="mode-badge" id="modeBadge">等待数据</span>
+        </div>
+
+        <div class="main-display">
+            <div class="speed-section">
+                <div class="speed-ring">
+                    <div class="speed-value" id="speedValue">0.0</div>
+                    <div class="speed-unit">km/h</div>
+                </div>
+                <div class="speed-label">当前速度</div>
+            </div>
+
+            <div class="step-section">
+                <div class="step-ring">
+                    <div class="step-value" id="stepValue">0</div>
+                    <div class="step-unit">步/分</div>
+                </div>
+                <div class="step-label">步频</div>
+            </div>
+        </div>
+
+        <div class="analysis-card">
+            <div class="analysis-icon" id="analysisIcon">🏃</div>
+            <div class="analysis-content">
+                <h3 class="analysis-title" id="analysisTitle">准备开始</h3>
+                <p class="analysis-desc" id="analysisDesc">请使用传感器模式开始测速</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-label">平均速度</span>
+                <span class="stat-value" id="avgSpeed">0.0 km/h</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">最高速度</span>
+                <span class="stat-value" id="maxSpeed">0.0 km/h</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">运动时长</span>
+                <span class="stat-value" id="duration">00:00</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">总里程</span>
+                <span class="stat-value" id="distance">0.00 km</span>
+            </div>
+        </div>
+
+        <div class="advice-section">
+            <h3>💡 运动建议</h3>
+            <div class="advice-card" id="adviceCard">
+                <p>保持规律的呼吸节奏，注意姿势调整。建议运动前进行热身，运动后进行拉伸。</p>
+            </div>
+        </div>
+
+        <div class="guide-section">
+            <h3>参考标准</h3>
+            <div class="guide-list">
+                <div class="guide-item">
+                    <span class="guide-range">3-5 km/h</span>
+                    <span class="guide-text">慢走</span>
+                </div>
+                <div class="guide-item">
+                    <span class="guide-range">5-7 km/h</span>
+                    <span class="guide-text">快走</span>
+                </div>
+                <div class="guide-item">
+                    <span class="guide-range">7-10 km/h</span>
+                    <span class="guide-text">慢跑</span>
+                </div>
+                <div class="guide-item">
+                    <span class="guide-range">10-14 km/h</span>
+                    <span class="guide-text">中速跑</span>
+                </div>
+                <div class="guide-item">
+                    <span class="guide-range">14+ km/h</span>
+                    <span class="guide-text">快跑</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

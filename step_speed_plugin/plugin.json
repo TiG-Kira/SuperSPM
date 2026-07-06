@@ -1,0 +1,10 @@
+{
+  "name": "步速测量",
+  "version": "1.0.0",
+  "author": "SuperSPM",
+  "description": "利用传感器数据测量步速和跑步速度，提供运动建议",
+  "type": "WEB_UI",
+  "entry": "index.html",
+  "permissions": ["speed_data"],
+  "requiresRestart": false
+}
