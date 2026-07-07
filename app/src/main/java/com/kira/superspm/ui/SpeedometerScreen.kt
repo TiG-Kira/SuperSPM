@@ -84,11 +84,7 @@ import kotlinx.coroutines.launch
 import android.location.Geocoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
-enum class SpeedMode {
-    GPS, SENSOR
-}
-
+import com.kira.superspm.viewmodel.SpeedMode
 @Composable
 fun SpeedometerScreen(
     onRecordSaved: () -> Unit = {},
@@ -126,7 +122,7 @@ fun SpeedometerScreen(
 
     var lastAccUpdateTime by remember { mutableStateOf(0L) }
 
-    var selectedMode by remember { mutableStateOf(SpeedMode.GPS) }
+    val selectedMode = viewModel.selectedMode
 
     LaunchedEffect(Unit) {
         LocationService.onLocationUpdate = { lat, lon, speed, accuracy ->
@@ -203,6 +199,9 @@ fun SpeedometerScreen(
                 LocationService.getTotalDistance(),
                 LocationService.getDataPoints()
             )
+            if (LocationService.isSensorMode()) {
+                viewModel.changeSpeedMode(SpeedMode.SENSOR)
+            }
         } else if (status != SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
             viewModel.reset()
         }
@@ -361,7 +360,7 @@ fun SpeedometerScreen(
                                 selectedTabIndex = if (selectedMode == SpeedMode.GPS) 0 else 1,
                                 onTabSelected = { index ->
                                     if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
-                                        selectedMode = if (index == 0) SpeedMode.GPS else SpeedMode.SENSOR
+                                        viewModel.changeSpeedMode(if (index == 0) SpeedMode.GPS else SpeedMode.SENSOR)
                                     }
                                 },
                                 modifier = Modifier.align(Alignment.CenterStart)

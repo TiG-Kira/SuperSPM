@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,6 +87,12 @@ fun AppNavHost(
                     isDark = isDark
                 )
             }
+            composable("plugins") {
+                PluginHomeScreen(
+                    isDark = isDark,
+                    navController = navController
+                )
+            }
             composable("history") {
                 HistoryScreen(recordClick = { recordId ->
                     navController.navigate("detail/$recordId")
@@ -118,14 +125,14 @@ fun AppNavHost(
                     navController = navController
                 )
             }
-            composable("settings/lab") {
-                LabSettingsScreen(
+            composable("settings/plugins") {
+                PluginScreen(
                     isDark = isDark,
                     navController = navController
                 )
             }
-            composable("settings/lab/plugins") {
-                PluginScreen(
+            composable("settings/plugins/templates") {
+                PluginTemplateScreen(
                     isDark = isDark,
                     navController = navController
                 )
@@ -180,16 +187,18 @@ fun AppNavHost(
             }
         }
 
-        if (baseRoute in listOf("speedometer", "history", "settings", "detail", "about", "openSource", "plugin_web", "plugin_native")) {
+        if (baseRoute in listOf("speedometer", "plugins", "history", "settings", "detail", "about", "openSource", "plugin_web", "plugin_native")) {
             NavigationBar(
                 modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
             ) {
-                val parentRoute = when (currentRoute) {
+                val parentRoute = when (baseRoute) {
                     "detail" -> "history"
                     "about" -> "settings"
                     "openSource" -> "settings"
-                    "plugin_web" -> "settings"
-                    "plugin_native" -> "settings"
+                    "plugin_web" -> "plugins"
+                    "plugin_native" -> "plugins"
+                    "settings" -> "settings"
+                    "plugins" -> "plugins"
                     else -> baseRoute
                 }
 
@@ -198,6 +207,12 @@ fun AppNavHost(
                     onClick = { navController.navigate("speedometer") { launchSingleTop = true; restoreState = true } },
                     icon = Icons.Filled.Speed,
                     label = "码表"
+                )
+                NavigationBarItem(
+                    selected = parentRoute == "plugins",
+                    onClick = { navController.navigate("plugins") { launchSingleTop = true; restoreState = true } },
+                    icon = Icons.Filled.Extension,
+                    label = "插件"
                 )
                 NavigationBarItem(
                     selected = parentRoute == "history",

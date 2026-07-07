@@ -40,10 +40,10 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Science
+import androidx.compose.material.icons.filled.Extension
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -89,9 +89,9 @@ fun SettingsScreen(
 
             item {
                 SettingNavItem(
-                    icon = Icons.Filled.LocationOn,
-                    title = "位置",
-                    subtitle = "位置刷新、省电模式",
+                    icon = Icons.Filled.Speed,
+                    title = "测速方式和逻辑",
+                    subtitle = "位置刷新、省电模式、传感器计速",
                     onClick = { navController.navigate("settings/location") }
                 )
             }
@@ -107,10 +107,10 @@ fun SettingsScreen(
 
             item {
                 SettingNavItem(
-                    icon = Icons.Filled.Science,
-                    title = "实验室",
-                    subtitle = "SuperSPM 的实验功能",
-                    onClick = { navController.navigate("settings/lab") }
+                    icon = Icons.Filled.Extension,
+                    title = "插件管理",
+                    subtitle = "导入、启用、删除插件",
+                    onClick = { navController.navigate("settings/plugins") }
                 )
             }
 

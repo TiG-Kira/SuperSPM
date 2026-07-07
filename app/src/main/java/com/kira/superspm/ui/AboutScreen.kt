@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,10 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
     var updateResult by remember { mutableStateOf<UpdateChecker.UpdateResult?>(null) }
     var showUpdateDialog by remember { mutableStateOf(false) }
     var downloadingApk by remember { mutableStateOf(false) }
+    var downloadProgress by remember { mutableStateOf(0) }
+    var downloadedBytes by remember { mutableStateOf(0L) }
+    var totalBytes by remember { mutableStateOf(0L) }
+    var pendingInstallVersion by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         scope.launch {
@@ -199,6 +204,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
+                            .clip(RoundedCornerShape(20.dp))
                             .clickable {
                                 val intent = android.content.Intent(
                                     android.content.Intent.ACTION_VIEW,
@@ -260,6 +266,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
+                            .clip(RoundedCornerShape(20.dp))
                             .clickable(onClick = onOpenSourceClick)
                     ) {
                         Row(
@@ -292,6 +299,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
+                            .clip(RoundedCornerShape(20.dp))
                             .clickable {
                                 if (!checkingUpdate) {
                                     checkingUpdate = true
@@ -384,6 +392,19 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
     }
 
     if (showUpdateDialog && updateResult != null) {
+        if (pendingInstallVersion != null && ApkDownloader.hasInstallPermission(context)) {
+            val apkFile = ApkDownloader.getDownloadedApkFile(context, pendingInstallVersion!!)
+            if (apkFile.exists()) {
+                LaunchedEffect(Unit) {
+                    ApkDownloader.installApk(context, apkFile)
+                    pendingInstallVersion = null
+                    showUpdateDialog = false
+                }
+            } else {
+                pendingInstallVersion = null
+            }
+        }
+
         androidx.compose.ui.window.Dialog(
             onDismissRequest = { showUpdateDialog = false }
         ) {
@@ -420,12 +441,8 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                             ),
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
-                        Text(
+                        MarkdownText(
                             text = updateResult!!.releaseNotes,
-                            style = TextStyle(
-                                fontSize = 13.sp,
-                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                            ),
                             modifier = Modifier
                                 .padding(bottom = 16.dp)
                                 .heightIn(max = 200.dp)
@@ -433,29 +450,61 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                         )
                     }
                     if (downloadingApk) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            androidx.compose.material3.CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp,
-                                color = MiuixTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = "正在下载...",
-                                style = TextStyle(
-                                    fontSize = 14.sp,
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "下载中...",
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                    )
                                 )
-                            )
+                                Text(
+                                    text = "$downloadProgress%",
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MiuixTheme.colorScheme.primary
+                                    )
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            androidx.compose.foundation.layout.Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(MiuixTheme.colorScheme.surfaceVariant)
+                            ) {
+                                androidx.compose.foundation.layout.Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(downloadProgress / 100f)
+                                        .height(6.dp)
+                                        .background(MiuixTheme.colorScheme.primary)
+                                )
+                            }
+                            if (totalBytes > 0) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "${formatUpdateFileSize(downloadedBytes)} / ${formatUpdateFileSize(totalBytes)}",
+                                    style = TextStyle(
+                                        fontSize = 12.sp,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                    )
+                                )
+                            }
                         }
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = if (updateResult!!.hasUpdate) Arrangement.SpaceBetween else Arrangement.Center
+                        horizontalArrangement = if (updateResult!!.hasUpdate) Arrangement.spacedBy(8.dp) else Arrangement.Center
                     ) {
                         if (updateResult!!.hasUpdate) {
                             Button(
@@ -483,17 +532,24 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                 ),
                                 enabled = !downloadingApk
                             ) {
-                                Text(text = "手动下载", fontWeight = FontWeight.Bold)
+                                Text(text = "手动", fontWeight = FontWeight.Bold)
                             }
                             Button(
                                 onClick = {
                                     downloadingApk = true
+                                    downloadProgress = 0
+                                    downloadedBytes = 0L
+                                    totalBytes = 0L
                                     scope.launch {
                                         val result = ApkDownloader.downloadAndInstall(
                                             context,
                                             updateResult!!.apkDownloadUrl,
                                             updateResult!!.latestVersion
-                                        )
+                                        ) { progress, downloaded, total ->
+                                            downloadProgress = progress
+                                            downloadedBytes = downloaded
+                                            totalBytes = total
+                                        }
                                         downloadingApk = false
                                         if (result.isFailure) {
                                             val intent = android.content.Intent(
@@ -501,8 +557,14 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                                 android.net.Uri.parse(updateResult!!.releaseUrl)
                                             )
                                             context.startActivity(intent)
+                                        } else {
+                                            if (!ApkDownloader.hasInstallPermission(context)) {
+                                                pendingInstallVersion = updateResult!!.latestVersion
+                                            }
                                         }
-                                        showUpdateDialog = false
+                                        if (ApkDownloader.hasInstallPermission(context)) {
+                                            showUpdateDialog = false
+                                        }
                                     }
                                 },
                                 modifier = Modifier.weight(1f),
@@ -511,7 +573,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                 ),
                                 enabled = !downloadingApk
                             ) {
-                                Text(text = "立即下载", fontWeight = FontWeight.Bold, color = Color.White)
+                                Text(text = "下载", fontWeight = FontWeight.Bold, color = Color.White)
                             }
                         } else {
                             Button(
@@ -552,6 +614,91 @@ fun InfoRow(title: String, value: String) {
             ),
             modifier = Modifier.padding(top = 2.dp)
         )
+    }
+}
+
+@Composable
+fun MarkdownText(text: String, modifier: Modifier = Modifier) {
+    val lines = text.lines()
+    Column(modifier = modifier) {
+        lines.forEach { line ->
+            when {
+                line.startsWith("### ") -> {
+                    Text(
+                        text = line.removePrefix("### "),
+                        style = TextStyle(
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MiuixTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
+                    )
+                }
+                line.startsWith("## ") -> {
+                    Text(
+                        text = line.removePrefix("## "),
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MiuixTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                    )
+                }
+                line.startsWith("# ") -> {
+                    Text(
+                        text = line.removePrefix("# "),
+                        style = TextStyle(
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MiuixTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                    )
+                }
+                line.startsWith("- ") || line.startsWith("* ") -> {
+                    Row(
+                        modifier = Modifier.padding(vertical = 1.dp)
+                    ) {
+                        Text(
+                            text = "• ",
+                            style = TextStyle(
+                                fontSize = 13.sp,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            )
+                        )
+                        Text(
+                            text = line.substring(2),
+                            style = TextStyle(
+                                fontSize = 13.sp,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            )
+                        )
+                    }
+                }
+                line.isBlank() -> {
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+                else -> {
+                    Text(
+                        text = line,
+                        style = TextStyle(
+                            fontSize = 13.sp,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun formatUpdateFileSize(bytes: Long): String {
+    return when {
+        bytes < 1024 -> "$bytes B"
+        bytes < 1024 * 1024 -> "${(bytes / 1024.0).toInt()} KB"
+        bytes < 1024 * 1024 * 1024 -> "${(bytes / (1024.0 * 1024.0)).let { String.format("%.1f", it) }} MB"
+        else -> "${(bytes / (1024.0 * 1024.0 * 1024.0)).let { String.format("%.2f", it) }} GB"
     }
 }
 

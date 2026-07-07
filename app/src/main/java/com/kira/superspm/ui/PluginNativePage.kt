@@ -32,9 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kira.superspm.plugin.AnalysisResult
-import com.kira.superspm.plugin.PluginProcessor
-import com.kira.superspm.plugin.SpeedData
+import com.kira.superspm.plugin.Plugin
+import com.kira.superspm.plugin.data.AnalysisResult
+import com.kira.superspm.plugin.data.SpeedData
 import com.kira.superspm.service.LocationService
 import com.kira.superspm.utils.PluginManager
 import kotlinx.coroutines.delay
@@ -55,14 +55,43 @@ fun PluginNativePage(
 ) {
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = MiuixTheme.colorScheme.background
-    val context = androidx.compose.ui.platform.LocalContext.current
 
-    var processor by remember { mutableStateOf<PluginProcessor?>(null) }
+    var processor by remember { mutableStateOf<Plugin?>(null) }
     var loaded by remember { mutableStateOf(false) }
 
     LaunchedEffect(pluginDirName) {
         processor = PluginManager.getProcessor(pluginDirName)
         loaded = true
+    }
+
+    val resultFlow = remember { MutableStateFlow<AnalysisResult?>(null) }
+    val result by resultFlow.collectAsState()
+
+    val speedDataFlow = remember { MutableStateFlow<SpeedData?>(null) }
+    val speedData by speedDataFlow.collectAsState()
+
+    LaunchedEffect(processor) {
+        if (processor == null) return@LaunchedEffect
+        while (true) {
+            val currentData = SpeedData(
+                currentSpeed = LocationService.getCurrentSpeed(),
+                maxSpeed = LocationService.getMaxSpeed(),
+                avgSpeed = LocationService.getAvgSpeed(),
+                totalDistance = LocationService.getTotalDistance(),
+                isRecording = LocationService.isRecording(),
+                isSensorMode = LocationService.isSensorMode(),
+                latitude = LocationService.getCurrentLatitude(),
+                longitude = LocationService.getCurrentLongitude(),
+                accuracy = LocationService.getCurrentAccuracy(),
+                sensorAcceleration = LocationService.getSensorAcceleration(),
+                sensorVelocity = LocationService.getSensorVelocity(),
+                recordingDuration = LocationService.getRecordingDuration(),
+                dataPoints = LocationService.getDataPoints()
+            )
+            speedDataFlow.value = currentData
+            resultFlow.value = processor!!.onSpeedUpdate(currentData)
+            delay(500)
+        }
     }
 
     Scaffold(
@@ -88,287 +117,264 @@ fun PluginNativePage(
             )
         }
     ) { paddingValues ->
-        Box(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(backgroundColor)
-                .padding(top = paddingValues.calculateTopPadding())
-        ) {
-            if (loaded) {
-                val p = processor
-                if (p != null) {
-                    NativePluginContent(processor = p)
-                } else {
-                    PluginErrorContent()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun NativePluginContent(processor: PluginProcessor) {
-    val resultFlow = remember { MutableStateFlow<AnalysisResult?>(null) }
-    val result by resultFlow.collectAsState()
-    val scrollBehavior = MiuixScrollBehavior()
-
-    LaunchedEffect(processor) {
-        while (true) {
-            val speedData = SpeedData(
-                currentSpeed = LocationService.getCurrentSpeed(),
-                maxSpeed = LocationService.getMaxSpeed(),
-                avgSpeed = LocationService.getAvgSpeed(),
-                totalDistance = LocationService.getTotalDistance(),
-                isRecording = LocationService.isRecording(),
-                isSensorMode = LocationService.isSensorMode(),
-                latitude = LocationService.getCurrentLatitude(),
-                longitude = LocationService.getCurrentLongitude(),
-                accuracy = LocationService.getCurrentAccuracy(),
-                sensorAcceleration = LocationService.getSensorAcceleration(),
-                sensorVelocity = LocationService.getSensorVelocity(),
-                recordingDuration = LocationService.getRecordingDuration(),
-                dataPoints = LocationService.getDataPoints()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                top = paddingValues.calculateTopPadding(),
+                bottom = 120.dp
             )
-            resultFlow.value = processor.onSpeedUpdate(speedData)
-            delay(500)
-        }
-    }
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp)
-    ) {
-        item {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = result?.icon ?: "🔍",
-                        fontSize = 64.sp
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = result?.title ?: "分析中...",
-                        style = TextStyle(
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MiuixTheme.colorScheme.onSurface
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = result?.description ?: "正在获取数据...",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                        )
-                    )
-                }
-            }
-        }
-
-        item {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "实时数据",
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MiuixTheme.colorScheme.onSurface
-                        ),
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            if (!loaded) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(60.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        val speedKmh = LocationService.getCurrentSpeed() * 3.6
-                        val avgKmh = LocationService.getAvgSpeed() * 3.6
-                        val maxKmh = LocationService.getMaxSpeed() * 3.6
-
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = String.format("%.1f", speedKmh),
-                                style = TextStyle(
-                                    fontSize = 24.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MiuixTheme.colorScheme.primary
-                                )
-                            )
-                            Text(
-                                text = "当前速度",
-                                style = TextStyle(
-                                    fontSize = 12.sp,
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                                )
-                            )
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = String.format("%.1f", avgKmh),
-                                style = TextStyle(
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MiuixTheme.colorScheme.onSurface
-                                )
-                            )
-                            Text(
-                                text = "平均速度",
-                                style = TextStyle(
-                                    fontSize = 12.sp,
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                                )
-                            )
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = String.format("%.1f", maxKmh),
-                                style = TextStyle(
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFFFF5252)
-                                )
-                            )
-                            Text(
-                                text = "最高速度",
-                                style = TextStyle(
-                                    fontSize = 12.sp,
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                                )
-                            )
-                        }
+                        Text(text = "加载中...")
                     }
                 }
-            }
-        }
-
-        item {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "运动建议",
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MiuixTheme.colorScheme.onSurface
-                        ),
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Text(
-                        text = result?.advice ?: "等待数据...",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                        ),
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-            }
-        }
-
-        item {
-            if (result?.metrics?.isNotEmpty() == true) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "分析指标",
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MiuixTheme.colorScheme.onSurface
-                            ),
-                            modifier = Modifier.padding(bottom = 12.dp)
-                        )
-                        result?.metrics?.forEach { (key, value) ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+            } else {
+                val p = processor
+                if (p != null) {
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = mapMetricKey(key),
+                                    text = result?.icon ?: "🔍",
+                                    fontSize = 64.sp
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = result?.title ?: "分析中...",
+                                    style = TextStyle(
+                                        fontSize = 24.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MiuixTheme.colorScheme.onSurface
+                                    )
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = result?.description ?: "正在获取数据...",
                                     style = TextStyle(
                                         fontSize = 14.sp,
                                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                     )
                                 )
+                            }
+                        }
+                    }
+
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = value,
+                                    text = "实时数据",
                                     style = TextStyle(
-                                        fontSize = 14.sp,
+                                        fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = MiuixTheme.colorScheme.onSurface
-                                    )
+                                    ),
+                                    modifier = Modifier.padding(bottom = 12.dp)
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceAround
+                                ) {
+                                    val speedKmh = speedData?.currentSpeed?.times(3.6) ?: 0.0
+                                    val avgKmh = speedData?.avgSpeed?.times(3.6) ?: 0.0
+                                    val maxKmh = speedData?.maxSpeed?.times(3.6) ?: 0.0
+
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = String.format("%.1f", speedKmh),
+                                            style = TextStyle(
+                                                fontSize = 24.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MiuixTheme.colorScheme.primary
+                                            )
+                                        )
+                                        Text(
+                                            text = "当前速度",
+                                            style = TextStyle(
+                                                fontSize = 12.sp,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                            )
+                                        )
+                                    }
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = String.format("%.1f", avgKmh),
+                                            style = TextStyle(
+                                                fontSize = 20.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MiuixTheme.colorScheme.onSurface
+                                            )
+                                        )
+                                        Text(
+                                            text = "平均速度",
+                                            style = TextStyle(
+                                                fontSize = 12.sp,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                            )
+                                        )
+                                    }
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = String.format("%.1f", maxKmh),
+                                            style = TextStyle(
+                                                fontSize = 20.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color(0xFFFF5252)
+                                            )
+                                        )
+                                        Text(
+                                            text = "最高速度",
+                                            style = TextStyle(
+                                                fontSize = 12.sp,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = "运动建议",
+                                    style = TextStyle(
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MiuixTheme.colorScheme.onSurface
+                                    ),
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                                Text(
+                                    text = result?.advice ?: "等待数据...",
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                    ),
+                                    modifier = Modifier.padding(start = 8.dp)
                                 )
                             }
                         }
                     }
-                }
-            }
-        }
 
-        item {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "参考标准",
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MiuixTheme.colorScheme.onSurface
-                        ),
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-                    val standards = listOf(
-                        "3-5 km/h → 慢走",
-                        "5-7 km/h → 快走",
-                        "7-10 km/h → 慢跑",
-                        "10-14 km/h → 中速跑",
-                        "14+ km/h → 快跑"
-                    )
-                    standards.forEach { standard ->
-                        Text(
-                            text = standard,
-                            style = TextStyle(
-                                fontSize = 13.sp,
-                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                            ),
-                            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
-                        )
+                    val currentResult = result
+                    if (currentResult != null && currentResult.metrics.isNotEmpty()) {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text(
+                                        text = "分析指标",
+                                        style = TextStyle(
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MiuixTheme.colorScheme.onSurface
+                                        ),
+                                        modifier = Modifier.padding(bottom = 12.dp)
+                                    )
+                                    val metricsList = currentResult.metrics.toList()
+                                    metricsList.forEach { (key, value) ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = mapMetricKey(key),
+                                                style = TextStyle(
+                                                    fontSize = 14.sp,
+                                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                                )
+                                            )
+                                            Text(
+                                                text = value,
+                                                style = TextStyle(
+                                                    fontSize = 14.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MiuixTheme.colorScheme.onSurface
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = "参考标准",
+                                    style = TextStyle(
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MiuixTheme.colorScheme.onSurface
+                                    ),
+                                    modifier = Modifier.padding(bottom = 12.dp)
+                                )
+                                val standards = listOf(
+                                    "3-5 km/h → 慢走",
+                                    "5-7 km/h → 快走",
+                                    "7-10 km/h → 慢跑",
+                                    "10-14 km/h → 中速跑",
+                                    "14+ km/h → 快跑"
+                                )
+                                standards.forEach { standard ->
+                                    Text(
+                                        text = standard,
+                                        style = TextStyle(
+                                            fontSize = 13.sp,
+                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                        ),
+                                        modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    item {
+                        PluginErrorContent()
                     }
                 }
             }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -414,8 +420,12 @@ fun mapMetricKey(key: String): String {
         "speed" -> "速度"
         "stepFrequency" -> "步频"
         "steps" -> "步数"
+        "pace" -> "配速"
         "duration" -> "时长"
         "distance" -> "里程"
+        "heartRate" -> "心率"
+        "avgHeartRate" -> "平均心率"
+        "calories" -> "消耗热量"
         else -> key
     }
 }

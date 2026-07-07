@@ -4,7 +4,9 @@ import android.content.Context
 import android.util.Log
 import com.kira.superspm.data.model.PluginConfig
 import com.kira.superspm.data.model.PluginType
-import com.kira.superspm.plugin.PluginProcessor
+import com.kira.superspm.plugin.HistoryService
+import com.kira.superspm.plugin.Plugin
+import com.kira.superspm.plugin.impl.HistoryServiceImpl
 import dalvik.system.DexClassLoader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,6 +15,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.InputStream
+import java.nio.file.Files
 import java.util.zip.ZipInputStream
 
 object PluginManager {
@@ -31,7 +34,7 @@ object PluginManager {
         val config: PluginConfig,
         val dirName: String,
         val enabled: Boolean,
-        val processor: PluginProcessor? = null
+        val processor: Plugin? = null
     )
 
     @Serializable
@@ -69,7 +72,7 @@ object PluginManager {
                         val config = json.decodeFromString<PluginConfig>(configFile.readText())
                         val state = states.find { it.dirName == dir.name }
                         val enabled = state?.enabled ?: true
-                        var processor: PluginProcessor? = null
+                        var processor: Plugin? = null
 
                         if (config.type == PluginType.NATIVE && enabled) {
                             processor = loadNativePlugin(context, dir)
@@ -86,14 +89,20 @@ object PluginManager {
         _plugins.value = list
     }
 
-    private fun loadNativePlugin(context: Context, pluginDir: File): PluginProcessor? {
+    private fun loadNativePlugin(context: Context, pluginDir: File): Plugin? {
         return try {
-            val dexFile = findDexFile(pluginDir) ?: return null
+            val sourceDexFile = findDexFile(pluginDir) ?: return null
             val optimizedDir = File(getDexDir(context), pluginDir.name)
             optimizedDir.mkdirs()
 
+            val targetDexFile = File(optimizedDir, "classes.dex")
+            if (!targetDexFile.exists() || targetDexFile.lastModified() < sourceDexFile.lastModified()) {
+                Files.copy(sourceDexFile.toPath(), targetDexFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                targetDexFile.setReadOnly()
+            }
+
             val classLoader = DexClassLoader(
-                dexFile.absolutePath,
+                targetDexFile.absolutePath,
                 optimizedDir.absolutePath,
                 null,
                 context.classLoader
@@ -101,8 +110,6 @@ object PluginManager {
 
             val configFile = File(pluginDir, CONFIG_FILE)
             val config = json.decodeFromString<PluginConfig>(configFile.readText())
-            val mainClass = config.entry.takeIf { it.endsWith("Kt") || it.contains(".") }
-                ?: "com.kira.superspm.plugin.${config.name}Kt"
 
             val entryClass = if (config.entry.contains(".")) {
                 config.entry
@@ -113,10 +120,10 @@ object PluginManager {
             val clazz = classLoader.loadClass(entryClass)
             val instance = clazz.getDeclaredConstructor().newInstance()
 
-            if (instance is PluginProcessor) {
+            if (instance is Plugin) {
                 instance
             } else {
-                Log.e(TAG, "插件主类未实现 PluginProcessor 接口: $entryClass")
+                Log.e(TAG, "插件主类未实现 Plugin 接口: $entryClass")
                 null
             }
         } catch (e: Exception) {
@@ -176,7 +183,7 @@ object PluginManager {
 
             val config = json.decodeFromString<PluginConfig>(configFile.readText())
 
-            var processor: PluginProcessor? = null
+            var processor: Plugin? = null
             if (config.type == PluginType.NATIVE) {
                 processor = loadNativePlugin(context, targetDir)
                 if (processor == null) {
@@ -238,8 +245,12 @@ object PluginManager {
         return if (targetDir.exists()) targetDir else null
     }
 
-    fun getProcessor(dirName: String): PluginProcessor? {
+    fun getProcessor(dirName: String): Plugin? {
         return _plugins.value.find { it.dirName == dirName && it.enabled }?.processor
+    }
+
+    fun getHistoryService(): HistoryService {
+        return HistoryServiceImpl
     }
 
     private fun loadStates(context: Context): List<PluginState> {

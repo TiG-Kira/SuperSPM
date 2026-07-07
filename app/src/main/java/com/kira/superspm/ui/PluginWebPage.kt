@@ -72,7 +72,6 @@ fun PluginWebPage(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(backgroundColor)
                 .padding(top = paddingValues.calculateTopPadding())
         ) {
             AndroidView(
@@ -83,6 +82,7 @@ fun PluginWebPage(
                     wv.settings.allowFileAccess = true
                     wv.settings.allowContentAccess = true
                     wv.webViewClient = WebViewClient()
+                    wv.setBackgroundColor(android.graphics.Color.TRANSPARENT)
 
                     wv.addJavascriptInterface(SpeedDataBridge(), "SpeedData")
 

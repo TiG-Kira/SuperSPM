@@ -15,6 +15,10 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+enum class SpeedMode {
+    GPS, SENSOR
+}
+
 class SpeedometerViewModel(private val repository: RecordRepository) : ViewModel() {
     var currentSpeed by mutableStateOf(0.0)
         private set
@@ -38,12 +42,18 @@ class SpeedometerViewModel(private val repository: RecordRepository) : ViewModel
         private set
     var currentAccuracy by mutableStateOf<Float?>(null)
         private set
+    var selectedMode by mutableStateOf(SpeedMode.GPS)
+        private set
 
     private val pathPoints = mutableListOf<LocationPoint>()
     private var lastPoint: LocationPoint? = null
 
     enum class RecordingStatus {
         NOT_STARTED, RECORDING, PAUSED
+    }
+
+    fun changeSpeedMode(mode: SpeedMode) {
+        selectedMode = mode
     }
 
     fun startRecording(recordData: Boolean = false) {

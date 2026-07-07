@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.runtime.Composable
@@ -90,7 +91,7 @@ fun PluginScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "插件",
+                title = "插件管理",
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor,
                 navigationIcon = {
@@ -155,10 +156,12 @@ fun PluginScreen(
                                 "插件类型：\n" +
                                 "• WebUI 插件：使用 HTML/CSS/JS 开发，通过 WebView 运行，可调用 SpeedData 接口获取测速数据\n" +
                                 "• Native 插件：使用内置 Kotlin/Java 库开发\n\n" +
+                                "权限说明：\n" +
+                                "• speed_data：实时速度数据（速度、距离、传感器数据等）\n" +
+                                "• history_query：历史记录查询权限（只读，不支持修改和删除）\n\n" +
                                 "限制：\n" +
                                 "• 插件运行在沙盒环境中，仅能访问 plugin.json 中声明的权限\n" +
-                                "• WebUI 插件可使用的接口：SpeedData（速度、距离、传感器数据）\n" +
-                                "• 插件不可修改应用核心逻辑、不可访问用户历史记录\n" +
+                                "• 插件不可修改应用核心逻辑\n" +
                                 "• 插件导入后立即生效，标记为需要重启的插件需手动重启应用",
                             style = TextStyle(
                                 fontSize = 13.sp,
@@ -175,40 +178,39 @@ fun PluginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .clickable { navController.navigate("settings/plugins/templates") }
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "plugin.json 配置模板",
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MiuixTheme.colorScheme.onSurface
-                            )
-                        )
-                        Text(
-                            text = """{
-  "name": "插件名称",
-  "version": "1.0.0",
-  "author": "开发者名称",
-  "description": "插件描述",
-  "type": "WEB_UI",
-  "entry": "index.html",
-  "permissions": ["speed_data"],
-  "requiresRestart": false
-}""",
-                            style = TextStyle(
-                                fontSize = 12.sp,
-                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                            ),
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .fillMaxWidth()
-                                .background(
-                                    if (isDark) Color(0xFF1A1A1A) else Color(0xFFF5F5F5),
-                                    RoundedCornerShape(8.dp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "插件配置模板",
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MiuixTheme.colorScheme.onSurface
                                 )
-                                .padding(12.dp)
+                            )
+                            Text(
+                                text = "查看配置模板和示例代码",
+                                style = TextStyle(
+                                    fontSize = 13.sp,
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                ),
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Filled.ArrowRight,
+                            contentDescription = "进入",
+                            tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
@@ -267,6 +269,7 @@ fun PluginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .clip(RoundedCornerShape(20.dp))
                     ) {
                         Row(
                             modifier = Modifier
@@ -276,16 +279,7 @@ fun PluginScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clickable(enabled = plugin.enabled) {
-                                        val route = if (plugin.config.type == com.kira.superspm.data.model.PluginType.NATIVE) {
-                                            "plugin_native/${plugin.dirName}/${plugin.config.name}"
-                                        } else {
-                                            "plugin_web/${plugin.dirName}/${plugin.config.name}"
-                                        }
-                                        navController.navigate(route)
-                                    },
+                                modifier = Modifier.weight(1f),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Box(

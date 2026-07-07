@@ -41,7 +41,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowRight
-import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Speed
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
 
@@ -60,7 +60,7 @@ fun LocationSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "位置",
+                title = "测速方式和逻辑",
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor,
                 navigationIcon = {
@@ -102,7 +102,7 @@ fun LocationSettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.LocationOn,
+                            imageVector = Icons.Filled.Speed,
                             contentDescription = null,
                             tint = MiuixTheme.colorScheme.primary,
                             modifier = Modifier.size(40.dp)
@@ -119,7 +119,7 @@ fun LocationSettingsScreen(
                                 )
                             )
                             Text(
-                                text = "本页面可对位置进行修改。包括自定义位置刷新时间设置、省电模式开关、加速度计辅助测速开关。",
+                                text = "本页面可对测速方式和逻辑进行修改。包括位置刷新时间设置、省电模式开关、传感器计速开关。",
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -161,10 +161,36 @@ fun LocationSettingsScreen(
                         checked = viewModel.powerSaving,
                         onCheckedChange = { viewModel.updatePowerSaving(it) },
                         description = when {
-                            viewModel.accelerometerEnabled -> "省电模式只能在GPS模式应用"
-                            viewModel.powerSaving -> "暗色模式自动启用，刷新间隔延长"
+                            viewModel.accelerometerEnabled -> "省电模式只能在 GPS 模式应用，打开后，将对 GPS 采集方式与间隔作出限制，对传感器采集方式无效"
+                            viewModel.powerSaving -> "暗色模式将自动启用（重启后生效），GPS 位置与速度采集刷新间隔延长"
                             else -> null
                         }
+                    )
+                }
+            }
+
+            item {
+                Text(
+                    text = "传感器测速",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                    ),
+                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 8.dp)
+                )
+            }
+
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    SettingSwitchItem(
+                        title = "启用传感器计速",
+                        checked = viewModel.accelerometerEnabled,
+                        onCheckedChange = { viewModel.updateAccelerometerEnabled(it) },
+                        description = "启用选择传感器计速方式，开启后，可在主页中可选择使用传感器测速"
                     )
                 }
             }
@@ -182,7 +208,7 @@ fun LocationSettingsScreen(
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "设置刷新时间",
+                        text = "设置位置刷新时间",
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,

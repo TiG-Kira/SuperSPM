@@ -398,7 +398,9 @@ class LocationService : Service(), LocationListener {
 
             val currentPoint = LocationPoint(location.latitude, location.longitude, finalSpeed, System.currentTimeMillis())
             if (lastPoint != null) {
-                totalDistance += calculateDistance(lastPoint!!, currentPoint)
+                if (finalSpeed >= 1.0) {
+                    totalDistance += calculateDistance(lastPoint!!, currentPoint)
+                }
             }
             pathPoints.add(currentPoint)
             lastPoint = currentPoint

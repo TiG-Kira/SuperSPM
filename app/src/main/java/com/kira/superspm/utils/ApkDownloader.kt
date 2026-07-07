@@ -1,9 +1,11 @@
 package com.kira.superspm.utils
 
+import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +24,66 @@ object ApkDownloader {
         .writeTimeout(120, TimeUnit.SECONDS)
         .build()
 
-    suspend fun downloadAndInstall(context: Context, url: String, versionName: String): Result<Unit> {
+    fun isChineseRom(): Boolean {
+        val manufacturers = listOf(
+            "Xiaomi".uppercase(),
+            "Redmi".uppercase(),
+            "POCO".uppercase(),
+            "OPPO".uppercase(),
+            "OnePlus".uppercase(),
+            "realme".uppercase(),
+            "vivo".uppercase(),
+            "iQOO".uppercase(),
+            "Huawei".uppercase(),
+            "Honor".uppercase(),
+            "Meizu".uppercase(),
+            "Smartisan".uppercase(),
+            "Nubia".uppercase(),
+            "ZTE".uppercase()
+        )
+        val brand = Build.BRAND?.uppercase() ?: ""
+        val manufacturer = Build.MANUFACTURER?.uppercase() ?: ""
+        return manufacturers.any { it in brand || it in manufacturer }
+    }
+
+    fun hasInstallPermission(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.packageManager.canRequestPackageInstalls()
+        } else {
+            true
+        }
+    }
+
+    fun requestInstallPermission(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                Uri.parse("package:${context.packageName}")
+            )
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            try {
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                Log.e(TAG, "请求安装权限失败", e)
+            }
+        }
+    }
+
+    fun tryInstallApkSilent(context: Context, apkFile: File): Boolean {
+        return try {
+            installApk(context, apkFile)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun downloadAndInstall(
+        context: Context,
+        url: String,
+        versionName: String,
+        onProgress: ((Int, Long, Long) -> Unit)? = null
+    ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
                 val apkFile = File(context.getExternalFilesDir(null), "SuperSPM_debug_${versionName}.apk")
@@ -41,8 +102,11 @@ object ApkDownloader {
                     }
 
                     val body = response.body ?: throw Exception("响应体为空")
+                    val contentLength = body.contentLength()
                     val inputStream = body.byteStream()
                     val outputStream = apkFile.outputStream()
+
+                    var bytesDownloaded: Long = 0
 
                     inputStream.use { input ->
                         outputStream.use { output ->
@@ -50,6 +114,11 @@ object ApkDownloader {
                             var bytesRead: Int
                             while (input.read(buffer).also { bytesRead = it } != -1) {
                                 output.write(buffer, 0, bytesRead)
+                                bytesDownloaded += bytesRead
+                                if (contentLength > 0 && onProgress != null) {
+                                    val progress = ((bytesDownloaded * 100) / contentLength).toInt()
+                                    onProgress(progress, bytesDownloaded, contentLength)
+                                }
                             }
                             output.flush()
                         }
@@ -58,7 +127,19 @@ object ApkDownloader {
 
                 if (apkFile.exists() && apkFile.length() > 0) {
                     withContext(Dispatchers.Main) {
-                        installApk(context, apkFile)
+                        if (isChineseRom()) {
+                            try {
+                                installApk(context, apkFile)
+                            } catch (e: Exception) {
+                                requestInstallPermission(context)
+                            }
+                        } else {
+                            if (hasInstallPermission(context)) {
+                                installApk(context, apkFile)
+                            } else {
+                                requestInstallPermission(context)
+                            }
+                        }
                     }
                     Result.success(Unit)
                 } else {
@@ -71,7 +152,7 @@ object ApkDownloader {
         }
     }
 
-    private fun installApk(context: Context, apkFile: File) {
+    fun installApk(context: Context, apkFile: File) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
             val apkUri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -90,6 +171,11 @@ object ApkDownloader {
             context.startActivity(intent)
         } catch (e: Exception) {
             Log.e(TAG, "安装失败", e)
+            throw e
         }
+    }
+
+    fun getDownloadedApkFile(context: Context, versionName: String): File {
+        return File(context.getExternalFilesDir(null), "SuperSPM_debug_${versionName}.apk")
     }
 }

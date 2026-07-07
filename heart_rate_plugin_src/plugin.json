@@ -1,0 +1,10 @@
+{
+  "name": "心率监测（运动估算）",
+  "version": "1.0.0",
+  "author": "SuperSPM",
+  "description": "基于运动强度估算心率，提供健康建议",
+  "type": "NATIVE",
+  "entry": "HeartRateMonitor",
+  "permissions": ["speed_data"],
+  "requiresRestart": false
+}

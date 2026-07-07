@@ -11,9 +11,9 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 13,
-      "versionName": "1.2.1",
-      "outputFile": "SuperSPM_debug_1.2.1.apk"
+      "versionCode": 15,
+      "versionName": "1.2.3",
+      "outputFile": "SuperSPM_debug_1.2.3.apk"
     }
   ],
   "elementType": "File",

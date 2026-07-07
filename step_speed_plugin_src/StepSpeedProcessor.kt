@@ -1,26 +1,22 @@
 package com.kira.superspm.plugin
 
-class StepSpeedProcessor : PluginProcessor {
-    private var enabled = true
+import com.kira.superspm.plugin.data.AnalysisResult
+import com.kira.superspm.plugin.data.SpeedData
+
+class StepSpeedProcessor : BasePlugin(
+    name = "步速测量",
+    version = "1.0.0",
+    author = "SuperSPM",
+    description = "利用传感器数据测量步速和跑步速度，提供运动建议"
+), PluginProcessor {
+
     private var stepCount = 0
     private var lastSpeed = 0.0
     private var totalSteps = 0
-    private var startTime = 0L
-
-    override fun getName(): String = "步速测量"
-
-    override fun getVersion(): String = "1.0.0"
-
-    override fun getDescription(): String = "利用传感器数据测量步速和跑步速度，提供运动建议"
-
-    override fun getAuthor(): String = "SuperSPM"
 
     override fun onSpeedUpdate(data: SpeedData): AnalysisResult {
-        if (startTime == 0L) startTime = System.currentTimeMillis()
-
         val speedKmh = data.currentSpeed * 3.6
 
-        // 检测步数变化
         val speedDiff = Math.abs(speedKmh - lastSpeed)
         if (speedDiff > 0.5 && speedKmh > 1.0) {
             stepCount++
@@ -28,16 +24,9 @@ class StepSpeedProcessor : PluginProcessor {
         }
         lastSpeed = speedKmh
 
-        // 检测活动模式
         val (mode, icon, desc) = detectActivityMode(speedKmh)
-
-        // 计算步频（步/分钟）
         val stepFrequency = calculateStepFrequency(speedKmh)
-
-        // 估算步数
         val estimatedSteps = estimateSteps(data)
-
-        // 生成建议
         val advice = generateAdvice(speedKmh, mode)
 
         val metrics = mapOf(
@@ -103,43 +92,23 @@ class StepSpeedProcessor : PluginProcessor {
         }
     }
 
-    private fun formatDuration(ms: Long): String {
-        val seconds = ms / 1000
-        val minutes = seconds / 60
-        val secs = seconds % 60
-        return String.format("%02d:%02d", minutes, secs)
-    }
-
-    private fun formatDistance(meters: Double): String {
-        return if (meters < 1000) {
-            String.format("%.0f m", meters)
-        } else {
-            String.format("%.2f km", meters / 1000)
-        }
-    }
-
     override fun onStart() {
-        startTime = System.currentTimeMillis()
+        super.onStart()
         stepCount = 0
         totalSteps = 0
         lastSpeed = 0.0
     }
 
     override fun onStop() {
+        super.onStop()
         stepCount = 0
     }
 
-    override fun isEnabled(): Boolean = enabled
-
-    override fun setEnabled(enabled: Boolean) {
-        this.enabled = enabled
-    }
-
     override fun getConfig(): Map<String, String> {
-        return mapOf("enabled" to enabled.toString())
+        return mapOf("enabled" to isEnabled().toString())
     }
 
     override fun setConfig(config: Map<String, String>) {
-        config["enabled"]?.let { this.enabled = it.toBoolean() }
+        config["enabled"]?.let { setEnabled(it.toBoolean()) }
     }
 }

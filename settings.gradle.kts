@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "SuperSPM"
 include(":app")
+include(":plugin-sdk")

@@ -1,0 +1,10 @@
+{
+  "name": "步数统计",
+  "version": "1.0.0",
+  "author": "SuperSPM",
+  "description": "基于速度数据估算步数，分析运动状态",
+  "type": "NATIVE",
+  "entry": "StepCounter",
+  "permissions": ["speed_data"],
+  "requiresRestart": false
+}

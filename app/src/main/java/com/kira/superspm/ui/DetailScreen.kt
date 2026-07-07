@@ -140,46 +140,48 @@ fun DetailScreen(
                 }
             }
 
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
+            if (viewModel.pathPoints.isNotEmpty()) {
+                item {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     ) {
-                        Text(
-                            text = "速度变化曲线",
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            ),
-                            modifier = Modifier.padding(bottom = 12.dp)
-                        )
-                        SpeedChart(viewModel.pathPoints, settingsViewModel.speedUnit)
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "速度变化曲线",
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
+                            SpeedChart(viewModel.pathPoints, settingsViewModel.speedUnit)
+                        }
                     }
                 }
-            }
 
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
+                item {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     ) {
-                        Text(
-                            text = "运动轨迹",
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            ),
-                            modifier = Modifier.padding(bottom = 12.dp)
-                        )
-                        TrackMap(viewModel.pathPoints)
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "运动轨迹",
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
+                            TrackMap(viewModel.pathPoints)
+                        }
                     }
                 }
             }
