@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "com.kira.superspm.plugin.plugin-sdk-release-10:/layout/ime_secondary_split_test_activity.xml",
+        "source": "com.kira.superspm.plugin.plugin-sdk-core-1.13.1-2:/layout/ime_secondary_split_test_activity.xml"
+    },
+    {
+        "merged": "com.kira.superspm.plugin.plugin-sdk-release-10:/layout/custom_dialog.xml",
+        "source": "com.kira.superspm.plugin.plugin-sdk-core-1.13.1-2:/layout/custom_dialog.xml"
+    },
+    {
+        "merged": "com.kira.superspm.plugin.plugin-sdk-release-10:/layout/notification_template_part_chronometer.xml",
+        "source": "com.kira.superspm.plugin.plugin-sdk-core-1.13.1-2:/layout/notification_template_part_chronometer.xml"
+    },
+    {
+        "merged": "com.kira.superspm.plugin.plugin-sdk-release-10:/layout/ime_base_split_test_activity.xml",
+        "source": "com.kira.superspm.plugin.plugin-sdk-core-1.13.1-2:/layout/ime_base_split_test_activity.xml"
+    },
+    {
+        "merged": "com.kira.superspm.plugin.plugin-sdk-release-10:/layout/notification_template_part_time.xml",
+        "source": "com.kira.superspm.plugin.plugin-sdk-core-1.13.1-2:/layout/notification_template_part_time.xml"
+    }
+]

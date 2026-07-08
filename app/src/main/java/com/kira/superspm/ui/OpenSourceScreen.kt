@@ -25,6 +25,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
+import androidx.compose.ui.draw.clip
+
 @Composable
 fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
     val context = LocalContext.current
@@ -41,6 +43,8 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
+                            .size(40.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
                             .clickable { onBack() },
                         contentAlignment = Alignment.Center
                     ) {

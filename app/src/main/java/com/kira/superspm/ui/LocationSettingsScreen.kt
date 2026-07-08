@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextStyle
@@ -67,14 +68,15 @@ fun LocationSettingsScreen(
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
+                            .size(40.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
                             .clickable { navController.popBackStack() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "返回",
-                            tint = if (isDark) Color.White else Color.Black,
-                            modifier = Modifier.size(24.dp)
+                            tint = MiuixTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -119,7 +121,7 @@ fun LocationSettingsScreen(
                                 )
                             )
                             Text(
-                                text = "本页面可对测速方式和逻辑进行修改。包括位置刷新时间设置、省电模式开关、传感器计速开关。",
+                                text = "本页面可对定位、测速方式和逻辑进行修改。包括位置刷新时间设置、省电模式开关、传感器计速开关。",
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary

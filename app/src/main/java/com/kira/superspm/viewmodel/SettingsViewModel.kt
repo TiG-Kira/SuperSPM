@@ -28,6 +28,8 @@ class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewMod
         private set
     var accelerometerEnabled by mutableStateOf(false)
         private set
+    var appLanguage by mutableStateOf("zh")
+        private set
 
     val effectiveDarkMode: Boolean
         get() = if (powerSaving) true else darkMode
@@ -48,6 +50,7 @@ class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewMod
             refreshTime = prefs[intPreferencesKey("refresh_time")] ?: 120
             powerSaving = prefs[booleanPreferencesKey("power_saving")] ?: false
             accelerometerEnabled = prefs[booleanPreferencesKey("accelerometer_enabled")] ?: false
+            appLanguage = prefs[stringPreferencesKey("app_language")] ?: "zh"
         }
     }
 
@@ -110,6 +113,13 @@ class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewMod
         accelerometerEnabled = value
         viewModelScope.launch {
             dataStore.edit { it[booleanPreferencesKey("accelerometer_enabled")] = value }
+        }
+    }
+
+    fun updateAppLanguage(value: String) {
+        appLanguage = value
+        viewModelScope.launch {
+            dataStore.edit { it[stringPreferencesKey("app_language")] = value }
         }
     }
 }

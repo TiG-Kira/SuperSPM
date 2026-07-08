@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.kira.superspm.ui.components.SearchBar
 import com.kira.superspm.utils.PluginManager
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -63,6 +64,12 @@ fun PluginScreen(
     val plugins by PluginManager.plugins.collectAsState()
     var showRestartDialog by remember { mutableStateOf(false) }
     var importMessage by remember { mutableStateOf<String?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredPlugins = plugins.filter {
+        searchQuery.isEmpty() ||
+                it.config.name.contains(searchQuery, ignoreCase = true) ||
+                it.config.description.contains(searchQuery, ignoreCase = true)
+    }
 
     val fileLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
@@ -98,6 +105,8 @@ fun PluginScreen(
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
+                            .size(40.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
                             .clickable { navController.popBackStack() },
                         contentAlignment = Alignment.Center
                     ) {
@@ -254,8 +263,12 @@ fun PluginScreen(
                 }
             } else {
                 item {
+                    SearchBar(hint = "搜索插件", onSearch = { searchQuery = it })
+                }
+
+                item {
                     Text(
-                        text = "已安装插件 (${plugins.size})",
+                        text = "已安装插件 (${filteredPlugins.size})",
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -264,7 +277,7 @@ fun PluginScreen(
                     )
                 }
 
-                items(plugins) { plugin ->
+                items(filteredPlugins) { plugin ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()

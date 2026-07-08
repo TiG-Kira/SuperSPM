@@ -60,6 +60,8 @@ fun LabSettingsScreen(
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
+                            .size(40.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
                             .clickable { navController.popBackStack() },
                         contentAlignment = Alignment.Center
                     ) {

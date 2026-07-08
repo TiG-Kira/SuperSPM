@@ -34,6 +34,7 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
 import com.kira.superspm.data.model.LocationRecord
 import com.kira.superspm.data.store.SpeedUnit
+import com.kira.superspm.ui.components.SearchBar
 import com.kira.superspm.viewmodel.HistoryViewModel
 import com.kira.superspm.viewmodel.SettingsViewModel
 import top.yukonga.miuix.kmp.basic.Button
@@ -68,6 +69,10 @@ fun HistoryScreen(
     var editingId by remember { mutableStateOf<Long?>(null) }
     var editingName by remember { mutableStateOf("") }
     var deletingRecord by remember { mutableStateOf<LocationRecord?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredRecords = records.filter {
+        searchQuery.isEmpty() || it.name.contains(searchQuery, ignoreCase = true)
+    }
 
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = getPageBackgroundColor(isDark)
@@ -86,7 +91,7 @@ fun HistoryScreen(
                 .fillMaxSize()
                 .background(backgroundColor)
         ) {
-            if (records.isEmpty()) {
+            if (filteredRecords.isEmpty()) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -95,7 +100,7 @@ fun HistoryScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "暂无记录",
+                        text = if (searchQuery.isEmpty()) "暂无记录" else "未找到匹配的记录",
                         style = TextStyle(
                             fontSize = 16.sp,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -110,7 +115,11 @@ fun HistoryScreen(
                         .nestedScroll(scrollBehavior.nestedScrollConnection),
                     contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
                 ) {
-                    items(records) { record ->
+                    item {
+                        SearchBar(hint = "搜索记录", onSearch = { searchQuery = it })
+                    }
+
+                    items(filteredRecords) { record ->
                         RecordItem(
                             record = record,
                             speedUnit = settingsViewModel.speedUnit,

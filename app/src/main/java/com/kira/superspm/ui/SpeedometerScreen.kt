@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -106,6 +107,9 @@ fun SpeedometerScreen(
     val currentLongitude = viewModel.currentLongitude
     val currentAccuracy = viewModel.currentAccuracy
     var gpsAccuracy by remember { mutableStateOf<Float?>(null) }
+    var displayAccuracy by remember { mutableStateOf<Float?>(null) }
+    var lastAccuracyChangeTime by remember { mutableStateOf(0L) }
+    val ACCURACY_DEBOUNCE_MS = 2000L
 
     var secondsUntilRefresh by remember { mutableStateOf(0) }
     var showPermissionDialog by remember { mutableStateOf(false) }
@@ -138,6 +142,37 @@ fun SpeedometerScreen(
 
         LocationService.onGpsSignalUpdate = { accuracy ->
             gpsAccuracy = accuracy
+            val currentTime = System.currentTimeMillis()
+            if (displayAccuracy == null) {
+                displayAccuracy = accuracy
+                lastAccuracyChangeTime = currentTime
+            } else {
+                val currentStrength = when {
+                    accuracy == null -> 0
+                    accuracy < 10 -> 5
+                    accuracy < 20 -> 4
+                    accuracy < 30 -> 3
+                    accuracy < 50 -> 2
+                    else -> 1
+                }
+                val displayStrength = when {
+                    displayAccuracy == null -> 0
+                    displayAccuracy!! < 10 -> 5
+                    displayAccuracy!! < 20 -> 4
+                    displayAccuracy!! < 30 -> 3
+                    displayAccuracy!! < 50 -> 2
+                    else -> 1
+                }
+                if (currentStrength != displayStrength) {
+                    if (currentTime - lastAccuracyChangeTime >= ACCURACY_DEBOUNCE_MS) {
+                        displayAccuracy = accuracy
+                        lastAccuracyChangeTime = currentTime
+                    }
+                } else {
+                    lastAccuracyChangeTime = currentTime
+                    displayAccuracy = accuracy
+                }
+            }
         }
 
         LocationService.onServiceStopped = {
@@ -308,7 +343,7 @@ fun SpeedometerScreen(
                                 imageVector = if (status == SpeedometerViewModel.RecordingStatus.RECORDING) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                                 contentDescription = if (status == SpeedometerViewModel.RecordingStatus.RECORDING) "暂停" else "继续",
                                 tint = MiuixTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                         IconButton(
@@ -354,6 +389,7 @@ fun SpeedometerScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .then(if (status != SpeedometerViewModel.RecordingStatus.NOT_STARTED) Modifier.pointerInput(Unit) {} else Modifier)
                         ) {
                             TabRowWithContour(
                                 tabs = tabs,
@@ -380,7 +416,7 @@ fun SpeedometerScreen(
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Text(
-                                    text = "未开始",
+                                    text = context.getString(R.string.not_started),
                                     style = TextStyle(
                                         fontSize = 48.sp,
                                         fontWeight = FontWeight.Bold,
@@ -388,7 +424,7 @@ fun SpeedometerScreen(
                                     )
                                 )
                                 Text(
-                                    text = "选择一种模式来开始测速",
+                                    text = context.getString(R.string.select_mode_to_start),
                                     style = TextStyle(
                                         fontSize = 16.sp,
                                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -468,7 +504,7 @@ fun SpeedometerScreen(
                                     ) {
                                         Text(
                                             modifier = Modifier.fillMaxWidth(),
-                                            text = "使用传感器",
+                                            text = context.getString(R.string.use_sensor),
                                             fontSize = 18.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             color = if (isDark) Color.White else Color.Black
@@ -596,7 +632,7 @@ fun SpeedometerScreen(
                         ) {
                             if (status == SpeedometerViewModel.RecordingStatus.NOT_STARTED) {
                                 GpsSignalCard(
-                                    accuracy = gpsAccuracy,
+                                    accuracy = displayAccuracy,
                                     isDark = isDark,
                                     powerSaving = settingsViewModel.powerSaving,
                                     accelerometerEnabled = false,
@@ -604,7 +640,7 @@ fun SpeedometerScreen(
                                 )
                             } else {
                                 GpsSignalCard(
-                                    accuracy = gpsAccuracy,
+                                    accuracy = displayAccuracy,
                                     isDark = isDark,
                                     powerSaving = settingsViewModel.powerSaving,
                                     accelerometerEnabled = false
@@ -726,7 +762,7 @@ fun SpeedometerScreen(
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "欢迎使用传感器测速",
+                                    text = context.getString(R.string.welcome_sensor_speed),
                                     style = TextStyle(
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold,
@@ -766,7 +802,7 @@ fun SpeedometerScreen(
                                     .padding(16.dp)
                             ) {
                                 Text(
-                                    text = "开始测速后获取位置和经纬度",
+                                    text = context.getString(R.string.get_location_after_start),
                                     style = TextStyle(
                                         fontSize = 14.sp,
                                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary

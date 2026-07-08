@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
 import androidx.navigation.NavHostController
+import com.kira.superspm.ui.components.SearchBar
 import com.kira.superspm.viewmodel.SettingsViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -61,6 +62,24 @@ fun SettingsScreen(
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = getPageBackgroundColor(isDark)
 
+    var searchQuery by remember { mutableStateOf("") }
+
+    val settingsItems = listOf(
+        Triple(Icons.Filled.Palette, "外观", "暗色模式、速度单位显示") to { navController.navigate("settings/appearance") },
+        Triple(Icons.Filled.Speed, "测速方式和逻辑", "位置刷新、省电模式、传感器计速") to { navController.navigate("settings/location") },
+        Triple(Icons.Filled.History, "历史记录管理", "记录管理、数据统计") to { navController.navigate("settings/history") },
+        Triple(Icons.Filled.Extension, "插件管理", "导入、启用、删除插件") to { navController.navigate("settings/plugins") },
+        Triple(Icons.Filled.Info, "关于", if (hasUpdate) "发现新版本" else "应用信息、开源项目") to {
+            onRedDotConsumed()
+            navController.navigate("about")
+        }
+    )
+
+    val filteredItems = settingsItems.filter {
+        val (icon, title, subtitle) = it.first
+        searchQuery.isEmpty() || title.contains(searchQuery, ignoreCase = true) || subtitle.contains(searchQuery, ignoreCase = true)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -77,54 +96,41 @@ fun SettingsScreen(
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
         ) {
-
             item {
-                SettingNavItem(
-                    icon = Icons.Filled.Palette,
-                    title = "外观",
-                    subtitle = "暗色模式、速度单位显示",
-                    onClick = { navController.navigate("settings/appearance") }
-                )
+                SearchBar(hint = "搜索设置", onSearch = { searchQuery = it })
             }
 
-            item {
-                SettingNavItem(
-                    icon = Icons.Filled.Speed,
-                    title = "测速方式和逻辑",
-                    subtitle = "位置刷新、省电模式、传感器计速",
-                    onClick = { navController.navigate("settings/location") }
-                )
-            }
-
-            item {
-                SettingNavItem(
-                    icon = Icons.Filled.History,
-                    title = "历史记录",
-                    subtitle = "记录管理、数据统计",
-                    onClick = { navController.navigate("settings/history") }
-                )
-            }
-
-            item {
-                SettingNavItem(
-                    icon = Icons.Filled.Extension,
-                    title = "插件管理",
-                    subtitle = "导入、启用、删除插件",
-                    onClick = { navController.navigate("settings/plugins") }
-                )
-            }
-
-            item {
-                SettingNavItem(
-                    icon = Icons.Filled.Info,
-                    title = "关于",
-                    subtitle = if (hasUpdate) "发现新版本" else "应用信息、开源项目",
-                    hasRedDot = hasUpdate && showRedDot,
-                    onClick = {
-                        onRedDotConsumed()
-                        navController.navigate("about")
+            if (filteredItems.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 80.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "未找到匹配的设置项",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            )
+                        )
                     }
-                )
+                }
+            } else {
+                filteredItems.forEachIndexed { index, item ->
+                    val (icon, title, subtitle) = item.first
+                    val onClick = item.second
+                    item {
+                        SettingNavItem(
+                            icon = icon,
+                            title = title,
+                            subtitle = subtitle,
+                            hasRedDot = index == 4 && hasUpdate && showRedDot,
+                            onClick = onClick
+                        )
+                    }
+                }
             }
 
             item {

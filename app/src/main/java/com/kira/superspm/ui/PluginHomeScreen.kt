@@ -24,6 +24,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.kira.superspm.ui.components.SearchBar
 import com.kira.superspm.utils.PluginManager
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -51,7 +55,12 @@ fun PluginHomeScreen(
     val backgroundColor = getPageBackgroundColor(isDark)
     val scrollBehavior = MiuixScrollBehavior()
     val plugins by PluginManager.plugins.collectAsState()
-    val enabledPlugins = plugins.filter { it.enabled }
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredPlugins = plugins.filter {
+        it.enabled && (searchQuery.isEmpty() ||
+                it.config.name.contains(searchQuery, ignoreCase = true) ||
+                it.config.description.contains(searchQuery, ignoreCase = true))
+    }
 
     Scaffold(
         topBar = {
@@ -87,6 +96,10 @@ fun PluginHomeScreen(
             contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
         ) {
             item {
+                SearchBar(hint = "搜索插件", onSearch = { searchQuery = it })
+            }
+
+            item {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -117,7 +130,7 @@ fun PluginHomeScreen(
                 }
             }
 
-            if (enabledPlugins.isEmpty()) {
+            if (filteredPlugins.isEmpty()) {
                 item {
                     Box(
                         modifier = Modifier
@@ -156,7 +169,7 @@ fun PluginHomeScreen(
             } else {
                 item {
                     Text(
-                        text = "已启用插件 (${enabledPlugins.size})",
+                        text = "已启用插件 (${filteredPlugins.size})",
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -165,7 +178,7 @@ fun PluginHomeScreen(
                     )
                 }
 
-                items(enabledPlugins) { plugin ->
+                items(filteredPlugins) { plugin ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()

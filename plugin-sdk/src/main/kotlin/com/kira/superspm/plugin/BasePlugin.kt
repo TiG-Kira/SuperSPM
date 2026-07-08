@@ -10,6 +10,23 @@ abstract class BasePlugin(
     override val description: String
 ) : Plugin {
 
+    companion object {
+        @Volatile
+        private var _historyService: HistoryService? = null
+
+        fun setHistoryService(service: HistoryService) {
+            _historyService = service
+        }
+
+        fun getHistoryService(): HistoryService? {
+            return _historyService
+        }
+    }
+
+    protected fun getHistoryServiceInstance(): HistoryService? {
+        return _historyService
+    }
+
     private var _enabled = true
     private var startTime = 0L
     private val configMap = mutableMapOf<String, String>()

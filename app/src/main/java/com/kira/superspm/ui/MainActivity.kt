@@ -20,12 +20,20 @@ import androidx.core.view.WindowCompat
 import com.kira.superspm.ui.theme.SuperSPMTheme
 import com.kira.superspm.viewmodel.SettingsViewModel
 import org.koin.androidx.compose.getViewModel
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.coroutines.flow.first
+import org.koin.android.ext.android.inject
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
     private val hasLocationPermissionState = mutableStateOf(false)
     private val hasBackgroundLocationPermissionState = mutableStateOf(false)
     private val hasNotificationPermissionState = mutableStateOf(false)
     private val systemDarkModeState = mutableStateOf(false)
+    private val dataStore: DataStore<Preferences> by inject()
 
     private val requestLocationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -46,11 +54,24 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        applySavedLanguage()
         checkPermissions()
         updateSystemDarkMode()
         requestPermissionsIfNeeded()
         setContent {
             MainApp()
+        }
+    }
+
+    private fun applySavedLanguage() {
+        runBlocking {
+            val prefs = dataStore.data.first()
+            val language = prefs[stringPreferencesKey("app_language")] ?: "zh"
+            val locale = if (language == "en") java.util.Locale.ENGLISH else java.util.Locale.CHINESE
+            val config = resources.configuration.apply {
+                setLocale(locale)
+            }
+            resources.updateConfiguration(config, resources.displayMetrics)
         }
     }
 

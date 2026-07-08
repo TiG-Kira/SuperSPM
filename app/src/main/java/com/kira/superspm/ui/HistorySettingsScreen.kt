@@ -67,13 +67,15 @@ fun HistorySettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "历史记录",
+                title = "历史记录管理",
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor,
                 navigationIcon = {
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
+                            .size(40.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
                             .clickable { navController.popBackStack() },
                         contentAlignment = Alignment.Center
                     ) {

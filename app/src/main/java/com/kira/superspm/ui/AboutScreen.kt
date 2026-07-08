@@ -107,6 +107,8 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                         Box(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
+                                .size(40.dp)
+                                .clip(androidx.compose.foundation.shape.CircleShape)
                                 .clickable { onBack() },
                             contentAlignment = Alignment.Center
                         ) {

@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.kira.superspm.data.model.PluginConfig
 import com.kira.superspm.data.model.PluginType
+import com.kira.superspm.plugin.BasePlugin
 import com.kira.superspm.plugin.HistoryService
 import com.kira.superspm.plugin.Plugin
 import com.kira.superspm.plugin.impl.HistoryServiceImpl
@@ -44,6 +45,7 @@ object PluginManager {
     )
 
     fun init(context: Context) {
+        BasePlugin.setHistoryService(HistoryServiceImpl)
         loadPlugins(context)
     }
 

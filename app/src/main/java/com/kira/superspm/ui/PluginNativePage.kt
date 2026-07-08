@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextStyle
@@ -104,6 +105,8 @@ fun PluginNativePage(
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
+                            .size(40.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
                             .clickable { onBack() },
                         contentAlignment = Alignment.Center
                     ) {
@@ -198,9 +201,9 @@ fun PluginNativePage(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceAround
                                 ) {
-                                    val speedKmh = speedData?.currentSpeed?.times(3.6) ?: 0.0
-                                    val avgKmh = speedData?.avgSpeed?.times(3.6) ?: 0.0
-                                    val maxKmh = speedData?.maxSpeed?.times(3.6) ?: 0.0
+                                    val speedKmh = speedData?.currentSpeed ?: 0.0
+                                    val avgKmh = speedData?.avgSpeed ?: 0.0
+                                    val maxKmh = speedData?.maxSpeed ?: 0.0
 
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text(
@@ -426,6 +429,12 @@ fun mapMetricKey(key: String): String {
         "heartRate" -> "心率"
         "avgHeartRate" -> "平均心率"
         "calories" -> "消耗热量"
+        "totalDistance" -> "总里程"
+        "maxSpeed" -> "最高速度"
+        "avgSpeed" -> "平均速度"
+        "recordCount" -> "记录次数"
+        "currentSpeed" -> "当前速度"
+        "todayDistance" -> "本次里程"
         else -> key
     }
 }

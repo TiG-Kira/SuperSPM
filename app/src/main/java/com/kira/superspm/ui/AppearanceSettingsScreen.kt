@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextStyle
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
 import androidx.navigation.NavHostController
+import androidx.compose.ui.platform.LocalContext
 import com.kira.superspm.data.store.SpeedUnit
 import com.kira.superspm.viewmodel.SettingsViewModel
 import top.yukonga.miuix.kmp.basic.Button
@@ -52,8 +54,10 @@ fun AppearanceSettingsScreen(
     navController: NavHostController
 ) {
     val viewModel: SettingsViewModel = getViewModel()
+    val context = LocalContext.current
 
     var showSpeedUnitDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
 
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = getPageBackgroundColor(isDark)
@@ -68,6 +72,8 @@ fun AppearanceSettingsScreen(
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
+                            .size(40.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
                             .clickable { navController.popBackStack() },
                         contentAlignment = Alignment.Center
                     ) {
@@ -189,6 +195,17 @@ fun AppearanceSettingsScreen(
             }
 
             item {
+                SettingClickableItem(
+                    title = "语言",
+                    value = when (viewModel.appLanguage) {
+                        "en" -> "English"
+                        else -> "中文"
+                    },
+                    onClick = { showLanguageDialog = true }
+                )
+            }
+
+            item {
                 androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(120.dp))
             }
         }
@@ -250,6 +267,78 @@ fun AppearanceSettingsScreen(
                     }
                     Button(
                         onClick = { showSpeedUnitDialog = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            color = MiuixTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Text(text = "取消", fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+
+    if (showLanguageDialog) {
+        Dialog(
+            onDismissRequest = { showLanguageDialog = false }
+        ) {
+            Card {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "选择语言",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MiuixTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Column(
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        listOf("中文" to "zh", "English" to "en").forEach { (name, code) ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp)
+                                    .clickable {
+                                        viewModel.updateAppLanguage(code)
+                                        showLanguageDialog = false
+                                        val locale = if (code == "en") java.util.Locale.ENGLISH else java.util.Locale.CHINESE
+                                        val config = android.content.res.Configuration().apply {
+                                            setLocale(locale)
+                                        }
+                                        context.resources.updateConfiguration(config, context.resources.displayMetrics)
+                                        val intent = android.content.Intent(context, MainActivity::class.java)
+                                        intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                        context.startActivity(intent)
+                                    },
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = name,
+                                    style = TextStyle(
+                                        fontSize = 16.sp,
+                                        color = MiuixTheme.colorScheme.onSurface
+                                    )
+                                )
+                                if (viewModel.appLanguage == code) {
+                                    Text(
+                                        text = "✓",
+                                        style = TextStyle(
+                                            fontSize = 18.sp,
+                                            color = MiuixTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Button(
+                        onClick = { showLanguageDialog = false },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
                             color = MiuixTheme.colorScheme.surfaceVariant
