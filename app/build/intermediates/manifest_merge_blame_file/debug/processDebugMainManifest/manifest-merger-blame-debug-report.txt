@@ -35,198 +35,201 @@
 19    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
 19-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:13:5-86
 19-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:13:22-83
-20
-21    <uses-feature android:name="android.hardware.location.gps" />
-21-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:15:5-66
-21-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:15:19-63
-22
-23    <permission
-23-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:22:5-24:47
-24        android:name="com.kira.superspm.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-24-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:23:9-81
-25        android:protectionLevel="signature" />
-25-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:24:9-44
-26
-27    <uses-permission android:name="com.kira.superspm.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-27-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:26:5-97
-27-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:26:22-94
-28
-29    <application
-29-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:17:5-49:19
-30        android:name="com.kira.superspm.SuperSPMApp"
-30-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:18:9-36
-31        android:allowBackup="true"
-31-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:19:9-35
-32        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-32-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:28:18-86
-33        android:debuggable="true"
-34        android:extractNativeLibs="false"
-35        android:icon="@mipmap/ic_launcher"
-35-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:20:9-43
-36        android:label="@string/app_name"
-36-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:21:9-41
-37        android:supportsRtl="true"
-37-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:22:9-35
-38        android:theme="@style/Theme.SuperSPM" >
-38-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:23:9-46
-39        <activity
-39-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:25:9-34:20
-40            android:name="com.kira.superspm.ui.MainActivity"
-40-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:26:13-44
-41            android:exported="true"
-41-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:27:13-36
-42            android:label="@string/app_name"
-42-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:28:13-45
-43            android:theme="@style/Theme.SuperSPM" >
-43-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:29:13-50
-44            <intent-filter>
-44-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:30:13-33:29
-45                <action android:name="android.intent.action.MAIN" />
-45-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:31:17-69
-45-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:31:25-66
-46
-47                <category android:name="android.intent.category.LAUNCHER" />
-47-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:32:17-77
-47-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:32:27-74
-48            </intent-filter>
-49        </activity>
-50
-51        <service
-51-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:35:9-38:40
-52            android:name="com.kira.superspm.service.LocationService"
-52-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:36:13-52
-53            android:exported="false"
-53-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:38:13-37
-54            android:foregroundServiceType="location|dataSync" />
-54-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:37:13-62
-55
-56        <provider
-57            android:name="androidx.core.content.FileProvider"
-57-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:41:13-62
-58            android:authorities="com.kira.superspm.fileprovider"
-58-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:42:13-64
-59            android:exported="false"
-59-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:43:13-37
-60            android:grantUriPermissions="true" >
-60-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:44:13-47
-61            <meta-data
-61-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:45:13-47:54
-62                android:name="android.support.FILE_PROVIDER_PATHS"
-62-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:46:17-67
-63                android:resource="@xml/file_paths" />
-63-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:47:17-51
-64        </provider>
-65
-66        <activity
-66-->[com.google.android.gms:play-services-base:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\6d20a92024800d8d2b72f69eecd070ef\transformed\jetified-play-services-base-18.9.0\AndroidManifest.xml:20:9-22:45
-67            android:name="com.google.android.gms.common.api.GoogleApiActivity"
-67-->[com.google.android.gms:play-services-base:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\6d20a92024800d8d2b72f69eecd070ef\transformed\jetified-play-services-base-18.9.0\AndroidManifest.xml:20:19-85
-68            android:exported="false"
-68-->[com.google.android.gms:play-services-base:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\6d20a92024800d8d2b72f69eecd070ef\transformed\jetified-play-services-base-18.9.0\AndroidManifest.xml:22:19-43
-69            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-69-->[com.google.android.gms:play-services-base:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\6d20a92024800d8d2b72f69eecd070ef\transformed\jetified-play-services-base-18.9.0\AndroidManifest.xml:21:19-78
-70
-71        <meta-data
-71-->[com.google.android.gms:play-services-basement:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\85f9b61f30e20599a59d864b398e7117\transformed\jetified-play-services-basement-18.9.0\AndroidManifest.xml:21:9-23:69
-72            android:name="com.google.android.gms.version"
-72-->[com.google.android.gms:play-services-basement:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\85f9b61f30e20599a59d864b398e7117\transformed\jetified-play-services-basement-18.9.0\AndroidManifest.xml:22:13-58
-73            android:value="@integer/google_play_services_version" />
-73-->[com.google.android.gms:play-services-basement:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\85f9b61f30e20599a59d864b398e7117\transformed\jetified-play-services-basement-18.9.0\AndroidManifest.xml:23:13-66
-74
-75        <activity
-75-->[androidx.compose.ui:ui-tooling-android:1.10.2] C:\Users\Kira\.gradle\caches\8.11.1\transforms\1dbc5aa0ae64ff333fb89f866bc58bb2\transformed\jetified-ui-tooling\AndroidManifest.xml:23:9-25:39
-76            android:name="androidx.compose.ui.tooling.PreviewActivity"
-76-->[androidx.compose.ui:ui-tooling-android:1.10.2] C:\Users\Kira\.gradle\caches\8.11.1\transforms\1dbc5aa0ae64ff333fb89f866bc58bb2\transformed\jetified-ui-tooling\AndroidManifest.xml:24:13-71
-77            android:exported="true" />
-77-->[androidx.compose.ui:ui-tooling-android:1.10.2] C:\Users\Kira\.gradle\caches\8.11.1\transforms\1dbc5aa0ae64ff333fb89f866bc58bb2\transformed\jetified-ui-tooling\AndroidManifest.xml:25:13-36
-78
-79        <uses-library
-79-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:23:9-25:40
-80            android:name="androidx.window.extensions"
-80-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:24:13-54
-81            android:required="false" />
-81-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:25:13-37
-82        <uses-library
-82-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:26:9-28:40
-83            android:name="androidx.window.sidecar"
-83-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:27:13-51
-84            android:required="false" />
-84-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:28:13-37
-85
-86        <provider
-86-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:24:9-32:20
-87            android:name="androidx.startup.InitializationProvider"
-87-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:25:13-67
-88            android:authorities="com.kira.superspm.androidx-startup"
-88-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:26:13-68
-89            android:exported="false" >
-89-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:27:13-37
-90            <meta-data
-90-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:29:13-31:52
-91                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-91-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:30:17-75
-92                android:value="androidx.startup" />
-92-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:31:17-49
-93            <meta-data
-93-->[androidx.lifecycle:lifecycle-process:2.9.4] C:\Users\Kira\.gradle\caches\8.11.1\transforms\68b397e073e444ab0f7169d87056fdf6\transformed\jetified-lifecycle-process-2.9.4\AndroidManifest.xml:29:13-31:52
-94                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-94-->[androidx.lifecycle:lifecycle-process:2.9.4] C:\Users\Kira\.gradle\caches\8.11.1\transforms\68b397e073e444ab0f7169d87056fdf6\transformed\jetified-lifecycle-process-2.9.4\AndroidManifest.xml:30:17-78
-95                android:value="androidx.startup" />
-95-->[androidx.lifecycle:lifecycle-process:2.9.4] C:\Users\Kira\.gradle\caches\8.11.1\transforms\68b397e073e444ab0f7169d87056fdf6\transformed\jetified-lifecycle-process-2.9.4\AndroidManifest.xml:31:17-49
-96            <meta-data
-96-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
-97                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-97-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
-98                android:value="androidx.startup" />
-98-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
-99        </provider>
-100
-101        <service
-101-->[androidx.room:room-runtime-android:2.7.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\9e3d11715c9177229395c07701831d89\transformed\jetified-room-runtime-release\AndroidManifest.xml:24:9-28:63
-102            android:name="androidx.room.MultiInstanceInvalidationService"
-102-->[androidx.room:room-runtime-android:2.7.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\9e3d11715c9177229395c07701831d89\transformed\jetified-room-runtime-release\AndroidManifest.xml:25:13-74
-103            android:directBootAware="true"
-103-->[androidx.room:room-runtime-android:2.7.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\9e3d11715c9177229395c07701831d89\transformed\jetified-room-runtime-release\AndroidManifest.xml:26:13-43
-104            android:exported="false" />
-104-->[androidx.room:room-runtime-android:2.7.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\9e3d11715c9177229395c07701831d89\transformed\jetified-room-runtime-release\AndroidManifest.xml:27:13-37
-105
-106        <receiver
-106-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
-107            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-107-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
-108            android:directBootAware="false"
-108-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
-109            android:enabled="true"
-109-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
-110            android:exported="true"
-110-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
-111            android:permission="android.permission.DUMP" >
-111-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
-112            <intent-filter>
-112-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
-113                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-113-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
-113-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
-114            </intent-filter>
-115            <intent-filter>
-115-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
-116                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-116-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
-116-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
-117            </intent-filter>
-118            <intent-filter>
-118-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
-119                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-119-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
-119-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
-120            </intent-filter>
-121            <intent-filter>
-121-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
-122                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-122-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
-122-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
-123            </intent-filter>
-124        </receiver>
-125    </application>
-126
-127</manifest>
+20    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+20-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:14:5-83
+20-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:14:22-80
+21
+22    <uses-feature android:name="android.hardware.location.gps" />
+22-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:16:5-66
+22-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:16:19-63
+23
+24    <permission
+24-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:22:5-24:47
+25        android:name="com.kira.superspm.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+25-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:23:9-81
+26        android:protectionLevel="signature" />
+26-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:24:9-44
+27
+28    <uses-permission android:name="com.kira.superspm.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+28-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:26:5-97
+28-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:26:22-94
+29
+30    <application
+30-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:18:5-50:19
+31        android:name="com.kira.superspm.SuperSPMApp"
+31-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:19:9-36
+32        android:allowBackup="true"
+32-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:20:9-35
+33        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+33-->[androidx.core:core:1.16.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\b9e6585aab2cbb7cf6eedf4317e0cb19\transformed\core-1.16.0\AndroidManifest.xml:28:18-86
+34        android:debuggable="true"
+35        android:extractNativeLibs="false"
+36        android:icon="@mipmap/ic_launcher"
+36-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:21:9-43
+37        android:label="@string/app_name"
+37-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:22:9-41
+38        android:supportsRtl="true"
+38-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:23:9-35
+39        android:theme="@style/Theme.SuperSPM" >
+39-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:24:9-46
+40        <activity
+40-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:26:9-35:20
+41            android:name="com.kira.superspm.ui.MainActivity"
+41-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:27:13-44
+42            android:exported="true"
+42-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:28:13-36
+43            android:label="@string/app_name"
+43-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:29:13-45
+44            android:theme="@style/Theme.SuperSPM" >
+44-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:30:13-50
+45            <intent-filter>
+45-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:31:13-34:29
+46                <action android:name="android.intent.action.MAIN" />
+46-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:32:17-69
+46-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:32:25-66
+47
+48                <category android:name="android.intent.category.LAUNCHER" />
+48-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:33:17-77
+48-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:33:27-74
+49            </intent-filter>
+50        </activity>
+51
+52        <service
+52-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:36:9-39:40
+53            android:name="com.kira.superspm.service.LocationService"
+53-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:37:13-52
+54            android:exported="false"
+54-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:39:13-37
+55            android:foregroundServiceType="location|dataSync" />
+55-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:38:13-62
+56
+57        <provider
+58            android:name="androidx.core.content.FileProvider"
+58-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:42:13-62
+59            android:authorities="com.kira.superspm.fileprovider"
+59-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:43:13-64
+60            android:exported="false"
+60-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:44:13-37
+61            android:grantUriPermissions="true" >
+61-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:45:13-47
+62            <meta-data
+62-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:46:13-48:54
+63                android:name="android.support.FILE_PROVIDER_PATHS"
+63-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:47:17-67
+64                android:resource="@xml/file_paths" />
+64-->D:\Local Datas\Sources\SuperSPM-By-Kira\SuperSPM\app\src\main\AndroidManifest.xml:48:17-51
+65        </provider>
+66
+67        <activity
+67-->[com.google.android.gms:play-services-base:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\6d20a92024800d8d2b72f69eecd070ef\transformed\jetified-play-services-base-18.9.0\AndroidManifest.xml:20:9-22:45
+68            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+68-->[com.google.android.gms:play-services-base:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\6d20a92024800d8d2b72f69eecd070ef\transformed\jetified-play-services-base-18.9.0\AndroidManifest.xml:20:19-85
+69            android:exported="false"
+69-->[com.google.android.gms:play-services-base:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\6d20a92024800d8d2b72f69eecd070ef\transformed\jetified-play-services-base-18.9.0\AndroidManifest.xml:22:19-43
+70            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+70-->[com.google.android.gms:play-services-base:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\6d20a92024800d8d2b72f69eecd070ef\transformed\jetified-play-services-base-18.9.0\AndroidManifest.xml:21:19-78
+71
+72        <meta-data
+72-->[com.google.android.gms:play-services-basement:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\85f9b61f30e20599a59d864b398e7117\transformed\jetified-play-services-basement-18.9.0\AndroidManifest.xml:21:9-23:69
+73            android:name="com.google.android.gms.version"
+73-->[com.google.android.gms:play-services-basement:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\85f9b61f30e20599a59d864b398e7117\transformed\jetified-play-services-basement-18.9.0\AndroidManifest.xml:22:13-58
+74            android:value="@integer/google_play_services_version" />
+74-->[com.google.android.gms:play-services-basement:18.9.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\85f9b61f30e20599a59d864b398e7117\transformed\jetified-play-services-basement-18.9.0\AndroidManifest.xml:23:13-66
+75
+76        <activity
+76-->[androidx.compose.ui:ui-tooling-android:1.10.2] C:\Users\Kira\.gradle\caches\8.11.1\transforms\1dbc5aa0ae64ff333fb89f866bc58bb2\transformed\jetified-ui-tooling\AndroidManifest.xml:23:9-25:39
+77            android:name="androidx.compose.ui.tooling.PreviewActivity"
+77-->[androidx.compose.ui:ui-tooling-android:1.10.2] C:\Users\Kira\.gradle\caches\8.11.1\transforms\1dbc5aa0ae64ff333fb89f866bc58bb2\transformed\jetified-ui-tooling\AndroidManifest.xml:24:13-71
+78            android:exported="true" />
+78-->[androidx.compose.ui:ui-tooling-android:1.10.2] C:\Users\Kira\.gradle\caches\8.11.1\transforms\1dbc5aa0ae64ff333fb89f866bc58bb2\transformed\jetified-ui-tooling\AndroidManifest.xml:25:13-36
+79
+80        <uses-library
+80-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:23:9-25:40
+81            android:name="androidx.window.extensions"
+81-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:24:13-54
+82            android:required="false" />
+82-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:25:13-37
+83        <uses-library
+83-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:26:9-28:40
+84            android:name="androidx.window.sidecar"
+84-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:27:13-51
+85            android:required="false" />
+85-->[androidx.window:window:1.5.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\01f41f03a2aa28622b9c5904b2fafa82\transformed\jetified-window-1.5.0\AndroidManifest.xml:28:13-37
+86
+87        <provider
+87-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:24:9-32:20
+88            android:name="androidx.startup.InitializationProvider"
+88-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:25:13-67
+89            android:authorities="com.kira.superspm.androidx-startup"
+89-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:26:13-68
+90            android:exported="false" >
+90-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:27:13-37
+91            <meta-data
+91-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:29:13-31:52
+92                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+92-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:30:17-75
+93                android:value="androidx.startup" />
+93-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\521dc56e493fd91e0f7c37ff283ec620\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:31:17-49
+94            <meta-data
+94-->[androidx.lifecycle:lifecycle-process:2.9.4] C:\Users\Kira\.gradle\caches\8.11.1\transforms\68b397e073e444ab0f7169d87056fdf6\transformed\jetified-lifecycle-process-2.9.4\AndroidManifest.xml:29:13-31:52
+95                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+95-->[androidx.lifecycle:lifecycle-process:2.9.4] C:\Users\Kira\.gradle\caches\8.11.1\transforms\68b397e073e444ab0f7169d87056fdf6\transformed\jetified-lifecycle-process-2.9.4\AndroidManifest.xml:30:17-78
+96                android:value="androidx.startup" />
+96-->[androidx.lifecycle:lifecycle-process:2.9.4] C:\Users\Kira\.gradle\caches\8.11.1\transforms\68b397e073e444ab0f7169d87056fdf6\transformed\jetified-lifecycle-process-2.9.4\AndroidManifest.xml:31:17-49
+97            <meta-data
+97-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
+98                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+98-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
+99                android:value="androidx.startup" />
+99-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
+100        </provider>
+101
+102        <service
+102-->[androidx.room:room-runtime-android:2.7.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\9e3d11715c9177229395c07701831d89\transformed\jetified-room-runtime-release\AndroidManifest.xml:24:9-28:63
+103            android:name="androidx.room.MultiInstanceInvalidationService"
+103-->[androidx.room:room-runtime-android:2.7.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\9e3d11715c9177229395c07701831d89\transformed\jetified-room-runtime-release\AndroidManifest.xml:25:13-74
+104            android:directBootAware="true"
+104-->[androidx.room:room-runtime-android:2.7.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\9e3d11715c9177229395c07701831d89\transformed\jetified-room-runtime-release\AndroidManifest.xml:26:13-43
+105            android:exported="false" />
+105-->[androidx.room:room-runtime-android:2.7.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\9e3d11715c9177229395c07701831d89\transformed\jetified-room-runtime-release\AndroidManifest.xml:27:13-37
+106
+107        <receiver
+107-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
+108            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+108-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
+109            android:directBootAware="false"
+109-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
+110            android:enabled="true"
+110-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
+111            android:exported="true"
+111-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
+112            android:permission="android.permission.DUMP" >
+112-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
+113            <intent-filter>
+113-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
+114                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+114-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
+114-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
+115            </intent-filter>
+116            <intent-filter>
+116-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
+117                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+117-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
+117-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
+118            </intent-filter>
+119            <intent-filter>
+119-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
+120                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+120-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
+120-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
+121            </intent-filter>
+122            <intent-filter>
+122-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
+123                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+123-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
+123-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Kira\.gradle\caches\8.11.1\transforms\78d2fa3924bbd26b816dbfb99ea4b044\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
+124            </intent-filter>
+125        </receiver>
+126    </application>
+127
+128</manifest>
