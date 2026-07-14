@@ -408,13 +408,22 @@
     <string name="abc_shareactionprovider_share_with_application">Share with <ns1:g example="Mail" id="application_name">%s</ns1:g></string>
     <string name="abc_toolbar_collapse_description">Collapse</string>
     <string name="about">关于</string>
+    <string name="about_subtitle">应用信息、开源项目</string>
     <string name="accuracy">精度</string>
+    <string name="ai_code_note">SuperSPM 项目使用了 Trae 辅助生成了部分 AI 代码。</string>
     <string name="analysis_metrics">分析指标</string>
+    <string name="analyzing">分析中...</string>
+    <string name="android_version">Android 版本</string>
     <string name="androidx_compose_foundation_autofill">Autofill</string>
     <string name="androidx_compose_ui_autofill">Autofill</string>
     <string name="androidx_startup" translatable="false">androidx.startup</string>
+    <string name="apk_download_failed">APK 文件下载失败</string>
     <string name="app_name">SuperSPM</string>
     <string name="appearance">外观</string>
+    <string name="appearance_desc">本页面可对外观进行修改。包括暗色模式开关、跟随系统开关、速度单位选择。</string>
+    <string name="appearance_display">外观和显示</string>
+    <string name="appearance_subtitle">暗色模式、速度单位显示</string>
+    <string name="arrow">箭头</string>
     <string name="avg">均速</string>
     <string name="avg_heart_rate">平均心率</string>
     <string name="avg_speed">平均速度</string>
@@ -430,9 +439,14 @@
     <string name="cancel">取消</string>
     <string name="check_updates">检查更新</string>
     <string name="chinese">中文</string>
+    <string name="clear">清空</string>
+    <string name="clear_all_records">清空全部记录</string>
+    <string name="clear_search">清除</string>
     <string name="click_to_visit">点击进入项目主页</string>
+    <string name="click_visit_project">点击进入项目主页</string>
     <string name="close_drawer">"Close navigation menu"</string>
     <string name="close_sheet">"Close sheet"</string>
+    <string name="coil_desc">图像加载库</string>
     <string msgid="2523291102206661146" name="common_google_play_services_enable_button">Enable</string>
     <string msgid="227660514972886228" name="common_google_play_services_enable_text"><ns1:g id="app_name">%1$s</ns1:g> won\'t work unless you enable Google Play services.</string>
     <string msgid="5122002158466380389" name="common_google_play_services_enable_title">Enable Google Play services</string>
@@ -451,48 +465,109 @@
     <string name="common_open_on_phone">Open on phone</string>
     <string name="common_signin_button_text">Sign in</string>
     <string name="common_signin_button_text_long">Sign in with Google</string>
+    <string name="confirm_clear_all">确定清空所有历史记录？此操作无法撤销。</string>
     <string name="confirm_delete">确定删除此记录？</string>
+    <string name="core_logic_limit">• 插件不可修改应用核心逻辑</string>
     <string name="current_location">当前位置</string>
     <string name="current_speed">当前速度</string>
+    <string name="current_version">当前版本</string>
     <string name="dark_mode">暗色模式</string>
     <string name="data_points">数据点</string>
+    <string name="data_stats">数据统计</string>
     <string name="default_error_message">"Invalid input"</string>
     <string name="default_popup_window_title" ns2:ignore="ExtraTranslation">"Pop-Up Window"</string>
     <string name="delete">删除</string>
     <string name="delete_record">删除记录</string>
     <string name="dependency_injection">依赖注入框架</string>
     <string name="developer_avatar">开发者头像</string>
-    <string name="developer_name">极犽</string>
+    <string name="developer_name">极犽 (Kira)</string>
     <string name="device_model">设备型号</string>
+    <string name="device_not_support_accelerometer">设备不支持加速度计传感器</string>
+    <string name="display">显示</string>
     <string name="distance">里程</string>
     <string name="download">下载</string>
+    <string name="download_failed">下载失败</string>
+    <string name="download_failed_with_code">下载失败: %1$d</string>
+    <string name="downloading">下载中...</string>
     <string name="dropdown_menu">"Dropdown menu"</string>
     <string name="duration">时长</string>
     <string name="edit">编辑</string>
     <string name="edit_name">编辑名称</string>
     <string name="enable_sensor_speed">启用传感器测速</string>
+    <string name="enable_sensor_speed_desc">打开后可在主页面选择传感器计速方式</string>
+    <string name="enable_sensor_speed_desc2">启用选择传感器计速方式，开启后，可在主页中可选择使用传感器测速</string>
+    <string name="enabled_plugins">已启用插件</string>
     <string name="english">English</string>
     <string name="enter">进入</string>
     <string name="enter_name">输入名称</string>
     <string name="error">错误</string>
+    <string name="extensions">扩展</string>
+    <string name="fast_run">快跑</string>
+    <string name="fast_walk">快走</string>
+    <string name="field_desc">字段说明</string>
+    <string name="field_description">字段说明</string>
     <string name="follow_system">跟随系统</string>
+    <string name="follow_system_dark_mode">暗色模式跟随系统</string>
     <string name="get_location_after_start">开始测速后获取位置和经纬度</string>
+    <string name="getting_address">获取地址中...</string>
+    <string name="getting_data">正在获取数据...</string>
+    <string name="google_location_desc">Google 位置服务，针对可以使用 Google 位置的机型，测速计使用此服务定位当前位置</string>
+    <string name="gps_normal">GPS 正常</string>
+    <string name="gps_not_enabled">GPS 未开启</string>
+    <string name="gps_not_started">GPS 未启动</string>
+    <string name="gps_not_started_desc">开始测速后自动获取GPS信号</string>
+    <string name="gps_poor">GPS 信号差</string>
     <string name="gps_signal">GPS信号强度</string>
+    <string name="gps_speed_measuring">使用 GPS 测速中</string>
+    <string name="gps_turned_off">GPS 已关闭</string>
+    <string name="gps_warning">速度和位置测量可能不准确</string>
+    <string name="gps_weak">GPS 信号较弱</string>
     <string name="grant_permission">去授权</string>
     <string name="heart_rate">心率</string>
+    <string name="heart_rate_monitor">心率监测</string>
+    <string name="heart_rate_monitor_desc">基于运动强度估算心率</string>
     <string name="high_speed">高速</string>
+    <string name="hint">提示</string>
     <string name="history_management">历史记录管理</string>
+    <string name="history_query_permission">• history_query：历史记录查询权限（只读，不支持修改和删除）</string>
+    <string name="history_settings_desc">本页面可对历史记录进行修改。包括查看记录统计、清空全部记录。</string>
+    <string name="history_subtitle">记录管理、数据统计</string>
+    <string name="hyperceiler_desc">项目部分UI排版与设置参考</string>
     <string name="image_loader">图像加载库</string>
+    <string name="import_failed">导入失败</string>
+    <string name="import_hint">点击右上角导入按钮导入插件</string>
     <string name="import_plugin">导入</string>
+    <string name="import_plugin_failed">导入插件失败</string>
     <string name="import_plugin_hint">点击右上角\"导入\"按钮导入插件</string>
+    <string name="import_success">插件 %1$s 导入成功</string>
     <string name="in_progress">In progress</string>
     <string name="indeterminate">Partially checked</string>
+    <string name="install_failed">安装失败</string>
+    <string name="installed_plugins">已安装插件</string>
+    <string name="is_latest">已是最新</string>
+    <string name="jetpack_compose_desc">Android Jetpack Compose UI框架</string>
     <string name="kernel_version">内核版本</string>
     <string name="km">km</string>
     <string name="kmh">km/h</string>
+    <string name="koin_desc">依赖注入框架</string>
+    <string name="kotlin_datetime_desc">Kotlin 日期时间库</string>
+    <string name="kotlin_serialization_desc">Kotlin 序列化库</string>
+    <string name="lab">实验室</string>
+    <string name="lab_settings_desc">本页面的功能为实验性质功能，功能上可能随版本变化有变动或调整，也有可能会在将来版本正式上线或移除。本页面的功能具有不稳定性，如果遇到 Bug，请进入 GitHub 提 Issue 反馈，感谢您的使用。</string>
     <string name="language">语言</string>
     <string name="later">稍后</string>
+    <string name="latest_version">最新版本</string>
     <string name="latitude">纬度</string>
+    <string name="license_note">用户界面采用 MiuiX 设计，详情请查看使用的开源项目。此应用遵循 AGPL-3.0 许可以及 MIT 许可。</string>
+    <string name="limitations">限制：</string>
+    <string name="loading">加载中...</string>
+    <string name="location_permission_denied">位置权限被拒绝</string>
+    <string name="location_permission_denied_with_message">位置权限被拒绝: %1$s</string>
+    <string name="location_permission_not_granted">位置权限未授予</string>
+    <string name="location_refresh">位置刷新</string>
+    <string name="location_service">位置服务</string>
+    <string name="location_settings_desc">本页面可对定位、测速方式和逻辑进行修改。包括位置刷新时间设置、省电模式开关、传感器计速开关。</string>
+    <string name="location_subtitle">位置刷新、省电模式、传感器计速</string>
     <string name="logging_library">日志库</string>
     <string name="longitude">经度</string>
     <string name="low_speed">低速</string>
@@ -567,62 +642,127 @@
     <string name="m3c_wide_navigation_rail_close_rail">"Close rail"</string>
     <string name="m3c_wide_navigation_rail_pane_title">"Navigation rail"</string>
     <string name="manage_plugins_hint">点击右上角设置按钮管理插件</string>
+    <string name="manual">手动</string>
     <string name="manual_update">手动</string>
     <string name="max">最高</string>
     <string name="max_speed">最高速度</string>
     <string name="mc2_snackbar_pane_title">Alert</string>
+    <string name="medium_run">中速跑</string>
     <string name="medium_speed">中速</string>
     <string name="meters">米</string>
+    <string name="miuix_desc">Compose MiuiX UI库</string>
     <string name="movement_track">运动轨迹</string>
     <string name="ms">m/s</string>
+    <string name="native_example">Native 插件示例 (Kotlin)</string>
+    <string name="native_plugin_desc">• Native 插件：使用内置 Kotlin/Java 库开发</string>
+    <string name="native_plugin_load_failed">加载Native插件失败</string>
+    <string name="native_plugin_load_failed_warning">Native插件加载失败，仍会显示但无法运行</string>
+    <string name="native_template">Native 插件配置模板</string>
     <string name="navigation_menu">"Navigation menu"</string>
     <string name="new_version_available">有新版本</string>
     <string name="new_version_found">发现新版本</string>
     <string name="no_matching_records">未找到匹配的记录</string>
+    <string name="no_matching_settings">未找到匹配的设置项</string>
     <string name="no_plugins">暂无插件</string>
     <string name="no_plugins_available">暂无可用插件</string>
     <string name="no_records">暂无记录</string>
+    <string name="no_sensor_gps">当前未使用GPS</string>
     <string name="not_selected">Not selected</string>
     <string name="not_started">未开始</string>
+    <string name="notification_speed">速度: %1$.0f km/h</string>
+    <string name="notification_summary">当前速度: %1$.0f km/h | 最高速度: %2$.0f km/h\n平均速度: %3$.0f km/h | 总里程: %4$.2f km\n点击通知进入测速页。</string>
     <string name="ok">确定</string>
     <string name="open_source_projects">使用的开源项目</string>
     <string name="pace">配速</string>
     <string name="page_description">本页说明</string>
     <string name="pause">暂停</string>
     <string name="paused">已暂停</string>
+    <string name="permission_desc">权限说明：</string>
     <string name="permission_description">为了获取您的位置信息和速度数据，请授予位置权限。</string>
     <string name="permission_required">需要位置权限</string>
+    <string name="plugin">插件</string>
+    <string name="plugin_author">开发者名称</string>
+    <string name="plugin_config_intro">以下是插件配置文件 plugin.json 的模板和示例代码，帮助你快速开发插件。</string>
+    <string name="plugin_config_not_found">插件配置文件 plugin.json 不存在</string>
     <string name="plugin_config_template">插件配置模板</string>
+    <string name="plugin_config_template_desc">配置模板说明</string>
+    <string name="plugin_desc">导入和管理第三方插件</string>
     <string name="plugin_description">插件说明</string>
+    <string name="plugin_entry_not_found">入口文件 %1$s 未找到</string>
+    <string name="plugin_interface_not_implemented">插件主类未实现 Plugin 接口</string>
+    <string name="plugin_intro">插件允许开发者扩展 SuperSPM 的功能。插件以 .zip 压缩包形式导入，包含 plugin.json 配置文件和资源文件。</string>
+    <string name="plugin_load_error_desc">无法加载插件的主类，请检查插件是否完整或尝试重新导入。</string>
     <string name="plugin_load_failed">插件加载失败</string>
     <string name="plugin_management">插件管理</string>
+    <string name="plugin_name">插件名称</string>
+    <string name="plugin_subtitle">导入、启用、删除插件</string>
+    <string name="plugin_types">插件类型：</string>
     <string name="plugins">插件</string>
     <string name="plugins_intro">此页面显示您启用的插件入口，如果需要导入或管理插件，请点击右上角设置按钮或进入设置-插件管理页面来导入或管理您安装的插件。</string>
     <string name="power_saving">省电模式</string>
+    <string name="power_saving_desc_gps">暗色模式将自动启用（重启后生效），GPS 位置与速度采集刷新间隔延长</string>
+    <string name="power_saving_desc_sensor">省电模式只能在 GPS 模式应用，打开后，将对 GPS 采集方式与间隔作出限制，对传感器采集方式无效</string>
+    <string name="power_saving_enabled">已打开省电模式</string>
+    <string name="power_saving_gps_warning">已开启省电模式，采集间隔延长，记录功能不可用</string>
+    <string name="power_saving_sensor">使用加速度计辅助测速</string>
+    <string name="power_saving_warning">计算数据可能有实际偏差, 记录功能不可用</string>
     <string name="range_end">"Range end"</string>
     <string name="range_start">"Range start"</string>
+    <string name="real_time">实时</string>
     <string name="real_time_data">实时数据</string>
+    <string name="realtime_speed_info">显示实时测速信息</string>
+    <string name="record">记录</string>
+    <string name="record_and_start">记录并开始</string>
+    <string name="record_count">记录次数</string>
+    <string name="record_management">记录管理</string>
     <string name="recording">记录中...</string>
     <string name="reference_standards">参考标准</string>
+    <string name="refresh">刷新</string>
     <string name="refresh_now">立即刷新</string>
     <string name="refresh_time">自定义位置刷新时间</string>
     <string name="rename_record">重命名记录</string>
+    <string name="request_install_permission_failed">请求安装权限失败</string>
+    <string name="response_body_empty">响应体为空</string>
+    <string name="restart_effect">重启应用后生效</string>
+    <string name="restart_limit">• 插件导入后立即生效，标记为需要重启的插件需手动重启应用</string>
     <string name="restart_now">立即重启</string>
     <string name="restart_required">需要重启应用</string>
+    <string name="restart_required_desc">该插件需要重启应用才能完全生效。是否立即重启？</string>
     <string name="resume">继续</string>
+    <string name="room_desc">Android Room 数据库</string>
+    <string name="sandbox_limit">• 插件运行在沙盒环境中，仅能访问 plugin.json 中声明的权限</string>
     <string name="save">保存</string>
+    <string name="search">搜索</string>
     <string name="search_menu_title">Search</string>
     <string name="search_plugins">搜索插件</string>
     <string name="search_records">搜索记录</string>
+    <string name="search_settings">搜索设置</string>
+    <string name="seconds">秒</string>
     <string name="seconds_until_refresh">距下次刷新还有 %1$d 秒</string>
+    <string name="select_language">选择语言</string>
     <string name="select_mode_to_start">选择一种模式来开始测速</string>
+    <string name="select_speed_unit">选择速度单位</string>
     <string name="selected">Selected</string>
+    <string name="sensor_speed">传感器测速</string>
+    <string name="sensor_speed_desc">传感器测速主要利用手机的加速度计来估算速度数值，更省电。但传感器测速无法计算相对静止场景，如测算车辆、航空器等的速度，因为设备为相对静止状态。您可以使用此功能测量步速等设备有移动加速度的场景。</string>
+    <string name="sensor_speed_measuring">使用传感器测速中</string>
+    <string name="set_location_refresh_time">设置位置刷新时间</string>
+    <string name="signal">信号</string>
+    <string name="signal_level">级</string>
+    <string name="slow_jog">慢跑</string>
+    <string name="slow_walk">慢走</string>
     <string name="snackbar_pane_title">Alert</string>
     <string name="speed_change_curve">速度变化曲线</string>
+    <string name="speed_data_permission">• speed_data：实时速度数据（速度、距离、传感器数据等）</string>
     <string name="speed_method_logic">测速方法与逻辑</string>
+    <string name="speed_test">测速</string>
     <string name="speed_unit">速度单位</string>
+    <string name="speedometer_tab_gps">GPS</string>
+    <string name="speedometer_tab_sensor">传感器</string>
     <string name="sport_suggestions">运动建议</string>
     <string name="start">开始</string>
+    <string name="start_location_service_failed">启动位置服务失败</string>
+    <string name="start_location_service_failed_with_message">启动位置服务失败: %1$s</string>
     <string name="state_empty">Empty</string>
     <string name="state_off">Off</string>
     <string name="state_on">On</string>
@@ -630,20 +770,34 @@
     <string name="step_frequency">步频</string>
     <string name="steps">步数</string>
     <string name="stop">结束</string>
+    <string name="superspm_version">SuperSPM 版本</string>
     <string name="switch_role">Switch</string>
     <string name="tab">Tab</string>
+    <string name="tab_history">历史</string>
+    <string name="tab_plugins">插件</string>
+    <string name="tab_settings">设置</string>
+    <string name="tab_speedometer">码表</string>
     <string name="template_percent"><ns1:g id="percentage">%1$d</ns1:g> percent.</string>
+    <string name="timber_desc">日志库</string>
     <string name="title_detail">详情</string>
     <string name="title_history">历史记录</string>
     <string name="title_settings">设置</string>
     <string name="title_speedometer">码表</string>
+    <string name="today_distance">本次里程</string>
     <string name="tooltip_description">tooltip</string>
     <string name="tooltip_label">show tooltip</string>
     <string name="total_distance">总里程</string>
+    <string name="total_records">总记录数</string>
+    <string name="total_size">数据总大小</string>
     <string name="up_to_date">已是最新版本</string>
     <string name="update_log">更新日志</string>
     <string name="use_sensor">使用传感器</string>
     <string name="view_config_template">查看配置模板和示例代码</string>
+    <string name="waiting_data">等待数据...</string>
+    <string name="webui_example">WebUI 插件示例 (index.html)</string>
+    <string name="webui_plugin_desc">• WebUI 插件：使用 HTML/CSS/JS 开发，通过 WebView 运行，可调用 SpeedData 接口获取测速数据</string>
+    <string name="webui_template">WebUI 插件配置模板</string>
+    <string name="welcome_lab">欢迎进入实验功能设置页</string>
     <string name="welcome_plugins">欢迎使用 SuperSPM 插件</string>
     <string name="welcome_sensor_speed">欢迎使用传感器测速</string>
     <style name="AlertDialog.AppCompat" parent="Base.AlertDialog.AppCompat"/>
@@ -2191,11 +2345,11 @@
     <declare-styleable name="ActionBar">
         
         <attr name="navigationMode">
-            <!-- Normal static title text -->
+            
             <enum name="normal" value="0"/>
-            <!-- The action bar will use a selection list for navigation. -->
+            
             <enum name="listMode" value="1"/>
-            <!-- The action bar will use a series of horizontal tabs for navigation. -->
+            
             <enum name="tabMode" value="2"/>
         </attr>
         
@@ -2365,22 +2519,17 @@
 
         
         <attr name="tintMode">
-            <!-- The tint is drawn on top of the drawable.
-                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            
             <enum name="src_over" value="3"/>
-            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
-                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            
             <enum name="src_in" value="5"/>
-            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
-                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            
             <enum name="src_atop" value="9"/>
-            <!-- Multiplies the color and alpha channels of the drawable with those of
-                 the tint. [Sa * Da, Sc * Dc] -->
+            
             <enum name="multiply" value="14"/>
-            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            
             <enum name="screen" value="15"/>
-            <!-- Combines the tint and icon color and alpha channels, clamping the
-                 result to valid color values. Saturate(S + D) -->
+            
             <enum name="add" value="16"/>
         </attr>
     </declare-styleable>
@@ -2392,22 +2541,17 @@
         <attr format="color" name="tickMarkTint"/>
         
         <attr name="tickMarkTintMode">
-            <!-- The tint is drawn on top of the drawable.
-                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            
             <enum name="src_over" value="3"/>
-            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
-                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            
             <enum name="src_in" value="5"/>
-            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
-                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            
             <enum name="src_atop" value="9"/>
-            <!-- Multiplies the color and alpha channels of the drawable with those of
-                 the tint. [Sa * Da, Sc * Dc] -->
+            
             <enum name="multiply" value="14"/>
-            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            
             <enum name="screen" value="15"/>
-            <!-- Combines the tint and drawable color and alpha channels, clamping the
-                 result to valid color values. Saturate(S + D) -->
+            
             <enum name="add" value="16"/>
         </attr>
     </declare-styleable>
@@ -2428,10 +2572,9 @@
         <attr name="android:textAppearance"/>
         
         <attr format="enum" name="autoSizeTextType">
-            <!-- No auto-sizing (default). -->
+            
             <enum name="none" value="0"/>
-            <!-- Uniform horizontal and vertical text size scaling to fit within the
-            container. -->
+            
             <enum name="uniform" value="1"/>
         </attr>
         
@@ -2463,22 +2606,17 @@
         <attr format="color" name="drawableTint"/>
         
         <attr name="drawableTintMode">
-            <!-- The tint is drawn on top of the drawable.
-                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            
             <enum name="src_over" value="3"/>
-            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
-                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            
             <enum name="src_in" value="5"/>
-            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
-                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            
             <enum name="src_atop" value="9"/>
-            <!-- Multiplies the color and alpha channels of the drawable with those of
-                 the tint. [Sa * Da, Sc * Dc] -->
+            
             <enum name="multiply" value="14"/>
-            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            
             <enum name="screen" value="15"/>
-            <!-- Combines the tint and drawable color and alpha channels, clamping the
-                 result to valid color values. Saturate(S + D) -->
+            
             <enum name="add" value="16"/>
         </attr>
         
@@ -2866,22 +3004,17 @@
 
         
         <attr name="checkMarkTintMode">
-            <!-- The tint is drawn on top of the drawable.
-                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            
             <enum name="src_over" value="3"/>
-            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
-                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            
             <enum name="src_in" value="5"/>
-            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
-                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            
             <enum name="src_atop" value="9"/>
-            <!-- Multiplies the color and alpha channels of the drawable with those of
-                 the tint. [Sa * Da, Sc * Dc] -->
+            
             <enum name="multiply" value="14"/>
-            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            
             <enum name="screen" value="15"/>
-            <!-- Combines the tint and icon color and alpha channels, clamping the
-                 result to valid color values. Saturate(S + D) -->
+            
             <enum name="add" value="16"/>
         </attr>
     </declare-styleable>
@@ -2904,31 +3037,26 @@
 
         
         <attr name="buttonTintMode">
-            <!-- The tint is drawn on top of the drawable.
-                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            
             <enum name="src_over" value="3"/>
-            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
-                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            
             <enum name="src_in" value="5"/>
-            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
-                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            
             <enum name="src_atop" value="9"/>
-            <!-- Multiplies the color and alpha channels of the drawable with those of
-                 the tint. [Sa * Da, Sc * Dc] -->
+            
             <enum name="multiply" value="14"/>
-            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            
             <enum name="screen" value="15"/>
-            <!-- Combines the tint and icon color and alpha channels, clamping the
-                 result to valid color values. Saturate(S + D) -->
+            
             <enum name="add" value="16"/>
         </attr>
     </declare-styleable>
     <declare-styleable name="DividerAttributes">
         
         <attr format="enum" name="embeddingDividerType">
-            <!-- Fixed divider type. -->
+            
             <enum name="fixed" value="0"/>
-            <!-- Draggable divider type. -->
+            
             <enum name="draggable" value="1"/>
         </attr>
         
@@ -2973,23 +3101,14 @@
         <attr format="reference" name="fontProviderCerts"/>
         
         <attr name="fontProviderFetchStrategy">
-            <!-- The blocking font fetch works as follows.
-              First, check the local cache, then if the requested font is not cached, request the
-              font from the provider and wait until it is finished.  You can change the length of
-              the timeout by modifying fontProviderFetchTimeout.  If the timeout happens, the
-              default typeface will be used instead. -->
+            
             <enum name="blocking" value="0"/>
-            <!-- The async font fetch works as follows.
-              First, check the local cache, then if the requested font is not cached, trigger a
-              request the font and continue with layout inflation. Once the font fetch succeeds, the
-              target text view will be refreshed with the downloaded font data. The
-              fontProviderFetchTimeout will be ignored if async loading is specified. -->
+            
             <enum name="async" value="1"/>
         </attr>
         
         <attr format="integer" name="fontProviderFetchTimeout">
-            <!-- A special value for the timeout. In this case, the blocking font fetching will not
-              timeout and wait until a reply is received from the font provider. -->
+            
             <enum name="forever" value="-1"/>
         </attr>
         
@@ -3197,24 +3316,15 @@
 
         
         <attr name="showAsAction">
-            <!-- Never show this item in an action bar, show it in the overflow menu instead.
-                 Mutually exclusive with "ifRoom" and "always". -->
+            
             <flag name="never" value="0"/>
-            <!-- Show this item in an action bar if there is room for it as determined
-                 by the system. Favor this option over "always" where possible.
-                 Mutually exclusive with "never" and "always". -->
+            
             <flag name="ifRoom" value="1"/>
-            <!-- Always show this item in an actionbar, even if it would override
-                 the system's limits of how much stuff to put there. This may make
-                 your action bar look bad on some screens. In most cases you should
-                 use "ifRoom" instead. Mutually exclusive with "ifRoom" and "never". -->
+            
             <flag name="always" value="2"/>
-            <!-- When this item is shown as an action in the action bar, show a text
-                 label with it even if it has an icon representation. -->
+            
             <flag name="withText" value="4"/>
-            <!-- This item's action view collapses to a normal menu
-                 item. When expanded, the action view takes over a
-                 larger segment of its container. -->
+            
             <flag name="collapseActionView" value="8"/>
         </attr>
 
@@ -3238,22 +3348,17 @@
 
         
         <attr name="iconTintMode">
-            <!-- The tint is drawn on top of the icon.
-                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            
             <enum name="src_over" value="3"/>
-            <!-- The tint is masked by the alpha channel of the icon. The icon’s
-                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            
             <enum name="src_in" value="5"/>
-            <!-- The tint is drawn above the icon, but with the icon’s alpha
-                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            
             <enum name="src_atop" value="9"/>
-            <!-- Multiplies the color and alpha channels of the icon with those of
-                 the tint. [Sa * Da, Sc * Dc] -->
+            
             <enum name="multiply" value="14"/>
-            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            
             <enum name="screen" value="15"/>
-            <!-- Combines the tint and icon color and alpha channels, clamping the
-                 result to valid color values. Saturate(S + D) -->
+            
             <enum name="add" value="16"/>
         </attr>
 
@@ -3471,22 +3576,17 @@
         <attr format="color" name="thumbTint"/>
         
         <attr name="thumbTintMode">
-            <!-- The tint is drawn on top of the drawable.
-                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            
             <enum name="src_over" value="3"/>
-            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
-                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            
             <enum name="src_in" value="5"/>
-            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
-                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            
             <enum name="src_atop" value="9"/>
-            <!-- Multiplies the color and alpha channels of the drawable with those of
-                 the tint. [Sa * Da, Sc * Dc] -->
+            
             <enum name="multiply" value="14"/>
-            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            
             <enum name="screen" value="15"/>
-            <!-- Combines the tint and drawable color and alpha channels, clamping the
-                 result to valid color values. Saturate(S + D) -->
+            
             <enum name="add" value="16"/>
         </attr>
         
@@ -3495,22 +3595,17 @@
         <attr format="color" name="trackTint"/>
         
         <attr name="trackTintMode">
-            <!-- The tint is drawn on top of the drawable.
-                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            
             <enum name="src_over" value="3"/>
-            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
-                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            
             <enum name="src_in" value="5"/>
-            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
-                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            
             <enum name="src_atop" value="9"/>
-            <!-- Multiplies the color and alpha channels of the drawable with those of
-                 the tint. [Sa * Da, Sc * Dc] -->
+            
             <enum name="multiply" value="14"/>
-            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            
             <enum name="screen" value="15"/>
-            <!-- Combines the tint and drawable color and alpha channels, clamping the
-                 result to valid color values. Saturate(S + D) -->
+            
             <enum name="add" value="16"/>
         </attr>
         
@@ -3576,11 +3671,11 @@
         <attr name="contentInsetEndWithActions"/>
         <attr format="dimension" name="maxButtonHeight"/>
         <attr name="buttonGravity">
-            <!-- Place object in the vertical center of its container, not changing its size. -->
+            
             <flag name="center_vertical" value="0x10"/>
-            <!-- Push object to the top of its container, not changing its size. -->
+            
             <flag name="top" value="0x30"/>
-            <!-- Push object to the bottom of its container, not changing its size. -->
+            
             <flag name="bottom" value="0x50"/>
         </attr>
         
@@ -3624,22 +3719,17 @@
 
         
         <attr name="backgroundTintMode">
-            <!-- The tint is drawn on top of the drawable.
-                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            
             <enum name="src_over" value="3"/>
-            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
-                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            
             <enum name="src_in" value="5"/>
-            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
-                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            
             <enum name="src_atop" value="9"/>
-            <!-- Multiplies the color and alpha channels of the drawable with those of
-                 the tint. [Sa * Da, Sc * Dc] -->
+            
             <enum name="multiply" value="14"/>
-            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            
             <enum name="screen" value="15"/>
-            <!-- Combines the tint and icon color and alpha channels, clamping the
-                 result to valid color values. Saturate(S + D) -->
+            
             <enum name="add" value="16"/>
         </attr>
     </declare-styleable>

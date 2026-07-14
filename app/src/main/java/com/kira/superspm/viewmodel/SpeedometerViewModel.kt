@@ -1,5 +1,6 @@
 package com.kira.superspm.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.kira.superspm.data.model.LocationPoint
 import com.kira.superspm.data.model.LocationRecord
 import com.kira.superspm.data.repository.RecordRepository
+import com.kira.superspm.R
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.coroutines.flow.first
@@ -19,7 +21,10 @@ enum class SpeedMode {
     GPS, SENSOR
 }
 
-class SpeedometerViewModel(private val repository: RecordRepository) : ViewModel() {
+class SpeedometerViewModel(
+    private val repository: RecordRepository,
+    private val context: Context
+) : ViewModel() {
     var currentSpeed by mutableStateOf(0.0)
         private set
     var maxSpeed by mutableStateOf(0.0)
@@ -110,7 +115,7 @@ class SpeedometerViewModel(private val repository: RecordRepository) : ViewModel
     private suspend fun generateDefaultName(): String {
         val records = repository.allRecords.first()
         val count = records.size + 1
-        return "记录 $count"
+        return "${context.getString(R.string.record)} $count"
     }
 
     fun updateLocation(latitude: Double, longitude: Double, speed: Double, accuracy: Float) {

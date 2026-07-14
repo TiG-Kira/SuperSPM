@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,7 +37,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "使用的开源项目",
+                title = context.getString(R.string.open_source_projects),
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor,
                 navigationIcon = {
@@ -50,7 +51,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "返回",
+                            contentDescription = context.getString(R.string.back),
                             tint = MiuixTheme.colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )
@@ -69,7 +70,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
             item {
                 OpenSourceCard(
                     title = "MiuiX",
-                    description = "Compose MiuiX UI库",
+                    description = context.getString(R.string.miuix_desc),
                     url = "https://github.com/compose-miuix-ui/miuix",
                     context = context
                 )
@@ -78,7 +79,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
             item {
                 OpenSourceCard(
                     title = "HyperCeiler",
-                    description = "项目部分UI排版与设置参考",
+                    description = context.getString(R.string.hyperceiler_desc),
                     url = "https://github.com/ReChronoRain/HyperCeiler",
                     context = context
                 )
@@ -87,7 +88,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
             item {
                 OpenSourceCard(
                     title = "Jetpack Compose",
-                    description = "Android Jetpack Compose UI框架",
+                    description = context.getString(R.string.jetpack_compose_desc),
                     url = "https://developer.android.com/jetpack/compose",
                     context = context
                 )
@@ -96,7 +97,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
             item {
                 OpenSourceCard(
                     title = "Room",
-                    description = "Android Room 数据库",
+                    description = context.getString(R.string.room_desc),
                     url = "https://developer.android.com/jetpack/androidx/releases/room",
                     context = context
                 )
@@ -105,7 +106,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
             item {
                 OpenSourceCard(
                     title = "Koin",
-                    description = "依赖注入框架",
+                    description = context.getString(R.string.koin_desc),
                     url = "https://insert-koin.io/",
                     context = context
                 )
@@ -114,7 +115,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
             item {
                 OpenSourceCard(
                     title = "Coil",
-                    description = "图像加载库",
+                    description = context.getString(R.string.coil_desc),
                     url = "https://coil-kt.github.io/coil/",
                     context = context
                 )
@@ -123,7 +124,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
             item {
                 OpenSourceCard(
                     title = "Timber",
-                    description = "日志库",
+                    description = context.getString(R.string.timber_desc),
                     url = "https://github.com/JakeWharton/timber",
                     context = context
                 )
@@ -132,7 +133,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
             item {
                 OpenSourceCard(
                     title = "Kotlin Serialization",
-                    description = "Kotlin 序列化库",
+                    description = context.getString(R.string.kotlin_serialization_desc),
                     url = "https://github.com/Kotlin/kotlinx.serialization",
                     context = context
                 )
@@ -141,7 +142,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
             item {
                 OpenSourceCard(
                     title = "Kotlinx Datetime",
-                    description = "Kotlin 日期时间库",
+                    description = context.getString(R.string.kotlin_datetime_desc),
                     url = "https://github.com/Kotlin/kotlinx-datetime",
                     context = context
                 )
@@ -150,7 +151,7 @@ fun OpenSourceScreen(isDark: Boolean, onBack: () -> Unit) {
             item {
                 OpenSourceCard(
                     title = "Google Play Services Location",
-                    description = "Google 位置服务，针对可以使用 Google 位置的机型，测速计使用此服务定位当前位置",
+                    description = context.getString(R.string.google_location_desc),
                     url = "https://developers.google.com/android/reference/com/google/android/gms/location/package-summary",
                     context = context
                 )
@@ -192,7 +193,7 @@ fun OpenSourceCard(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Text(
-                text = "点击进入项目主页",
+                text = context.getString(R.string.click_visit_project),
                 style = TextStyle(
                     fontSize = 13.sp,
                     color = MiuixTheme.colorScheme.primary

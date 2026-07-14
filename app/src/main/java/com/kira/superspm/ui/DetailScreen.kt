@@ -48,6 +48,8 @@ import org.koin.androidx.compose.getViewModel
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 
 @Composable
 fun DetailScreen(
@@ -55,6 +57,7 @@ fun DetailScreen(
     onBack: () -> Unit,
     isDark: Boolean = false
 ) {
+    val context = LocalContext.current
     val viewModel: DetailViewModel = getViewModel()
     val settingsViewModel: SettingsViewModel = getViewModel()
 
@@ -69,7 +72,7 @@ fun DetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = record?.name ?: "详情",
+                title = record?.name ?: context.getString(R.string.title_detail),
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor,
                 navigationIcon = {
@@ -83,7 +86,7 @@ fun DetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "返回",
+                            contentDescription = context.getString(R.string.back),
                             tint = if (isDark) Color.White else Color.Black,
                             modifier = Modifier.size(24.dp)
                         )
@@ -122,22 +125,22 @@ fun DetailScreen(
                 ) {
                     DetailStatCard(
                         value = formatSpeed(it.maxSpeed, settingsViewModel.speedUnit),
-                        label = "最高速度",
+                        label = context.getString(R.string.max_speed),
                         unit = getSpeedUnitString(settingsViewModel.speedUnit)
                     )
                     DetailStatCard(
                         value = String.format("%.2f", it.totalDistance),
-                        label = "总里程",
+                        label = context.getString(R.string.total_distance),
                         unit = "km"
                     )
                     DetailStatCard(
                         value = formatSpeed(it.avgSpeed, settingsViewModel.speedUnit),
-                        label = "平均速度",
+                        label = context.getString(R.string.avg_speed),
                         unit = getSpeedUnitString(settingsViewModel.speedUnit)
                     )
                     DetailStatCard(
                         value = it.dataPoints.toString(),
-                        label = "数据点",
+                        label = context.getString(R.string.data_points),
                         unit = ""
                     )
                 }
@@ -154,7 +157,7 @@ fun DetailScreen(
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
-                                text = "速度变化曲线",
+                                text = context.getString(R.string.speed_change_curve),
                                 style = TextStyle(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium
@@ -176,14 +179,14 @@ fun DetailScreen(
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
-                                text = "运动轨迹",
+                                text = context.getString(R.string.movement_track),
                                 style = TextStyle(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium
                                 ),
                                 modifier = Modifier.padding(bottom = 12.dp)
                             )
-                            TrackMap(viewModel.pathPoints)
+                            TrackMap(viewModel.pathPoints, context)
                         }
                     }
                 }
@@ -332,7 +335,7 @@ fun SpeedChart(points: List<LocationPoint>, unit: SpeedUnit) {
 }
 
 @Composable
-fun TrackMap(points: List<LocationPoint>) {
+fun TrackMap(points: List<LocationPoint>, context: android.content.Context) {
     Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             if (points.isEmpty()) return@Canvas
@@ -399,19 +402,19 @@ fun TrackMap(points: List<LocationPoint>) {
                 Canvas(modifier = Modifier.size(12.dp)) {
                     drawCircle(Color(0xFF00C853))
                 }
-                Text(text = "低速", style = TextStyle(fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurface))
+                Text(text = context.getString(R.string.low_speed), style = TextStyle(fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurface))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Canvas(modifier = Modifier.size(12.dp)) {
                     drawCircle(Color(0xFFFFAB00))
                 }
-                Text(text = "中速", style = TextStyle(fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurface))
+                Text(text = context.getString(R.string.medium_speed), style = TextStyle(fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurface))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Canvas(modifier = Modifier.size(12.dp)) {
                     drawCircle(Color(0xFFFF1744))
                 }
-                Text(text = "高速", style = TextStyle(fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurface))
+                Text(text = context.getString(R.string.high_speed), style = TextStyle(fontSize = 10.sp, color = MiuixTheme.colorScheme.onSurface))
             }
         }
     }

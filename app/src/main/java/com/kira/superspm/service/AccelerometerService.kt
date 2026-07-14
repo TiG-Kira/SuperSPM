@@ -5,6 +5,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import com.kira.superspm.R
 import kotlin.math.abs
 
 object AccelerometerService : SensorEventListener {
@@ -32,7 +33,7 @@ object AccelerometerService : SensorEventListener {
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
         if (accelerometer == null) {
-            onError?.invoke("设备不支持加速度计传感器")
+            onError?.invoke(context.getString(R.string.device_not_support_accelerometer))
             return
         }
         accelerometer?.let {

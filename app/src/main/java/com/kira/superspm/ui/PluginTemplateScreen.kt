@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,6 +42,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.kira.superspm.R
 
 @Composable
 fun PluginTemplateScreen(
@@ -49,11 +51,12 @@ fun PluginTemplateScreen(
 ) {
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = getPageBackgroundColor(isDark)
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "插件配置模板",
+                title = context.getString(R.string.plugin_config_template),
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor,
                 navigationIcon = {
@@ -67,7 +70,7 @@ fun PluginTemplateScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "返回",
+                            contentDescription = context.getString(R.string.back),
                             tint = if (isDark) Color.White else Color.Black,
                             modifier = Modifier.size(24.dp)
                         )
@@ -97,7 +100,7 @@ fun PluginTemplateScreen(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = "配置模板说明",
+                            text = context.getString(R.string.plugin_config_template_desc),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -106,7 +109,7 @@ fun PluginTemplateScreen(
                             modifier = Modifier.padding(top = 8.dp)
                         )
                         Text(
-                            text = "以下是插件配置文件 plugin.json 的模板和示例代码，帮助你快速开发插件。",
+                            text = context.getString(R.string.plugin_config_intro),
                             style = TextStyle(
                                 fontSize = 13.sp,
                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -131,7 +134,7 @@ fun PluginTemplateScreen(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = "WebUI 插件配置模板",
+                            text = context.getString(R.string.webui_template),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -182,7 +185,7 @@ fun PluginTemplateScreen(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = "Native 插件配置模板",
+                            text = context.getString(R.string.native_template),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -233,7 +236,7 @@ fun PluginTemplateScreen(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = "WebUI 插件示例 (index.html)",
+                            text = context.getString(R.string.webui_example),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -295,7 +298,7 @@ fun PluginTemplateScreen(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = "Native 插件示例 (Kotlin)",
+                            text = context.getString(R.string.native_example),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -360,7 +363,7 @@ class HeartRateMonitor : BasePlugin(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "字段说明",
+                            text = context.getString(R.string.field_description),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,

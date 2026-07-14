@@ -31,7 +31,7 @@ val appModule = module {
     single<RecordRepository> { RecordRepository(get()) }
     single<DataStore<Preferences>> { androidContext().dataStore }
 
-    viewModel { SpeedometerViewModel(get()) }
+    viewModel { SpeedometerViewModel(get(), androidContext()) }
     viewModel { HistoryViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { DetailViewModel(get()) }

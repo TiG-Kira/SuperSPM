@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import com.kira.superspm.R
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -64,7 +65,7 @@ object ApkDownloader {
             try {
                 context.startActivity(intent)
             } catch (e: Exception) {
-                Log.e(TAG, "请求安装权限失败", e)
+                Log.e(TAG, context.getString(R.string.request_install_permission_failed), e)
             }
         }
     }
@@ -98,10 +99,10 @@ object ApkDownloader {
 
                 client.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
-                        return@use Result.failure<Unit>(Exception("下载失败: ${response.code}"))
+                        return@use Result.failure<Unit>(Exception(context.getString(R.string.download_failed_with_code, response.code)))
                     }
 
-                    val body = response.body ?: throw Exception("响应体为空")
+                    val body = response.body ?: throw Exception(context.getString(R.string.response_body_empty))
                     val contentLength = body.contentLength()
                     val inputStream = body.byteStream()
                     val outputStream = apkFile.outputStream()
@@ -143,10 +144,10 @@ object ApkDownloader {
                     }
                     Result.success(Unit)
                 } else {
-                    Result.failure(Exception("APK 文件下载失败"))
+                    Result.failure(Exception(context.getString(R.string.apk_download_failed)))
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "下载失败", e)
+                Log.e(TAG, context.getString(R.string.download_failed), e)
                 Result.failure(e)
             }
         }
@@ -170,7 +171,7 @@ object ApkDownloader {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             context.startActivity(intent)
         } catch (e: Exception) {
-            Log.e(TAG, "安装失败", e)
+            Log.e(TAG, context.getString(R.string.install_failed), e)
             throw e
         }
     }

@@ -26,6 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
+import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 
 @Composable
 fun SettingSwitchItem(
@@ -91,6 +93,7 @@ fun SettingClickableItem(
     value: String = "",
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -128,7 +131,7 @@ fun SettingClickableItem(
                 }
                 Icon(
                     imageVector = Icons.Filled.ArrowRight,
-                    contentDescription = "箭头",
+                    contentDescription = context.getString(R.string.arrow),
                     tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     modifier = Modifier.size(24.dp)
                 )

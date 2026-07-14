@@ -45,6 +45,8 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -52,6 +54,7 @@ fun PluginHomeScreen(
     isDark: Boolean = false,
     navController: NavHostController
 ) {
+    val context = LocalContext.current
     val backgroundColor = getPageBackgroundColor(isDark)
     val scrollBehavior = MiuixScrollBehavior()
     val plugins by PluginManager.plugins.collectAsState()
@@ -65,7 +68,7 @@ fun PluginHomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "插件",
+                title = context.getString(R.string.plugins),
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor,
                 actions = {
@@ -79,7 +82,7 @@ fun PluginHomeScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Settings,
-                            contentDescription = "插件管理",
+                            contentDescription = context.getString(R.string.plugin_management),
                             tint = MiuixTheme.colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )
@@ -96,7 +99,7 @@ fun PluginHomeScreen(
             contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
         ) {
             item {
-                SearchBar(hint = "搜索插件", onSearch = { searchQuery = it })
+                SearchBar(hint = context.getString(R.string.search_plugins), onSearch = { searchQuery = it })
             }
 
             item {
@@ -111,7 +114,7 @@ fun PluginHomeScreen(
                             .padding(20.dp)
                     ) {
                         Text(
-                            text = "欢迎使用 SuperSPM 插件",
+                            text = context.getString(R.string.welcome_plugins),
                             style = TextStyle(
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
@@ -120,7 +123,7 @@ fun PluginHomeScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "此页面显示您启用的插件入口，如果需要导入或管理插件，请点击右上角设置按钮或进入设置-插件管理页面来导入或管理您安装的插件。",
+                            text = context.getString(R.string.plugins_intro),
                             style = TextStyle(
                                 fontSize = 14.sp,
                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -149,7 +152,7 @@ fun PluginHomeScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "暂无可用插件",
+                                text = context.getString(R.string.no_plugins_available),
                                 style = TextStyle(
                                     fontSize = 16.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -157,7 +160,7 @@ fun PluginHomeScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "点击右上角设置按钮管理插件",
+                                text = context.getString(R.string.manage_plugins_hint),
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -169,7 +172,7 @@ fun PluginHomeScreen(
             } else {
                 item {
                     Text(
-                        text = "已启用插件 (${filteredPlugins.size})",
+                        text = "${context.getString(R.string.enabled_plugins)} (${filteredPlugins.size})",
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary

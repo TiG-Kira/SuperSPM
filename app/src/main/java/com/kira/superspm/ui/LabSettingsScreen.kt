@@ -39,12 +39,15 @@ import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Extension
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
+import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 
 @Composable
 fun LabSettingsScreen(
     isDark: Boolean = false,
     navController: NavHostController
 ) {
+    val context = LocalContext.current
     val viewModel: SettingsViewModel = getViewModel()
 
     val scrollBehavior = MiuixScrollBehavior()
@@ -53,7 +56,7 @@ fun LabSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "实验室",
+                title = context.getString(R.string.lab),
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor,
                 navigationIcon = {
@@ -67,7 +70,7 @@ fun LabSettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "返回",
+                            contentDescription = context.getString(R.string.back),
                             tint = if (isDark) Color.White else Color.Black,
                             modifier = Modifier.size(24.dp)
                         )
@@ -91,7 +94,7 @@ fun LabSettingsScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "欢迎进入实验功能设置页",
+                            text = context.getString(R.string.welcome_lab),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -99,7 +102,7 @@ fun LabSettingsScreen(
                             )
                         )
                         Text(
-                            text = "本页面的功能为实验性质功能，功能上可能随版本变化有变动或调整，也有可能会在将来版本正式上线或移除。本页面的功能具有不稳定性，如果遇到 Bug，请进入 GitHub 提 Issue 反馈，感谢您的使用。",
+                            text = context.getString(R.string.lab_settings_desc),
                             style = TextStyle(
                                 fontSize = 13.sp,
                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -112,7 +115,7 @@ fun LabSettingsScreen(
 
             item {
                 Text(
-                    text = "测速",
+                    text = context.getString(R.string.speed_test),
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -128,17 +131,17 @@ fun LabSettingsScreen(
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     SettingSwitchItem(
-                        title = "启用传感器计速",
+                        title = context.getString(R.string.enable_sensor_speed),
                         checked = viewModel.accelerometerEnabled,
                         onCheckedChange = { viewModel.updateAccelerometerEnabled(it) },
-                        description = "打开后可在主页面选择传感器计速方式"
+                        description = context.getString(R.string.enable_sensor_speed_desc)
                     )
                 }
             }
 
             item {
                 Text(
-                    text = "扩展",
+                    text = context.getString(R.string.extensions),
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -174,7 +177,7 @@ fun LabSettingsScreen(
                             )
                             Column {
                                 Text(
-                                    text = "插件",
+                                    text = context.getString(R.string.plugins),
                                     style = TextStyle(
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold,
@@ -182,7 +185,7 @@ fun LabSettingsScreen(
                                     )
                                 )
                                 Text(
-                                    text = "导入和管理第三方插件",
+                                    text = context.getString(R.string.plugin_desc),
                                     style = TextStyle(
                                         fontSize = 13.sp,
                                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -192,7 +195,7 @@ fun LabSettingsScreen(
                         }
                         Icon(
                             imageVector = Icons.Filled.ArrowRight,
-                            contentDescription = "箭头",
+                            contentDescription = context.getString(R.string.arrow),
                             tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             modifier = Modifier.size(24.dp)
                         )

@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.Stop
@@ -290,7 +291,7 @@ fun SpeedometerScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.PlayArrow,
-                                contentDescription = "开始",
+                                contentDescription = context.getString(R.string.start),
                                 tint = MiuixTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(28.dp)
                             )
@@ -316,7 +317,7 @@ fun SpeedometerScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Circle,
-                                contentDescription = "记录并开始",
+                                contentDescription = context.getString(R.string.record_and_start),
                                 tint = MiuixTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -341,7 +342,7 @@ fun SpeedometerScreen(
                         ) {
                             Icon(
                                 imageVector = if (status == SpeedometerViewModel.RecordingStatus.RECORDING) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                                contentDescription = if (status == SpeedometerViewModel.RecordingStatus.RECORDING) "暂停" else "继续",
+                                contentDescription = if (status == SpeedometerViewModel.RecordingStatus.RECORDING) context.getString(R.string.pause) else context.getString(R.string.resume),
                                 tint = MiuixTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -359,7 +360,7 @@ fun SpeedometerScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Stop,
-                                contentDescription = "停止",
+                                contentDescription = context.getString(R.string.stop),
                                 tint = MiuixTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(28.dp)
                             )
@@ -384,7 +385,7 @@ fun SpeedometerScreen(
 
                 item {
                     if (settingsViewModel.accelerometerEnabled) {
-                        val tabs = listOf("GPS", "传感器")
+                        val tabs = listOf(context.getString(R.string.speedometer_tab_gps), context.getString(R.string.speedometer_tab_sensor))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -512,7 +513,7 @@ fun SpeedometerScreen(
                                         Spacer(Modifier.height(2.dp))
                                         Text(
                                             modifier = Modifier.fillMaxWidth(),
-                                            text = "当前未使用GPS",
+                                            text = context.getString(R.string.no_sensor_gps),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Medium,
                                             color = if (isDark) Color.White else Color.Black
@@ -636,14 +637,16 @@ fun SpeedometerScreen(
                                     isDark = isDark,
                                     powerSaving = settingsViewModel.powerSaving,
                                     accelerometerEnabled = false,
-                                    isNotStarted = true
+                                    isNotStarted = true,
+                                    context = context
                                 )
                             } else {
                                 GpsSignalCard(
                                     accuracy = displayAccuracy,
                                     isDark = isDark,
                                     powerSaving = settingsViewModel.powerSaving,
-                                    accelerometerEnabled = false
+                                    accelerometerEnabled = false,
+                                    context = context
                                 )
 
                                 Column(
@@ -770,7 +773,7 @@ fun SpeedometerScreen(
                                     )
                                 )
                                 Text(
-                                    text = "传感器测速主要利用手机的加速度计来估算速度数值，更省电。但传感器测速无法计算相对静止场景，如测算车辆、航空器等的速度，因为设备为相对静止状态。您可以使用此功能测量步速等设备有移动加速度的场景。",
+                                    text = context.getString(R.string.sensor_speed_desc),
                                     style = TextStyle(
                                         fontSize = 13.sp,
                                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -811,7 +814,7 @@ fun SpeedometerScreen(
                                 )
                                 Icon(
                                     imageVector = Icons.Rounded.Warning,
-                                    contentDescription = "提示",
+                                    contentDescription = context.getString(R.string.hint),
                                     tint = MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.5f),
                                     modifier = Modifier
                                         .size(20.dp)
@@ -841,7 +844,7 @@ fun SpeedometerScreen(
                                     )
                                     Icon(
                                         imageVector = Icons.Filled.Refresh,
-                                        contentDescription = "刷新",
+                                        contentDescription = context.getString(R.string.refresh),
                                         tint = MiuixTheme.colorScheme.primary,
                                         modifier = Modifier
                                             .size(20.dp)
@@ -855,7 +858,7 @@ fun SpeedometerScreen(
                                 }
 
                                 Text(
-                                    text = addressText.ifEmpty { "获取地址中..." },
+                                    text = addressText.ifEmpty { context.getString(R.string.getting_address) },
                                     style = TextStyle(color = MiuixTheme.colorScheme.onSurface)
                                 )
 
@@ -1074,6 +1077,11 @@ private suspend fun getAddress(context: android.content.Context, latitude: Doubl
 @Composable
 fun SpeedometerGauge(speed: Double) {
     val colorScheme = MiuixTheme.colorScheme
+    val animatedSpeed = androidx.compose.animation.core.animateFloatAsState(
+        targetValue = speed.toFloat(),
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 300, easing = androidx.compose.animation.core.EaseOutQuad)
+    ).value
+
     Canvas(modifier = Modifier.size(280.dp)) {
         val center = Offset(size.width / 2, size.height / 2)
         val radius = size.width / 2 - 20.dp.toPx()
@@ -1090,17 +1098,17 @@ fun SpeedometerGauge(speed: Double) {
             style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
         )
 
-        val speedRatio = minOf(speed / 120.0, 1.0)
+        val speedRatio = minOf(animatedSpeed / 120.0f, 1.0f)
         val activeAngle = speedRatio * sweepAngle
 
         drawArc(
             color = when {
-                speedRatio < 0.3 -> Color(0xFFFF1744)
-                speedRatio < 0.6 -> Color(0xFFFFAB00)
+                speedRatio < 0.3f -> Color(0xFFFF1744)
+                speedRatio < 0.6f -> Color(0xFFFFAB00)
                 else -> Color(0xFF0066FF)
             },
             startAngle = startAngle,
-            sweepAngle = activeAngle.toFloat(),
+            sweepAngle = activeAngle,
             useCenter = false,
             topLeft = Offset(20.dp.toPx(), 20.dp.toPx()),
             size = Size(radius * 2, radius * 2),
@@ -1166,7 +1174,8 @@ fun GpsSignalCard(
     isDark: Boolean = false,
     powerSaving: Boolean = false,
     accelerometerEnabled: Boolean = false,
-    isNotStarted: Boolean = false
+    isNotStarted: Boolean = false,
+    context: android.content.Context
 ) {
     val cardColor: Color
     val iconColor: Color
@@ -1177,9 +1186,9 @@ fun GpsSignalCard(
     if (powerSaving && accelerometerEnabled) {
         cardColor = if (isDark) Color(0xFF3D3514) else Color(0xFFFFF9C4)
         iconColor = Color(0xFFFDD835)
-        title = "已打开省电模式"
-        summary = "使用加速度计辅助测速"
-        warning = "计算数据可能有实际偏差, 记录功能不可用"
+        title = context.getString(R.string.power_saving_enabled)
+        summary = context.getString(R.string.power_saving_sensor)
+        warning = context.getString(R.string.power_saving_warning)
     } else if (powerSaving) {
         val strength = when {
             accuracy == null -> 0
@@ -1195,30 +1204,30 @@ fun GpsSignalCard(
             4, 5 -> {
                 cardColor = if (isDark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
                 iconColor = Color(0xFF36D167)
-                title = "GPS 正常"
-                summary = "精度: $accuracyText | 信号 ${strength}级"
-                warning = "已开启省电模式，采集间隔延长，记录功能不可用"
+                title = context.getString(R.string.gps_normal)
+                summary = "${context.getString(R.string.accuracy)}: $accuracyText | ${context.getString(R.string.signal)} ${strength}${context.getString(R.string.signal_level)}"
+                warning = context.getString(R.string.power_saving_gps_warning)
             }
             3 -> {
                 cardColor = if (isDark) Color(0xFF3D3514) else Color(0xFFFFF9C4)
                 iconColor = Color(0xFFFDD835)
-                title = "GPS 信号较弱"
-                summary = "精度: $accuracyText | 信号 ${strength}级"
-                warning = "已开启省电模式，采集间隔延长，记录功能不可用"
+                title = context.getString(R.string.gps_weak)
+                summary = "${context.getString(R.string.accuracy)}: $accuracyText | ${context.getString(R.string.signal)} ${strength}${context.getString(R.string.signal_level)}"
+                warning = context.getString(R.string.power_saving_gps_warning)
             }
             else -> {
                 cardColor = if (isDark) Color(0xFF3B1414) else Color(0xFFFFEBEE)
                 iconColor = Color(0xFFFF5252)
-                title = "GPS 信号差"
-                summary = "精度: $accuracyText | 信号 ${strength}级"
-                warning = "已开启省电模式，采集间隔延长，记录功能不可用"
+                title = context.getString(R.string.gps_poor)
+                summary = "${context.getString(R.string.accuracy)}: $accuracyText | ${context.getString(R.string.signal)} ${strength}${context.getString(R.string.signal_level)}"
+                warning = context.getString(R.string.power_saving_gps_warning)
             }
         }
     } else if (isNotStarted) {
         cardColor = if (isDark) Color(0xFF1A1A1A) else Color(0xFFF0F0F0)
         iconColor = if (isDark) Color(0xFF666666) else Color(0xFFCCCCCC)
-        title = "GPS 未启动"
-        summary = "开始测速后自动获取GPS信号"
+        title = context.getString(R.string.gps_not_started)
+        summary = context.getString(R.string.gps_not_started_desc)
         warning = null
     } else {
         val strength = when {
@@ -1235,34 +1244,39 @@ fun GpsSignalCard(
             4, 5 -> {
                 cardColor = if (isDark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
                 iconColor = Color(0xFF36D167)
-                title = "GPS 正常"
-                summary = "精度: $accuracyText | 信号 ${strength}级"
+                title = context.getString(R.string.gps_normal)
+                summary = "${context.getString(R.string.accuracy)}: $accuracyText | ${context.getString(R.string.signal)} ${strength}${context.getString(R.string.signal_level)}"
                 warning = null
             }
             3 -> {
                 cardColor = if (isDark) Color(0xFF3D3514) else Color(0xFFFFF9C4)
                 iconColor = Color(0xFFFDD835)
-                title = "GPS 信号较弱"
-                summary = "精度: $accuracyText | 信号 ${strength}级"
+                title = context.getString(R.string.gps_weak)
+                summary = "${context.getString(R.string.accuracy)}: $accuracyText | ${context.getString(R.string.signal)} ${strength}${context.getString(R.string.signal_level)}"
                 warning = null
             }
             else -> {
                 cardColor = if (isDark) Color(0xFF3B1414) else Color(0xFFFFEBEE)
                 iconColor = Color(0xFFFF5252)
-                title = "GPS 信号差"
-                summary = "精度: $accuracyText | 信号 ${strength}级"
-                warning = "速度和位置测量可能不准确"
+                title = context.getString(R.string.gps_poor)
+                summary = "${context.getString(R.string.accuracy)}: $accuracyText | ${context.getString(R.string.signal)} ${strength}${context.getString(R.string.signal_level)}"
+                warning = context.getString(R.string.gps_warning)
             }
         }
     }
 
     val textColor = if (isDark) Color.White else Color.Black
 
+    val animatedCardColor = androidx.compose.animation.animateColorAsState(
+        targetValue = cardColor,
+        animationSpec = androidx.compose.animation.core.tween(500)
+    )
+
     Card(
         modifier = Modifier
             .then(if (isNotStarted) Modifier.fillMaxWidth() else Modifier.width(180.dp))
             .height(160.dp),
-        colors = CardDefaults.defaultColors(color = cardColor)
+        colors = CardDefaults.defaultColors(color = animatedCardColor.value)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Box(
@@ -1272,7 +1286,7 @@ fun GpsSignalCard(
                 contentAlignment = Alignment.BottomEnd
             ) {
                 Icon(
-                    modifier = Modifier.size(120.dp),
+                    modifier = Modifier.size(120.dp).alpha(0.8f),
                     imageVector = when {
                         powerSaving && accelerometerEnabled -> Icons.Rounded.Warning
                         powerSaving -> Icons.Rounded.Warning
@@ -1282,7 +1296,7 @@ fun GpsSignalCard(
                         accuracy < 50 -> Icons.Rounded.Warning
                         else -> Icons.Rounded.ErrorOutline
                     },
-                    tint = iconColor.copy(alpha = 0.8f),
+                    tint = iconColor,
                     contentDescription = null
                 )
             }

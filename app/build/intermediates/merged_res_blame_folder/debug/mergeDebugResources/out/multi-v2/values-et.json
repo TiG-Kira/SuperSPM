@@ -4,7 +4,7 @@
             "outputFile": "com.kira.superspm.app-mergeDebugResources-61:/values-et/values-et.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.11.1\\transforms\\85f9b61f30e20599a59d864b398e7117\\transformed\\jetified-play-services-basement-18.9.0\\res\\values-et\\values.xml",
+                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.13\\transforms\\b3224e2c1963c0fda8067ffde87c4b11\\transformed\\jetified-play-services-basement-18.9.0\\res\\values-et\\values.xml",
                     "from": {
                         "startLines": "4",
                         "startColumns": "0",
@@ -21,75 +21,24 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.11.1\\transforms\\04cefcede0f0a2f40977d8d49233ee5a\\transformed\\jetified-foundation\\res\\values-et\\values-et.xml",
+                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.13\\transforms\\00ff4b63c56b031c3fb02891dfbc3206\\transformed\\core-1.16.0\\res\\values-et\\values-et.xml",
                     "from": {
-                        "startLines": "2,3,4",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "55,164,254",
-                        "endColumns": "108,89,88",
-                        "endOffsets": "159,249,338"
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,150,252,350,453,559,664,784",
+                        "endColumns": "94,101,97,102,105,104,119,100",
+                        "endOffsets": "145,247,345,448,554,659,779,880"
                     },
                     "to": {
-                        "startLines": "29,144,145",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "2827,15135,15225",
-                        "endColumns": "108,89,88",
-                        "endOffsets": "2931,15220,15309"
+                        "startLines": "31,32,33,34,35,36,37,140",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "3037,3132,3234,3332,3435,3541,3646,14764",
+                        "endColumns": "94,101,97,102,105,104,119,100",
+                        "endOffsets": "3127,3229,3327,3430,3536,3641,3761,14860"
                     }
                 },
                 {
-                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.11.1\\transforms\\d5538eac6245173f564366ae086d0994\\transformed\\jetified-material-release\\res\\values-et\\values-et.xml",
-                    "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "89",
-                        "endOffsets": "140"
-                    },
-                    "to": {
-                        "startLines": "129",
-                        "startColumns": "4",
-                        "startOffsets": "13869",
-                        "endColumns": "89",
-                        "endOffsets": "13954"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.11.1\\transforms\\0644191fe677ec9e97f7007414f54171\\transformed\\jetified-ui\\res\\values-et\\values-et.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "105,206,299,379,475,570,652,730,821,912,996,1078,1163,1235,1321,1396,1471,1543,1620,1691",
-                        "endColumns": "100,92,79,95,94,81,77,90,90,83,81,84,71,85,74,74,71,76,70,121",
-                        "endOffsets": "201,294,374,470,565,647,725,816,907,991,1073,1158,1230,1316,1391,1466,1538,1615,1686,1808"
-                    },
-                    "to": {
-                        "startLines": "30,38,39,58,59,60,61,62,130,131,132,133,135,136,137,138,139,141,142,143",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "2936,3766,3859,6157,6253,6348,6430,6508,13959,14050,14134,14216,14384,14456,14542,14617,14692,14865,14942,15013",
-                        "endColumns": "100,92,79,95,94,81,77,90,90,83,81,84,71,85,74,74,71,76,70,121",
-                        "endOffsets": "3032,3854,3934,6248,6343,6425,6503,6594,14045,14129,14211,14296,14451,14537,14612,14687,14759,14937,15008,15130"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.11.1\\transforms\\02e42023adc521d2bd5d23a460d77447\\transformed\\appcompat-1.6.1\\res\\values-et\\values-et.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "105,211,310,421,507,609,726,807,884,976,1070,1166,1268,1377,1471,1572,1666,1758,1851,1934,2045,2149,2248,2358,2460,2559,2725,2827",
-                        "endColumns": "105,98,110,85,101,116,80,76,91,93,95,101,108,93,100,93,91,92,82,110,103,98,109,101,98,165,101,82",
-                        "endOffsets": "206,305,416,502,604,721,802,879,971,1065,1161,1263,1372,1466,1567,1661,1753,1846,1929,2040,2144,2243,2353,2455,2554,2720,2822,2905"
-                    },
-                    "to": {
-                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,134",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "105,211,310,421,507,609,726,807,884,976,1070,1166,1268,1377,1471,1572,1666,1758,1851,1934,2045,2149,2248,2358,2460,2559,2725,14301",
-                        "endColumns": "105,98,110,85,101,116,80,76,91,93,95,101,108,93,100,93,91,92,82,110,103,98,109,101,98,165,101,82",
-                        "endOffsets": "206,305,416,502,604,721,802,879,971,1065,1161,1263,1372,1466,1567,1661,1753,1846,1929,2040,2144,2243,2353,2455,2554,2720,2822,14379"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.11.1\\transforms\\6d20a92024800d8d2b72f69eecd070ef\\transformed\\jetified-play-services-base-18.9.0\\res\\values-et\\values.xml",
+                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.13\\transforms\\2997bc0e90fc1cd7b35149228df2b1e8\\transformed\\jetified-play-services-base-18.9.0\\res\\values-et\\values.xml",
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
                         "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
@@ -106,7 +55,41 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.11.1\\transforms\\fcb87bb9372dc4ac7da28dc0bf1096ad\\transformed\\jetified-material3\\res\\values-et\\values-et.xml",
+                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.13\\transforms\\2e5d67a599a0b7e8aa65443a00f646fa\\transformed\\appcompat-1.6.1\\res\\values-et\\values-et.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,211,310,421,507,609,726,807,884,976,1070,1166,1268,1377,1471,1572,1666,1758,1851,1934,2045,2149,2248,2358,2460,2559,2725,2827",
+                        "endColumns": "105,98,110,85,101,116,80,76,91,93,95,101,108,93,100,93,91,92,82,110,103,98,109,101,98,165,101,82",
+                        "endOffsets": "206,305,416,502,604,721,802,879,971,1065,1161,1263,1372,1466,1567,1661,1753,1846,1929,2040,2144,2243,2353,2455,2554,2720,2822,2905"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,134",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,211,310,421,507,609,726,807,884,976,1070,1166,1268,1377,1471,1572,1666,1758,1851,1934,2045,2149,2248,2358,2460,2559,2725,14301",
+                        "endColumns": "105,98,110,85,101,116,80,76,91,93,95,101,108,93,100,93,91,92,82,110,103,98,109,101,98,165,101,82",
+                        "endOffsets": "206,305,416,502,604,721,802,879,971,1065,1161,1263,1372,1466,1567,1661,1753,1846,1929,2040,2144,2243,2353,2455,2554,2720,2822,14379"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.13\\transforms\\d4dea2f184e6c3f541a6bb480899ea57\\transformed\\jetified-foundation\\res\\values-et\\values-et.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,164,254",
+                        "endColumns": "108,89,88",
+                        "endOffsets": "159,249,338"
+                    },
+                    "to": {
+                        "startLines": "29,144,145",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "2827,15135,15225",
+                        "endColumns": "108,89,88",
+                        "endOffsets": "2931,15220,15309"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.13\\transforms\\e56f32ec8d77632cd3d92493fa63a90a\\transformed\\jetified-material3\\res\\values-et\\values-et.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -123,20 +106,37 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.11.1\\transforms\\b9e6585aab2cbb7cf6eedf4317e0cb19\\transformed\\core-1.16.0\\res\\values-et\\values-et.xml",
+                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.13\\transforms\\63f2557f7e217818239acecae4d6f729\\transformed\\jetified-ui\\res\\values-et\\values-et.xml",
                     "from": {
-                        "startLines": "2,3,4,5,6,7,8,9",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,150,252,350,453,559,664,784",
-                        "endColumns": "94,101,97,102,105,104,119,100",
-                        "endOffsets": "145,247,345,448,554,659,779,880"
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,206,299,379,475,570,652,730,821,912,996,1078,1163,1235,1321,1396,1471,1543,1620,1691",
+                        "endColumns": "100,92,79,95,94,81,77,90,90,83,81,84,71,85,74,74,71,76,70,121",
+                        "endOffsets": "201,294,374,470,565,647,725,816,907,991,1073,1158,1230,1316,1391,1466,1538,1615,1686,1808"
                     },
                     "to": {
-                        "startLines": "31,32,33,34,35,36,37,140",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "3037,3132,3234,3332,3435,3541,3646,14764",
-                        "endColumns": "94,101,97,102,105,104,119,100",
-                        "endOffsets": "3127,3229,3327,3430,3536,3641,3761,14860"
+                        "startLines": "30,38,39,58,59,60,61,62,130,131,132,133,135,136,137,138,139,141,142,143",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "2936,3766,3859,6157,6253,6348,6430,6508,13959,14050,14134,14216,14384,14456,14542,14617,14692,14865,14942,15013",
+                        "endColumns": "100,92,79,95,94,81,77,90,90,83,81,84,71,85,74,74,71,76,70,121",
+                        "endOffsets": "3032,3854,3934,6248,6343,6425,6503,6594,14045,14129,14211,14296,14451,14537,14612,14687,14759,14937,15008,15130"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\Kira\\.gradle\\caches\\8.13\\transforms\\5bd276e2c204e04f4876f8dac6981276\\transformed\\jetified-material-release\\res\\values-et\\values-et.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "89",
+                        "endOffsets": "140"
+                    },
+                    "to": {
+                        "startLines": "129",
+                        "startColumns": "4",
+                        "startOffsets": "13869",
+                        "endColumns": "89",
+                        "endOffsets": "13954"
                     }
                 }
             ]

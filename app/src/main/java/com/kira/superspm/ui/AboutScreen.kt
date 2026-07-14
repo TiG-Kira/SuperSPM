@@ -100,7 +100,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = "关于",
+                    title = context.getString(R.string.about),
                     scrollBehavior = scrollBehavior,
                     color = backgroundColor,
                     navigationIcon = {
@@ -114,7 +114,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = "返回",
+                                contentDescription = context.getString(R.string.back),
                                 tint = MiuixTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -186,15 +186,15 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             InfoRow(
-                                title = "设备型号",
+                                title = context.getString(R.string.device_model),
                                 value = android.os.Build.MODEL
                             )
                             InfoRow(
-                                title = "Android 版本",
+                                title = context.getString(R.string.android_version),
                                 value = android.os.Build.VERSION.RELEASE
                             )
                             InfoRow(
-                                title = "内核版本",
+                                title = context.getString(R.string.kernel_version),
                                 value = android.os.Build.DISPLAY
                             )
                         }
@@ -228,7 +228,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                             ) {
                                 AsyncImage(
                                     model = "https://avatars.githubusercontent.com/u/297331574",
-                                    contentDescription = "开发者头像",
+                                    contentDescription = context.getString(R.string.developer_avatar),
                                     modifier = Modifier
                                         .size(48.dp)
                                         .clip(CircleShape)
@@ -237,7 +237,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                     verticalArrangement = Arrangement.Center
                                 ) {
                                     Text(
-                                        text = "极犽",
+                                        text = context.getString(R.string.developer_name),
                                         style = TextStyle(
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold,
@@ -255,7 +255,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                             }
                             Icon(
                                 imageVector = Icons.Filled.ArrowRight,
-                                contentDescription = "箭头",
+                                contentDescription = context.getString(R.string.arrow),
                                 tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -279,12 +279,12 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "使用的开源项目",
+                                text = context.getString(R.string.open_source_projects),
                                 style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             )
                             Icon(
                                 imageVector = Icons.Filled.ArrowRight,
-                                contentDescription = "箭头",
+                                contentDescription = context.getString(R.string.arrow),
                                 tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -333,12 +333,12 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                 }
                                 Column {
                                     Text(
-                                        text = "检查更新",
+                                        text = context.getString(R.string.check_updates),
                                         style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold)
                                     )
                                     if (hasUpdate) {
                                         Text(
-                                            text = "有新版本",
+                                            text = context.getString(R.string.new_version_available),
                                             style = TextStyle(
                                                 fontSize = 13.sp,
                                                 color = MiuixTheme.colorScheme.error
@@ -349,7 +349,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                             }
                             Icon(
                                 imageVector = Icons.Filled.ArrowRight,
-                                contentDescription = "箭头",
+                                contentDescription = context.getString(R.string.arrow),
                                 tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -368,11 +368,11 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             InfoRow(
-                                title = "SuperSPM 版本",
+                                title = context.getString(R.string.superspm_version),
                                 value = getVersionName(context)
                             )
                             Text(
-                                text = "SuperSPM 项目使用了 Trae 辅助生成了部分 AI 代码。",
+                                text = context.getString(R.string.ai_code_note),
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -380,7 +380,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                 modifier = Modifier.padding(bottom = 4.dp)
                             )
                             Text(
-                                text = "用户界面采用 MiuiX 设计，详情请查看使用的开源项目。此应用遵循 AGPL-3.0 许可以及 MIT 许可。",
+                                text = context.getString(R.string.license_note),
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -413,7 +413,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = if (updateResult!!.hasUpdate) "发现新版本" else "已是最新版本",
+                        text = if (updateResult!!.hasUpdate) context.getString(R.string.new_version_found) else context.getString(R.string.up_to_date),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -423,9 +423,9 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                     )
                     Text(
                         text = if (updateResult!!.hasUpdate) {
-                            "当前版本: v${updateResult!!.currentVersion}\n最新版本: v${updateResult!!.latestVersion}"
+                            "${context.getString(R.string.current_version)}: v${updateResult!!.currentVersion}\n${context.getString(R.string.latest_version)}: v${updateResult!!.latestVersion}"
                         } else {
-                            "当前版本: v${updateResult!!.currentVersion} 已是最新"
+                            "${context.getString(R.string.current_version)}: v${updateResult!!.currentVersion} ${context.getString(R.string.is_latest)}"
                         },
                         style = TextStyle(
                             fontSize = 14.sp,
@@ -435,7 +435,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                     )
                     if (updateResult!!.hasUpdate && updateResult!!.releaseNotes.isNotBlank()) {
                         Text(
-                            text = "更新日志",
+                                text = context.getString(R.string.update_log),
                             style = TextStyle(
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
@@ -462,7 +462,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "下载中...",
+                                    text = context.getString(R.string.downloading),
                                     style = TextStyle(
                                         fontSize = 14.sp,
                                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -517,7 +517,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                 ),
                                 enabled = !downloadingApk
                             ) {
-                                Text(text = "稍后", fontWeight = FontWeight.Bold)
+                                Text(text = context.getString(R.string.later), fontWeight = FontWeight.Bold)
                             }
                             Button(
                                 onClick = {
@@ -534,7 +534,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                 ),
                                 enabled = !downloadingApk
                             ) {
-                                Text(text = "手动", fontWeight = FontWeight.Bold)
+                                Text(text = context.getString(R.string.manual), fontWeight = FontWeight.Bold)
                             }
                             Button(
                                 onClick = {
@@ -575,7 +575,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                 ),
                                 enabled = !downloadingApk
                             ) {
-                                Text(text = "下载", fontWeight = FontWeight.Bold, color = Color.White)
+                                Text(text = context.getString(R.string.download), fontWeight = FontWeight.Bold, color = Color.White)
                             }
                         } else {
                             Button(
@@ -585,7 +585,7 @@ fun AboutScreen(isDark: Boolean, hasUpdate: Boolean = false, onBack: () -> Unit,
                                     color = MiuixTheme.colorScheme.primary
                                 )
                             ) {
-                                Text(text = "确定", fontWeight = FontWeight.Bold, color = Color.White)
+                                Text(text = context.getString(R.string.ok), fontWeight = FontWeight.Bold, color = Color.White)
                             }
                         }
                     }

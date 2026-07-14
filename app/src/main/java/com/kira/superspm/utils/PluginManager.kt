@@ -3,6 +3,7 @@ package com.kira.superspm.utils
 import android.content.Context
 import android.util.Log
 import com.kira.superspm.data.model.PluginConfig
+import com.kira.superspm.R
 import com.kira.superspm.data.model.PluginType
 import com.kira.superspm.plugin.BasePlugin
 import com.kira.superspm.plugin.HistoryService
@@ -82,7 +83,7 @@ object PluginManager {
 
                         list.add(InstalledPlugin(config, dir.name, enabled, processor))
                     } catch (e: Exception) {
-                        Log.e(TAG, "加载插件失败: ${dir.name}", e)
+                        Log.e(TAG, "Failed to load plugin: ${dir.name}", e)
                     }
                 }
             }
@@ -125,11 +126,11 @@ object PluginManager {
             if (instance is Plugin) {
                 instance
             } else {
-                Log.e(TAG, "插件主类未实现 Plugin 接口: $entryClass")
+                Log.e(TAG, "Plugin main class does not implement Plugin interface: $entryClass")
                 null
             }
         } catch (e: Exception) {
-            Log.e(TAG, "加载Native插件失败", e)
+            Log.e(TAG, "Failed to load Native plugin", e)
             null
         }
     }
@@ -180,7 +181,7 @@ object PluginManager {
             val configFile = File(targetDir, CONFIG_FILE)
             if (!configFile.exists()) {
                 targetDir.deleteRecursively()
-                return Result.failure(Exception("插件配置文件 plugin.json 不存在"))
+                return Result.failure(Exception(context.getString(R.string.plugin_config_not_found)))
             }
 
             val config = json.decodeFromString<PluginConfig>(configFile.readText())
@@ -189,7 +190,7 @@ object PluginManager {
             if (config.type == PluginType.NATIVE) {
                 processor = loadNativePlugin(context, targetDir)
                 if (processor == null) {
-                    Log.w(TAG, "Native插件加载失败，仍会显示但无法运行")
+                    Log.w(TAG, context.getString(R.string.native_plugin_load_failed_warning))
                 }
             }
 
@@ -201,7 +202,7 @@ object PluginManager {
 
             Result.success(plugin)
         } catch (e: Exception) {
-            Log.e(TAG, "导入插件失败", e)
+            Log.e(TAG, context.getString(R.string.import_plugin_failed), e)
             Result.failure(e)
         }
     }

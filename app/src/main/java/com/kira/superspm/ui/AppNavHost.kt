@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,6 +31,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 import com.kira.superspm.utils.UpdateChecker
 import kotlinx.coroutines.launch
 
@@ -48,6 +61,7 @@ fun AppNavHost(
     onPermissionRequest: () -> Unit,
     isDark: Boolean
 ) {
+    val context = LocalContext.current
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -58,6 +72,37 @@ fun AppNavHost(
 
     var hasUpdate by remember { mutableStateOf(false) }
     var showRedDot by remember { mutableStateOf(false) }
+
+    val mainRoutes = setOf("speedometer", "plugins", "history", "settings")
+
+    fun enterTransition(initialRoute: String?, targetRoute: String?): EnterTransition {
+        val isMainToSub = initialRoute in mainRoutes && targetRoute !in mainRoutes
+        val isMainToMain = initialRoute in mainRoutes && targetRoute in mainRoutes
+        return when {
+            isMainToSub -> slideInHorizontally(
+                animationSpec = tween(300, easing = androidx.compose.animation.core.EaseOutQuad),
+                initialOffsetX = { it }
+            ) + fadeIn(animationSpec = tween(300))
+            isMainToMain -> slideInHorizontally(
+                animationSpec = tween(150, easing = androidx.compose.animation.core.EaseOutQuad),
+                initialOffsetX = { if (targetRoute != null && mainRoutes.indexOf(targetRoute) > mainRoutes.indexOf(initialRoute)) it else -it }
+            )
+            else -> EnterTransition.None
+        }
+    }
+
+    fun exitTransition(initialRoute: String?, targetRoute: String?): ExitTransition {
+        val isMainToSub = initialRoute in mainRoutes && targetRoute !in mainRoutes
+        val isMainToMain = initialRoute in mainRoutes && targetRoute in mainRoutes
+        return when {
+            isMainToSub -> fadeOut(animationSpec = tween(200))
+            isMainToMain -> slideOutHorizontally(
+                animationSpec = tween(150, easing = androidx.compose.animation.core.EaseOutQuad),
+                targetOffsetX = { if (targetRoute != null && mainRoutes.indexOf(targetRoute) > mainRoutes.indexOf(initialRoute)) -it else it }
+            )
+            else -> ExitTransition.None
+        }
+    }
 
     LaunchedEffect(Unit) {
         scope.launch {
@@ -78,7 +123,21 @@ fun AppNavHost(
         NavHost(
             navController = navController,
             startDestination = "speedometer",
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            enterTransition = { enterTransition(initialState?.destination?.route, targetState?.destination?.route) },
+            exitTransition = { exitTransition(initialState?.destination?.route, targetState?.destination?.route) },
+            popEnterTransition = {
+                slideInHorizontally(
+                    animationSpec = tween(250, easing = androidx.compose.animation.core.EaseOutQuad),
+                    initialOffsetX = { -it }
+                ) + fadeIn(animationSpec = tween(250))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    animationSpec = tween(250, easing = androidx.compose.animation.core.EaseOutQuad),
+                    targetOffsetX = { it }
+                ) + fadeOut(animationSpec = tween(250))
+            }
         ) {
             composable("speedometer") {
                 SpeedometerScreen(
@@ -139,7 +198,7 @@ fun AppNavHost(
             }
             composable("plugin_web/{dirName}/{pluginName}") { backStackEntry ->
                 val dirName = backStackEntry.arguments?.getString("dirName") ?: ""
-                val pluginName = backStackEntry.arguments?.getString("pluginName") ?: "插件"
+                val pluginName = backStackEntry.arguments?.getString("pluginName") ?: context.getString(R.string.plugin)
                 PluginWebPage(
                     pluginDirName = dirName,
                     pluginName = pluginName,
@@ -148,7 +207,7 @@ fun AppNavHost(
             }
             composable("plugin_native/{dirName}/{pluginName}") { backStackEntry ->
                 val dirName = backStackEntry.arguments?.getString("dirName") ?: ""
-                val pluginName = backStackEntry.arguments?.getString("pluginName") ?: "插件"
+                val pluginName = backStackEntry.arguments?.getString("pluginName") ?: context.getString(R.string.plugin)
                 PluginNativePage(
                     pluginDirName = dirName,
                     pluginName = pluginName,
@@ -206,25 +265,25 @@ fun AppNavHost(
                     selected = parentRoute == "speedometer",
                     onClick = { navController.navigate("speedometer") { launchSingleTop = true; restoreState = true } },
                     icon = Icons.Filled.Speed,
-                    label = "码表"
+                    label = context.getString(R.string.tab_speedometer)
                 )
                 NavigationBarItem(
                     selected = parentRoute == "plugins",
                     onClick = { navController.navigate("plugins") { launchSingleTop = true; restoreState = true } },
                     icon = Icons.Filled.Extension,
-                    label = "插件"
+                    label = context.getString(R.string.tab_plugins)
                 )
                 NavigationBarItem(
                     selected = parentRoute == "history",
                     onClick = { navController.navigate("history") { launchSingleTop = true; restoreState = true } },
                     icon = Icons.Filled.History,
-                    label = "历史"
+                    label = context.getString(R.string.tab_history)
                 )
                 NavigationBarItem(
                     selected = parentRoute == "settings",
                     onClick = { navController.navigate("settings") { launchSingleTop = true; restoreState = true } },
                     icon = Icons.Filled.Settings,
-                    label = "设置"
+                    label = context.getString(R.string.tab_settings)
                 )
             }
         }

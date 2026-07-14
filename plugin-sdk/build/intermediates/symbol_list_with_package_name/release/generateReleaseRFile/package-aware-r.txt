@@ -1,1 +1,0 @@
-com.kira.superspm.plugin

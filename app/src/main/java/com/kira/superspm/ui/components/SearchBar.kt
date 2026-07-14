@@ -33,15 +33,19 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 
 @Composable
 fun SearchBar(
     modifier: Modifier = Modifier,
-    hint: String = "搜索",
+    hint: String? = null,
     onSearch: (String) -> Unit
 ) {
+    val context = LocalContext.current
     var text by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
+    val actualHint = hint ?: context.getString(R.string.search)
 
     Row(
         modifier = modifier
@@ -89,7 +93,7 @@ fun SearchBar(
                         contentAlignment = Alignment.CenterStart
                     ) {
                         androidx.compose.material3.Text(
-                            text = hint,
+                            text = actualHint,
                             style = TextStyle(
                                 fontSize = 15.sp,
                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -105,7 +109,7 @@ fun SearchBar(
         if (text.isNotEmpty()) {
             Icon(
                 imageVector = Icons.Filled.Close,
-                contentDescription = "清除",
+                contentDescription = context.getString(R.string.clear_search),
                 tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 modifier = Modifier
                     .padding(end = 16.dp)

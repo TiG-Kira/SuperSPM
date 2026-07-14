@@ -30,6 +30,7 @@ import androidx.compose.foundation.background
 import androidx.navigation.NavHostController
 import androidx.compose.ui.platform.LocalContext
 import com.kira.superspm.data.store.SpeedUnit
+import com.kira.superspm.R
 import com.kira.superspm.viewmodel.SettingsViewModel
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -64,10 +65,10 @@ fun AppearanceSettingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = "外观",
-                scrollBehavior = scrollBehavior,
-                color = backgroundColor,
+                TopAppBar(
+                    title = context.getString(R.string.appearance_display),
+                    scrollBehavior = scrollBehavior,
+                    color = backgroundColor,
                 navigationIcon = {
                     Box(
                         modifier = Modifier
@@ -79,7 +80,7 @@ fun AppearanceSettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "返回",
+                            contentDescription = context.getString(R.string.back),
                             tint = if (isDark) Color.White else Color.Black,
                             modifier = Modifier.size(24.dp)
                         )
@@ -118,7 +119,7 @@ fun AppearanceSettingsScreen(
                             modifier = Modifier.padding(start = 16.dp)
                         ) {
                             Text(
-                                text = "本页说明",
+                                text = context.getString(R.string.page_description),
                                 style = TextStyle(
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
@@ -126,7 +127,7 @@ fun AppearanceSettingsScreen(
                                 )
                             )
                             Text(
-                                text = "本页面可对外观进行修改。包括暗色模式开关、跟随系统开关、速度单位选择。",
+                                text = context.getString(R.string.appearance_desc),
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -140,7 +141,7 @@ fun AppearanceSettingsScreen(
 
             item {
                 Text(
-                    text = "显示",
+                    text = context.getString(R.string.display),
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -155,26 +156,28 @@ fun AppearanceSettingsScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    SettingSwitchItem(
-                        title = "暗色模式",
-                        checked = viewModel.darkMode,
-                        onCheckedChange = { viewModel.updateDarkMode(it) },
-                        enabled = !viewModel.followSystem && !viewModel.powerSaving
-                    )
-
-                    if (!viewModel.followSystem && !viewModel.powerSaving) {
-                        Text(
-                            text = "重启应用后生效",
-                            style = TextStyle(
-                                fontSize = 12.sp,
-                                color = Color(0xFFF44336)
-                            ),
-                            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                    if (!viewModel.followSystem) {
+                        SettingSwitchItem(
+                            title = context.getString(R.string.dark_mode),
+                            checked = viewModel.darkMode,
+                            onCheckedChange = { viewModel.updateDarkMode(it) },
+                            enabled = !viewModel.powerSaving
                         )
+
+                        if (!viewModel.powerSaving) {
+                            Text(
+                                text = context.getString(R.string.restart_effect),
+                                style = TextStyle(
+                                    fontSize = 12.sp,
+                                    color = Color(0xFFF44336)
+                                ),
+                                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                            )
+                        }
                     }
 
                     SettingSwitchItem(
-                        title = "跟随系统开/关暗色模式",
+                        title = context.getString(R.string.follow_system_dark_mode),
                         checked = viewModel.followSystem,
                         onCheckedChange = { viewModel.updateFollowSystem(it) },
                         enabled = !viewModel.powerSaving
@@ -184,7 +187,7 @@ fun AppearanceSettingsScreen(
 
             item {
                 SettingClickableItem(
-                    title = "速度单位",
+                    title = context.getString(R.string.speed_unit),
                     value = when (viewModel.speedUnit) {
                         SpeedUnit.KMH -> "km/h"
                         SpeedUnit.MS -> "m/s"
@@ -196,10 +199,10 @@ fun AppearanceSettingsScreen(
 
             item {
                 SettingClickableItem(
-                    title = "语言",
+                    title = context.getString(R.string.language),
                     value = when (viewModel.appLanguage) {
-                        "en" -> "English"
-                        else -> "中文"
+                        "en" -> context.getString(R.string.english)
+                        else -> context.getString(R.string.chinese)
                     },
                     onClick = { showLanguageDialog = true }
                 )
@@ -218,7 +221,7 @@ fun AppearanceSettingsScreen(
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "选择速度单位",
+                        text = context.getString(R.string.select_speed_unit),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -272,7 +275,7 @@ fun AppearanceSettingsScreen(
                             color = MiuixTheme.colorScheme.surfaceVariant
                         )
                     ) {
-                        Text(text = "取消", fontWeight = FontWeight.Bold)
+                        Text(text = context.getString(R.string.cancel), fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -286,7 +289,7 @@ fun AppearanceSettingsScreen(
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "选择语言",
+                        text = context.getString(R.string.select_language),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -297,7 +300,7 @@ fun AppearanceSettingsScreen(
                     Column(
                         modifier = Modifier.padding(bottom = 16.dp)
                     ) {
-                        listOf("中文" to "zh", "English" to "en").forEach { (name, code) ->
+                        listOf(context.getString(R.string.chinese) to "zh", context.getString(R.string.english) to "en").forEach { (name, code) ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -344,7 +347,7 @@ fun AppearanceSettingsScreen(
                             color = MiuixTheme.colorScheme.surfaceVariant
                         )
                     ) {
-                        Text(text = "取消", fontWeight = FontWeight.Bold)
+                        Text(text = context.getString(R.string.cancel), fontWeight = FontWeight.Bold)
                     }
                 }
             }

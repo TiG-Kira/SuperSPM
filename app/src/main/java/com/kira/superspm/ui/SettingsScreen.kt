@@ -46,8 +46,10 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Extension
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import org.koin.androidx.compose.getViewModel
+import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.koin.androidx.compose.getViewModel
 
 @Composable
 fun SettingsScreen(
@@ -58,6 +60,7 @@ fun SettingsScreen(
     onRedDotConsumed: () -> Unit = {}
 ) {
     val viewModel: SettingsViewModel = getViewModel()
+    val context = LocalContext.current
 
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = getPageBackgroundColor(isDark)
@@ -65,11 +68,11 @@ fun SettingsScreen(
     var searchQuery by remember { mutableStateOf("") }
 
     val settingsItems = listOf(
-        Triple(Icons.Filled.Palette, "外观", "暗色模式、速度单位显示") to { navController.navigate("settings/appearance") },
-        Triple(Icons.Filled.Speed, "测速方式和逻辑", "位置刷新、省电模式、传感器计速") to { navController.navigate("settings/location") },
-        Triple(Icons.Filled.History, "历史记录管理", "记录管理、数据统计") to { navController.navigate("settings/history") },
-        Triple(Icons.Filled.Extension, "插件管理", "导入、启用、删除插件") to { navController.navigate("settings/plugins") },
-        Triple(Icons.Filled.Info, "关于", if (hasUpdate) "发现新版本" else "应用信息、开源项目") to {
+        Triple(Icons.Filled.Palette, context.getString(R.string.appearance_display), context.getString(R.string.appearance_subtitle)) to { navController.navigate("settings/appearance") },
+        Triple(Icons.Filled.Speed, context.getString(R.string.speed_method_logic), context.getString(R.string.location_subtitle)) to { navController.navigate("settings/location") },
+        Triple(Icons.Filled.History, context.getString(R.string.history_management), context.getString(R.string.history_subtitle)) to { navController.navigate("settings/history") },
+        Triple(Icons.Filled.Extension, context.getString(R.string.plugin_management), context.getString(R.string.plugin_subtitle)) to { navController.navigate("settings/plugins") },
+        Triple(Icons.Filled.Info, context.getString(R.string.about), if (hasUpdate) context.getString(R.string.new_version_found) else context.getString(R.string.about_subtitle)) to {
             onRedDotConsumed()
             navController.navigate("about")
         }
@@ -83,7 +86,7 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "设置",
+                title = context.getString(R.string.title_settings),
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor
             )
@@ -97,7 +100,7 @@ fun SettingsScreen(
             contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
         ) {
             item {
-                SearchBar(hint = "搜索设置", onSearch = { searchQuery = it })
+                SearchBar(hint = context.getString(R.string.search_settings), onSearch = { searchQuery = it })
             }
 
             if (filteredItems.isEmpty()) {
@@ -109,7 +112,7 @@ fun SettingsScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "未找到匹配的设置项",
+                            text = context.getString(R.string.no_matching_settings),
                             style = TextStyle(
                                 fontSize = 14.sp,
                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -127,7 +130,8 @@ fun SettingsScreen(
                             title = title,
                             subtitle = subtitle,
                             hasRedDot = index == 4 && hasUpdate && showRedDot,
-                            onClick = onClick
+                            onClick = onClick,
+                            isUpdateItem = index == 4 && hasUpdate
                         )
                     }
                 }
@@ -146,7 +150,8 @@ fun SettingNavItem(
     title: String,
     subtitle: String,
     hasRedDot: Boolean = false,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isUpdateItem: Boolean = false
 ) {
     Card(
         modifier = Modifier
@@ -187,7 +192,7 @@ fun SettingNavItem(
                         text = subtitle,
                         style = TextStyle(
                             fontSize = 13.sp,
-                            color = if (subtitle == "发现新版本") MiuixTheme.colorScheme.error else MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            color = if (isUpdateItem) MiuixTheme.colorScheme.error else MiuixTheme.colorScheme.onSurfaceVariantSummary
                         ),
                         modifier = Modifier.padding(top = 2.dp)
                     )
@@ -206,7 +211,7 @@ fun SettingNavItem(
                 }
                 Icon(
                     imageVector = Icons.Filled.ArrowRight,
-                    contentDescription = "箭头",
+                    contentDescription = "arrow",
                     tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     modifier = Modifier.size(24.dp)
                 )

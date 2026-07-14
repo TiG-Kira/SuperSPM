@@ -120,7 +120,7 @@ class LocationService : Service(), LocationListener {
         fun requestSingleUpdate(context: Context) {
             val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                onError?.invoke("位置权限未授予")
+                onError?.invoke(context.getString(R.string.location_permission_not_granted))
                 return
             }
 
@@ -199,12 +199,12 @@ class LocationService : Service(), LocationListener {
 
         if (!isSensorMode) {
             if (!checkPermissions()) {
-                onError?.invoke("位置权限未授予")
+                onError?.invoke(getString(R.string.location_permission_not_granted))
                 return START_STICKY
             }
 
             if (!isGpsEnabled()) {
-                onError?.invoke("GPS 未开启")
+                onError?.invoke(getString(R.string.gps_not_enabled))
             }
         }
 
@@ -242,9 +242,9 @@ class LocationService : Service(), LocationListener {
                 this
             )
         } catch (e: SecurityException) {
-            onError?.invoke("位置权限被拒绝: ${e.message}")
+            onError?.invoke(getString(R.string.location_permission_denied_with_message, e.message))
         } catch (e: Exception) {
-            onError?.invoke("启动位置服务失败: ${e.message}")
+            onError?.invoke(getString(R.string.start_location_service_failed_with_message, e.message))
         }
 
         try {
@@ -327,9 +327,9 @@ class LocationService : Service(), LocationListener {
                 recordRepository.allRecords.first()
             }
             val count = records.size + 1
-            "记录 $count"
+            "${getString(R.string.record)} $count"
         } catch (e: Exception) {
-            "记录 ${System.currentTimeMillis()}"
+            "${getString(R.string.record)} ${System.currentTimeMillis()}"
         }
     }
 
@@ -433,7 +433,7 @@ class LocationService : Service(), LocationListener {
         if (provider == LocationManager.GPS_PROVIDER) {
             isGpsActive = false
             onStatusChange?.invoke(false)
-            onError?.invoke("GPS 已关闭")
+            onError?.invoke(getString(R.string.gps_turned_off))
         }
     }
 
@@ -461,7 +461,7 @@ class LocationService : Service(), LocationListener {
 
     fun requestSingleUpdate() {
         if (!checkPermissions()) {
-            onError?.invoke("位置权限未授予")
+            onError?.invoke(getString(R.string.location_permission_not_granted))
             return
         }
 
@@ -489,10 +489,10 @@ class LocationService : Service(), LocationListener {
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "位置服务",
+            getString(R.string.location_service),
             NotificationManager.IMPORTANCE_LOW
         )
-        channel.description = "显示实时测速信息"
+        channel.description = getString(R.string.realtime_speed_info)
         channel.setSound(null, null)
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
@@ -519,7 +519,7 @@ class LocationService : Service(), LocationListener {
 
         return buildNotificationBuilder(pendingIntent)
             .setContentText(getString(R.string.recording))
-            .addAction(0, "停止", stopPendingIntent)
+            .addAction(0, getString(R.string.stop), stopPendingIntent)
             .build()
     }
 
@@ -543,11 +543,11 @@ class LocationService : Service(), LocationListener {
         )
 
         val notificationBuilder = buildNotificationBuilder(pendingIntent)
-            .setContentText("速度: ${String.format("%.0f", currentSpeed)} km/h")
-            .addAction(0, "停止", stopPendingIntent)
+            .setContentText(String.format(getString(R.string.notification_speed), currentSpeed))
+            .addAction(0, getString(R.string.stop), stopPendingIntent)
 
         val bigText = String.format(
-            "当前速度: %.0f km/h | 最高速度: %.0f km/h\n平均速度: %.0f km/h | 总里程: %.2f km\n点击通知进入测速页。",
+            getString(R.string.notification_summary),
             currentSpeed, maxSpeed, avgSpeed, totalDistance
         )
         notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
@@ -557,7 +557,7 @@ class LocationService : Service(), LocationListener {
     }
 
     private fun buildNotificationBuilder(pendingIntent: PendingIntent): NotificationCompat.Builder {
-        val notificationTitle = if (isSensorMode) "使用传感器测速中" else "使用 GPS 测速中"
+        val notificationTitle = if (isSensorMode) getString(R.string.sensor_speed_measuring) else getString(R.string.gps_speed_measuring)
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(notificationTitle)
             .setSmallIcon(R.drawable.ic_launcher_foreground)

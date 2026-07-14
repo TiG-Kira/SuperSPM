@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -84,13 +85,13 @@ fun PluginScreen(
                         if (plugin?.config?.requiresRestart == true) {
                             showRestartDialog = true
                         }
-                        importMessage = "插件 ${plugin?.config?.name} 导入成功"
+                        importMessage = context.getString(R.string.import_success, plugin?.config?.name)
                     } else {
-                        importMessage = "导入失败: ${result.exceptionOrNull()?.message}"
+                        importMessage = "${context.getString(R.string.import_failed)}: ${result.exceptionOrNull()?.message}"
                     }
                 }
             } catch (e: Exception) {
-                importMessage = "导入失败: ${e.message}"
+                importMessage = "${context.getString(R.string.import_failed)}: ${e.message}"
             }
         }
     }
@@ -98,7 +99,7 @@ fun PluginScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "插件管理",
+                title = context.getString(R.string.plugin_management),
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor,
                 navigationIcon = {
@@ -112,7 +113,7 @@ fun PluginScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "返回",
+                            contentDescription = context.getString(R.string.back),
                             tint = if (isDark) Color.White else Color.Black,
                             modifier = Modifier.size(24.dp)
                         )
@@ -126,7 +127,7 @@ fun PluginScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "导入",
+                            text = context.getString(R.string.import_plugin),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -153,7 +154,7 @@ fun PluginScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "插件说明",
+                            text = context.getString(R.string.plugin_description),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -161,17 +162,17 @@ fun PluginScreen(
                             )
                         )
                         Text(
-                            text = "插件允许开发者扩展 SuperSPM 的功能。插件以 .zip 压缩包形式导入，包含 plugin.json 配置文件和资源文件。\n\n" +
-                                "插件类型：\n" +
-                                "• WebUI 插件：使用 HTML/CSS/JS 开发，通过 WebView 运行，可调用 SpeedData 接口获取测速数据\n" +
-                                "• Native 插件：使用内置 Kotlin/Java 库开发\n\n" +
-                                "权限说明：\n" +
-                                "• speed_data：实时速度数据（速度、距离、传感器数据等）\n" +
-                                "• history_query：历史记录查询权限（只读，不支持修改和删除）\n\n" +
-                                "限制：\n" +
-                                "• 插件运行在沙盒环境中，仅能访问 plugin.json 中声明的权限\n" +
-                                "• 插件不可修改应用核心逻辑\n" +
-                                "• 插件导入后立即生效，标记为需要重启的插件需手动重启应用",
+                            text = "${context.getString(R.string.plugin_intro)}\n\n" +
+                                "${context.getString(R.string.plugin_types)}\n" +
+                                "${context.getString(R.string.webui_plugin_desc)}\n" +
+                                "${context.getString(R.string.native_plugin_desc)}\n\n" +
+                                "${context.getString(R.string.permission_desc)}\n" +
+                                "${context.getString(R.string.speed_data_permission)}\n" +
+                                "${context.getString(R.string.history_query_permission)}\n\n" +
+                                "${context.getString(R.string.limitations)}\n" +
+                                "${context.getString(R.string.sandbox_limit)}\n" +
+                                "${context.getString(R.string.core_logic_limit)}\n" +
+                                "${context.getString(R.string.restart_limit)}",
                             style = TextStyle(
                                 fontSize = 13.sp,
                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -199,7 +200,7 @@ fun PluginScreen(
                     ) {
                         Column {
                             Text(
-                                text = "插件配置模板",
+                                text = context.getString(R.string.plugin_config_template),
                                 style = TextStyle(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold,
@@ -207,7 +208,7 @@ fun PluginScreen(
                                 )
                             )
                             Text(
-                                text = "查看配置模板和示例代码",
+                                text = context.getString(R.string.view_config_template),
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -217,7 +218,7 @@ fun PluginScreen(
                         }
                         Icon(
                             imageVector = Icons.Filled.ArrowRight,
-                            contentDescription = "进入",
+                            contentDescription = context.getString(R.string.enter),
                             tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             modifier = Modifier.size(20.dp)
                         )
@@ -244,7 +245,7 @@ fun PluginScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "暂无插件",
+                                text = context.getString(R.string.no_plugins),
                                 style = TextStyle(
                                     fontSize = 14.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -252,7 +253,7 @@ fun PluginScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "点击右上角\"导入\"按钮导入插件",
+                                text = context.getString(R.string.import_hint),
                                 style = TextStyle(
                                     fontSize = 12.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -263,12 +264,12 @@ fun PluginScreen(
                 }
             } else {
                 item {
-                    SearchBar(hint = "搜索插件", onSearch = { searchQuery = it })
+                    SearchBar(hint = context.getString(R.string.search_plugins), onSearch = { searchQuery = it })
                 }
 
                 item {
                     Text(
-                        text = "已安装插件 (${filteredPlugins.size})",
+                        text = "${context.getString(R.string.installed_plugins)} (${filteredPlugins.size})",
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -374,7 +375,7 @@ fun PluginScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
-                                    contentDescription = "删除",
+                                    contentDescription = context.getString(R.string.delete),
                                     tint = Color(0xFFFF5252),
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -395,7 +396,7 @@ fun PluginScreen(
             Card {
                 Column(modifier = Modifier.padding(24.dp)) {
                     Text(
-                        text = "需要重启应用",
+                        text = context.getString(R.string.restart_required),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -404,7 +405,7 @@ fun PluginScreen(
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
                     Text(
-                        text = "该插件需要重启应用才能完全生效。是否立即重启？",
+                        text = context.getString(R.string.restart_required_desc),
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -422,7 +423,7 @@ fun PluginScreen(
                                 color = MiuixTheme.colorScheme.surfaceVariant
                             )
                         ) {
-                            Text(text = "稍后", fontWeight = FontWeight.Bold)
+                            Text(text = context.getString(R.string.later), fontWeight = FontWeight.Bold)
                         }
                         top.yukonga.miuix.kmp.basic.Button(
                             onClick = {
@@ -437,7 +438,7 @@ fun PluginScreen(
                                 color = MiuixTheme.colorScheme.primary
                             )
                         ) {
-                            Text(text = "立即重启", fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(text = context.getString(R.string.restart_now), fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }
@@ -464,7 +465,7 @@ fun PluginScreen(
                             color = MiuixTheme.colorScheme.primary
                         )
                     ) {
-                        Text(text = "确定", fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(text = context.getString(R.string.ok), fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }

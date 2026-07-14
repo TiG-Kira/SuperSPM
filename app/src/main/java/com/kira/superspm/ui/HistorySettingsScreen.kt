@@ -46,12 +46,14 @@ import androidx.compose.material.icons.filled.History
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kira.superspm.R
 
 @Composable
 fun HistorySettingsScreen(
     isDark: Boolean = false,
     navController: NavHostController
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val historyViewModel: HistoryViewModel = getViewModel()
     val records by historyViewModel.records.collectAsStateWithLifecycle(emptyList())
 
@@ -67,7 +69,7 @@ fun HistorySettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "历史记录管理",
+                title = context.getString(R.string.history_management),
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor,
                 navigationIcon = {
@@ -81,7 +83,7 @@ fun HistorySettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "返回",
+                            contentDescription = context.getString(R.string.back),
                             tint = if (isDark) Color.White else Color.Black,
                             modifier = Modifier.size(24.dp)
                         )
@@ -120,7 +122,7 @@ fun HistorySettingsScreen(
                             modifier = Modifier.padding(start = 16.dp)
                         ) {
                             Text(
-                                text = "本页说明",
+                                text = context.getString(R.string.page_description),
                                 style = TextStyle(
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
@@ -128,7 +130,7 @@ fun HistorySettingsScreen(
                                 )
                             )
                             Text(
-                                text = "本页面可对历史记录进行修改。包括查看记录统计、清空全部记录。",
+                                text = context.getString(R.string.history_settings_desc),
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -142,7 +144,7 @@ fun HistorySettingsScreen(
 
             item {
                 Text(
-                    text = "数据统计",
+                    text = context.getString(R.string.data_stats),
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -179,7 +181,7 @@ fun HistorySettingsScreen(
                                 )
                             )
                             Text(
-                                text = "总记录数",
+                                text = context.getString(R.string.total_records),
                                 style = TextStyle(
                                     fontSize = 12.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -208,7 +210,7 @@ fun HistorySettingsScreen(
                                 )
                             )
                             Text(
-                                text = "数据总大小",
+                                text = context.getString(R.string.total_size),
                                 style = TextStyle(
                                     fontSize = 12.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -221,7 +223,7 @@ fun HistorySettingsScreen(
 
             item {
                 Text(
-                    text = "记录管理",
+                    text = context.getString(R.string.record_management),
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -246,7 +248,7 @@ fun HistorySettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "清空全部记录",
+                            text = context.getString(R.string.clear_all_records),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -255,7 +257,7 @@ fun HistorySettingsScreen(
                         )
                         Icon(
                             imageVector = Icons.Filled.ArrowRight,
-                            contentDescription = "箭头",
+                            contentDescription = context.getString(R.string.arrow),
                             tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -276,7 +278,7 @@ fun HistorySettingsScreen(
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "清空全部记录",
+                        text = context.getString(R.string.clear_all_records),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -285,7 +287,7 @@ fun HistorySettingsScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     Text(
-                        text = "确定清空所有历史记录？此操作无法撤销。",
+                        text = context.getString(R.string.confirm_clear_all),
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -303,7 +305,7 @@ fun HistorySettingsScreen(
                                 color = MiuixTheme.colorScheme.surfaceVariant
                             )
                         ) {
-                            Text(text = "取消", fontWeight = FontWeight.Bold)
+                            Text(text = context.getString(R.string.cancel), fontWeight = FontWeight.Bold)
                         }
                         Button(
                             onClick = {
@@ -315,7 +317,7 @@ fun HistorySettingsScreen(
                                 color = MiuixTheme.colorScheme.error
                             )
                         ) {
-                            Text(text = "清空", fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(text = context.getString(R.string.clear), fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }

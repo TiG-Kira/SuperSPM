@@ -33,6 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 import com.kira.superspm.plugin.Plugin
 import com.kira.superspm.plugin.data.AnalysisResult
 import com.kira.superspm.plugin.data.SpeedData
@@ -47,6 +49,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import android.content.Context
 
 @Composable
 fun PluginNativePage(
@@ -54,6 +57,7 @@ fun PluginNativePage(
     pluginName: String,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = MiuixTheme.colorScheme.background
 
@@ -112,7 +116,7 @@ fun PluginNativePage(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "返回",
+                            contentDescription = context.getString(R.string.back),
                             tint = MiuixTheme.colorScheme.onSurface
                         )
                     }
@@ -138,7 +142,7 @@ fun PluginNativePage(
                             .padding(60.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "加载中...")
+                        Text(text = context.getString(R.string.loading))
                     }
                 }
             } else {
@@ -162,7 +166,7 @@ fun PluginNativePage(
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
-                                    text = result?.title ?: "分析中...",
+                                    text = result?.title ?: context.getString(R.string.analyzing),
                                     style = TextStyle(
                                         fontSize = 24.sp,
                                         fontWeight = FontWeight.Bold,
@@ -171,7 +175,7 @@ fun PluginNativePage(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = result?.description ?: "正在获取数据...",
+                                    text = result?.description ?: context.getString(R.string.getting_data),
                                     style = TextStyle(
                                         fontSize = 14.sp,
                                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -189,7 +193,7 @@ fun PluginNativePage(
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "实时数据",
+                                    text = context.getString(R.string.real_time_data),
                                     style = TextStyle(
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold,
@@ -215,7 +219,7 @@ fun PluginNativePage(
                                             )
                                         )
                                         Text(
-                                            text = "当前速度",
+                                            text = context.getString(R.string.current_speed),
                                             style = TextStyle(
                                                 fontSize = 12.sp,
                                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -232,7 +236,7 @@ fun PluginNativePage(
                                             )
                                         )
                                         Text(
-                                            text = "平均速度",
+                                            text = context.getString(R.string.avg_speed),
                                             style = TextStyle(
                                                 fontSize = 12.sp,
                                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -249,7 +253,7 @@ fun PluginNativePage(
                                             )
                                         )
                                         Text(
-                                            text = "最高速度",
+                                            text = context.getString(R.string.max_speed),
                                             style = TextStyle(
                                                 fontSize = 12.sp,
                                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -269,7 +273,7 @@ fun PluginNativePage(
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "运动建议",
+                                    text = context.getString(R.string.sport_suggestions),
                                     style = TextStyle(
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold,
@@ -278,7 +282,7 @@ fun PluginNativePage(
                                     modifier = Modifier.padding(bottom = 8.dp)
                                 )
                                 Text(
-                                    text = result?.advice ?: "等待数据...",
+                                    text = result?.advice ?: context.getString(R.string.waiting_data),
                                     style = TextStyle(
                                         fontSize = 14.sp,
                                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -299,7 +303,7 @@ fun PluginNativePage(
                             ) {
                                 Column(modifier = Modifier.padding(16.dp)) {
                                     Text(
-                                        text = "分析指标",
+                                        text = context.getString(R.string.analysis_metrics),
                                         style = TextStyle(
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold,
@@ -315,7 +319,7 @@ fun PluginNativePage(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = mapMetricKey(key),
+                                                text = mapMetricKey(key, context),
                                                 style = TextStyle(
                                                     fontSize = 14.sp,
                                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -344,7 +348,7 @@ fun PluginNativePage(
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "参考标准",
+                                    text = context.getString(R.string.reference_standards),
                                     style = TextStyle(
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold,
@@ -353,11 +357,11 @@ fun PluginNativePage(
                                     modifier = Modifier.padding(bottom = 12.dp)
                                 )
                                 val standards = listOf(
-                                    "3-5 km/h → 慢走",
-                                    "5-7 km/h → 快走",
-                                    "7-10 km/h → 慢跑",
-                                    "10-14 km/h → 中速跑",
-                                    "14+ km/h → 快跑"
+                                    "3-5 km/h → ${context.getString(R.string.slow_walk)}",
+                                    "5-7 km/h → ${context.getString(R.string.fast_walk)}",
+                                    "7-10 km/h → ${context.getString(R.string.slow_jog)}",
+                                    "10-14 km/h → ${context.getString(R.string.medium_run)}",
+                                    "14+ km/h → ${context.getString(R.string.fast_run)}"
                                 )
                                 standards.forEach { standard ->
                                     Text(
@@ -374,7 +378,7 @@ fun PluginNativePage(
                     }
                 } else {
                     item {
-                        PluginErrorContent()
+                        PluginErrorContent(context)
                     }
                 }
             }
@@ -383,7 +387,7 @@ fun PluginNativePage(
 }
 
 @Composable
-fun PluginErrorContent() {
+fun PluginErrorContent(context: Context) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -399,7 +403,7 @@ fun PluginErrorContent() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "插件加载失败",
+            text = context.getString(R.string.plugin_load_failed),
             style = TextStyle(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
@@ -408,7 +412,7 @@ fun PluginErrorContent() {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "无法加载插件的主类，请检查插件是否完整或尝试重新导入。",
+            text = context.getString(R.string.plugin_load_error_desc),
             style = TextStyle(
                 fontSize = 14.sp,
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -418,23 +422,23 @@ fun PluginErrorContent() {
     }
 }
 
-fun mapMetricKey(key: String): String {
+fun mapMetricKey(key: String, context: Context): String {
     return when (key) {
-        "speed" -> "速度"
-        "stepFrequency" -> "步频"
-        "steps" -> "步数"
-        "pace" -> "配速"
-        "duration" -> "时长"
-        "distance" -> "里程"
-        "heartRate" -> "心率"
-        "avgHeartRate" -> "平均心率"
-        "calories" -> "消耗热量"
-        "totalDistance" -> "总里程"
-        "maxSpeed" -> "最高速度"
-        "avgSpeed" -> "平均速度"
-        "recordCount" -> "记录次数"
-        "currentSpeed" -> "当前速度"
-        "todayDistance" -> "本次里程"
+        "speed" -> context.getString(R.string.max_speed)
+        "stepFrequency" -> context.getString(R.string.step_frequency)
+        "steps" -> context.getString(R.string.steps)
+        "pace" -> context.getString(R.string.pace)
+        "duration" -> context.getString(R.string.duration)
+        "distance" -> context.getString(R.string.distance)
+        "heartRate" -> context.getString(R.string.heart_rate)
+        "avgHeartRate" -> context.getString(R.string.avg_heart_rate)
+        "calories" -> context.getString(R.string.calories)
+        "totalDistance" -> context.getString(R.string.total_distance)
+        "maxSpeed" -> context.getString(R.string.max_speed)
+        "avgSpeed" -> context.getString(R.string.avg_speed)
+        "recordCount" -> context.getString(R.string.record_count)
+        "currentSpeed" -> context.getString(R.string.current_speed)
+        "todayDistance" -> context.getString(R.string.today_distance)
         else -> key
     }
 }

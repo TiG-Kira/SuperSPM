@@ -19,8 +19,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.kira.superspm.R
 import com.kira.superspm.data.model.PluginConfig
 import com.kira.superspm.service.LocationService
 import com.kira.superspm.utils.PluginManager
@@ -43,7 +45,7 @@ fun PluginWebPage(
 ) {
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = MiuixTheme.colorScheme.background
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
 
     var webView by remember { mutableStateOf<WebView?>(null) }
     var isRunning by remember { mutableStateOf(true) }
@@ -65,7 +67,7 @@ fun PluginWebPage(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "返回",
+                            contentDescription = context.getString(R.string.back),
                             tint = MiuixTheme.colorScheme.onSurface
                         )
                     }
@@ -106,7 +108,7 @@ fun PluginWebPage(
                             wv.loadUrl("file://${entryFile.absolutePath}")
                         } else {
                             wv.loadData(
-                                "<html><body><h1>Error</h1><p>入口文件 ${config?.entry ?: "index.html"} 未找到</p></body></html>",
+                                "<html><body><h1>Error</h1><p>${context.getString(R.string.plugin_entry_not_found, config?.entry ?: "index.html")}</p></body></html>",
                                 "text/html",
                                 "UTF-8"
                             )

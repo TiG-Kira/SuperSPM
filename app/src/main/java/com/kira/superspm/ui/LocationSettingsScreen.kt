@@ -45,12 +45,15 @@ import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Speed
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.koin.androidx.compose.getViewModel
+import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 
 @Composable
 fun LocationSettingsScreen(
     isDark: Boolean = false,
     navController: NavHostController
 ) {
+    val context = LocalContext.current
     val viewModel: SettingsViewModel = getViewModel()
 
     var showRefreshTimeDialog by remember { mutableStateOf(false) }
@@ -61,7 +64,7 @@ fun LocationSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "测速方式和逻辑",
+                title = context.getString(R.string.speed_method_logic),
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor,
                 navigationIcon = {
@@ -75,7 +78,7 @@ fun LocationSettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "返回",
+                            contentDescription = context.getString(R.string.back),
                             tint = MiuixTheme.colorScheme.onSurface
                         )
                     }
@@ -113,7 +116,7 @@ fun LocationSettingsScreen(
                             modifier = Modifier.padding(start = 16.dp)
                         ) {
                             Text(
-                                text = "本页说明",
+                                text = context.getString(R.string.page_description),
                                 style = TextStyle(
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
@@ -121,7 +124,7 @@ fun LocationSettingsScreen(
                                 )
                             )
                             Text(
-                                text = "本页面可对定位、测速方式和逻辑进行修改。包括位置刷新时间设置、省电模式开关、传感器计速开关。",
+                                text = context.getString(R.string.location_settings_desc),
                                 style = TextStyle(
                                     fontSize = 13.sp,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -135,7 +138,7 @@ fun LocationSettingsScreen(
 
             item {
                 Text(
-                    text = "位置刷新",
+                    text = context.getString(R.string.location_refresh),
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -146,8 +149,8 @@ fun LocationSettingsScreen(
 
             item {
                 SettingClickableItem(
-                    title = "自定义位置刷新时间",
-                    value = if (viewModel.refreshTime == 0) "实时" else "${viewModel.refreshTime} 秒",
+                    title = context.getString(R.string.refresh_time),
+                    value = if (viewModel.refreshTime == 0) context.getString(R.string.real_time) else "${viewModel.refreshTime} ${context.getString(R.string.seconds)}",
                     onClick = { showRefreshTimeDialog = true }
                 )
             }
@@ -159,12 +162,12 @@ fun LocationSettingsScreen(
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     SettingSwitchItem(
-                        title = "省电模式",
+                        title = context.getString(R.string.power_saving),
                         checked = viewModel.powerSaving,
                         onCheckedChange = { viewModel.updatePowerSaving(it) },
                         description = when {
-                            viewModel.accelerometerEnabled -> "省电模式只能在 GPS 模式应用，打开后，将对 GPS 采集方式与间隔作出限制，对传感器采集方式无效"
-                            viewModel.powerSaving -> "暗色模式将自动启用（重启后生效），GPS 位置与速度采集刷新间隔延长"
+                            viewModel.accelerometerEnabled -> context.getString(R.string.power_saving_desc_sensor)
+                            viewModel.powerSaving -> context.getString(R.string.power_saving_desc_gps)
                             else -> null
                         }
                     )
@@ -173,7 +176,7 @@ fun LocationSettingsScreen(
 
             item {
                 Text(
-                    text = "传感器测速",
+                    text = context.getString(R.string.sensor_speed),
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -189,10 +192,10 @@ fun LocationSettingsScreen(
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     SettingSwitchItem(
-                        title = "启用传感器计速",
+                        title = context.getString(R.string.enable_sensor_speed),
                         checked = viewModel.accelerometerEnabled,
                         onCheckedChange = { viewModel.updateAccelerometerEnabled(it) },
-                        description = "启用选择传感器计速方式，开启后，可在主页中可选择使用传感器测速"
+                        description = context.getString(R.string.enable_sensor_speed_desc2)
                     )
                 }
             }
@@ -210,7 +213,7 @@ fun LocationSettingsScreen(
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "设置位置刷新时间",
+                        text = context.getString(R.string.set_location_refresh_time),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -234,7 +237,7 @@ fun LocationSettingsScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = if (time == 0) "实时" else "$time 秒",
+                                    text = if (time == 0) context.getString(R.string.real_time) else "$time ${context.getString(R.string.seconds)}",
                                     style = TextStyle(
                                         fontSize = 16.sp,
                                         color = MiuixTheme.colorScheme.onSurface
@@ -260,7 +263,7 @@ fun LocationSettingsScreen(
                             color = MiuixTheme.colorScheme.surfaceVariant
                         )
                     ) {
-                        Text(text = "取消", fontWeight = FontWeight.Bold)
+                        Text(text = context.getString(R.string.cancel), fontWeight = FontWeight.Bold)
                     }
                 }
             }

@@ -56,12 +56,15 @@ import org.koin.androidx.compose.getViewModel
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import androidx.compose.ui.platform.LocalContext
+import com.kira.superspm.R
 
 @Composable
 fun HistoryScreen(
     recordClick: (Long) -> Unit,
     isDark: Boolean = false
 ) {
+    val context = LocalContext.current
     val viewModel: HistoryViewModel = getViewModel()
     val settingsViewModel: SettingsViewModel = getViewModel()
     val records by viewModel.records.collectAsStateWithLifecycle(emptyList())
@@ -80,7 +83,7 @@ fun HistoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "历史记录",
+                title = context.getString(R.string.title_history),
                 scrollBehavior = scrollBehavior,
                 color = backgroundColor
             )
@@ -100,7 +103,7 @@ fun HistoryScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = if (searchQuery.isEmpty()) "暂无记录" else "未找到匹配的记录",
+                        text = if (searchQuery.isEmpty()) context.getString(R.string.no_records) else context.getString(R.string.no_matching_records),
                         style = TextStyle(
                             fontSize = 16.sp,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -116,7 +119,7 @@ fun HistoryScreen(
                     contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
                 ) {
                     item {
-                        SearchBar(hint = "搜索记录", onSearch = { searchQuery = it })
+                        SearchBar(hint = context.getString(R.string.search_records), onSearch = { searchQuery = it })
                     }
 
                     items(filteredRecords) { record ->
@@ -148,7 +151,7 @@ fun HistoryScreen(
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "重命名记录",
+                        text = context.getString(R.string.rename_record),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -159,7 +162,7 @@ fun HistoryScreen(
                     TextField(
                         value = editingName,
                         onValueChange = { editingName = it },
-                        label = "输入名称",
+                        label = context.getString(R.string.enter_name),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     Row(
@@ -173,7 +176,7 @@ fun HistoryScreen(
                                 color = MiuixTheme.colorScheme.surfaceVariant
                             )
                         ) {
-                            Text(text = "取消", fontWeight = FontWeight.Bold)
+                            Text(text = context.getString(R.string.cancel), fontWeight = FontWeight.Bold)
                         }
                         Button(
                             onClick = {
@@ -187,7 +190,7 @@ fun HistoryScreen(
                                 color = MiuixTheme.colorScheme.primary
                             )
                         ) {
-                            Text(text = "保存", fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(text = context.getString(R.string.save), fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }
@@ -202,7 +205,7 @@ fun HistoryScreen(
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "删除记录",
+                        text = context.getString(R.string.delete_record),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -211,7 +214,7 @@ fun HistoryScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     Text(
-                        text = "确定删除此记录？",
+                        text = context.getString(R.string.confirm_delete),
                         style = TextStyle(
                             fontSize = 14.sp,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -229,7 +232,7 @@ fun HistoryScreen(
                                 color = MiuixTheme.colorScheme.surfaceVariant
                             )
                         ) {
-                            Text(text = "取消", fontWeight = FontWeight.Bold)
+                            Text(text = context.getString(R.string.cancel), fontWeight = FontWeight.Bold)
                         }
                         Button(
                             onClick = {
@@ -241,7 +244,7 @@ fun HistoryScreen(
                                 color = MiuixTheme.colorScheme.error
                             )
                         ) {
-                            Text(text = "删除", fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(text = context.getString(R.string.delete), fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }
@@ -258,6 +261,7 @@ fun RecordItem(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -284,7 +288,7 @@ fun RecordItem(
                 )
                 Icon(
                     imageVector = Icons.Filled.ArrowRight,
-                    contentDescription = "箭头",
+                    contentDescription = context.getString(R.string.arrow),
                     tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     modifier = Modifier.size(24.dp)
                 )
@@ -307,22 +311,22 @@ fun RecordItem(
             ) {
                 HistoryStatCard(
                     value = formatSpeed(record.maxSpeed, speedUnit),
-                    label = "最高",
+                    label = context.getString(R.string.max),
                     unit = getSpeedUnitString(speedUnit)
                 )
                 HistoryStatCard(
                     value = String.format("%.2f", record.totalDistance),
-                    label = "总里程",
+                    label = context.getString(R.string.total_distance),
                     unit = "km"
                 )
                 HistoryStatCard(
                     value = formatSpeed(record.avgSpeed, speedUnit),
-                    label = "均速",
+                    label = context.getString(R.string.avg),
                     unit = getSpeedUnitString(speedUnit)
                 )
                 HistoryStatCard(
                     value = record.dataPoints.toString(),
-                    label = "数据点",
+                    label = context.getString(R.string.data_points),
                     unit = ""
                 )
             }
@@ -342,7 +346,7 @@ fun RecordItem(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Edit,
-                        contentDescription = "编辑",
+                        contentDescription = context.getString(R.string.edit),
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -354,7 +358,7 @@ fun RecordItem(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
-                        contentDescription = "删除",
+                        contentDescription = context.getString(R.string.delete),
                         tint = MiuixTheme.colorScheme.error,
                         modifier = Modifier.size(20.dp)
                     )
