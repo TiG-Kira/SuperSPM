@@ -1,5 +1,6 @@
 package com.kira.superspm.ui
 
+import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +11,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kira.superspm.data.store.NavBarStyle
+import com.kira.superspm.ui.glass.LiquidGlassNavigationBarItem
+import com.kira.superspm.ui.glass.LiquidGlassNavigationBarWithIndicator
+import com.kira.superspm.ui.glass.NavStyle
+import com.kira.superspm.ui.glass.computeNavDimensions
+import com.kira.superspm.viewmodel.SettingsViewModel
+import org.koin.androidx.compose.getViewModel
+import top.yukonga.miuix.kmp.blur.layerBackdrop as miuixLayerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop as rememberMiuixLayerBackdrop
+import top.yukonga.miuix.kmp.glass.GlassNavigationBar
+import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -70,6 +85,18 @@ fun AppNavHost(
     val backgroundColor = getPageBackgroundColor(isDark)
     val scope = rememberCoroutineScope()
 
+    // ---- 悬浮玻璃底栏（对齐 KiTerminal-UX）----
+    // 玻璃/液态都依赖 RuntimeShader，Android 13（API 33）起才可用；低版本一律走经典底栏。
+    val settingsViewModel: SettingsViewModel = getViewModel()
+    val navBarStyle = settingsViewModel.navBarStyle
+    val glassSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    val useGlassNav = glassSupported && navBarStyle == NavBarStyle.GLASS
+    val useLiquidNav = glassSupported && navBarStyle == NavBarStyle.LIQUID
+    // 取景层：页面内容先被捕获进 backdrop，导航栏再折射它。仅在对应样式下创建，
+    // 避免低版本设备加载 blur/shader 相关类。
+    val liquidBackdrop = if (useLiquidNav) rememberLayerBackdrop() else null
+    val glassNavBackdrop = if (useGlassNav) rememberMiuixLayerBackdrop() else null
+
     var hasUpdate by remember { mutableStateOf(false) }
     var showRedDot by remember { mutableStateOf(false) }
 
@@ -120,6 +147,18 @@ fun AppNavHost(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
+        // 页面内容层：玻璃底栏靠它提供折射素材，因此单独包一层挂取景修饰符
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(
+                    when {
+                        useLiquidNav && liquidBackdrop != null -> Modifier.layerBackdrop(liquidBackdrop)
+                        useGlassNav && glassNavBackdrop != null -> Modifier.miuixLayerBackdrop(glassNavBackdrop)
+                        else -> Modifier
+                    }
+                )
+        ) {
         NavHost(
             navController = navController,
             startDestination = "speedometer",
@@ -245,46 +284,108 @@ fun AppNavHost(
                 }, isDark = isDark)
             }
         }
+        }
 
         if (baseRoute in listOf("speedometer", "plugins", "history", "settings", "detail", "about", "openSource", "plugin_web", "plugin_native")) {
-            NavigationBar(
-                modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
-            ) {
-                val parentRoute = when (baseRoute) {
-                    "detail" -> "history"
-                    "about" -> "settings"
-                    "openSource" -> "settings"
-                    "plugin_web" -> "plugins"
-                    "plugin_native" -> "plugins"
-                    "settings" -> "settings"
-                    "plugins" -> "plugins"
-                    else -> baseRoute
+            val tabRoutes = listOf("speedometer", "plugins", "history", "settings")
+            val tabIcons = listOf(
+                Icons.Filled.Speed,
+                Icons.Filled.Extension,
+                Icons.Filled.History,
+                Icons.Filled.Settings
+            )
+            val tabLabels = listOf(
+                context.getString(R.string.tab_speedometer),
+                context.getString(R.string.tab_plugins),
+                context.getString(R.string.tab_history),
+                context.getString(R.string.tab_settings)
+            )
+            val parentRoute = when (baseRoute) {
+                "detail" -> "history"
+                "about" -> "settings"
+                "openSource" -> "settings"
+                "plugin_web" -> "plugins"
+                "plugin_native" -> "plugins"
+                "settings" -> "settings"
+                "plugins" -> "plugins"
+                else -> baseRoute
+            }
+            val selectedIndex = tabRoutes.indexOf(parentRoute).coerceAtLeast(0)
+
+            fun navigateTo(route: String) {
+                navController.navigate(route) { launchSingleTop = true; restoreState = true }
+            }
+
+            when {
+                useLiquidNav && liquidBackdrop != null -> {
+                    val dims = computeNavDimensions(tabRoutes.size, NavStyle.GLASS)
+                    LiquidGlassNavigationBarWithIndicator(
+                        selectedIndex = selectedIndex,
+                        itemCount = tabRoutes.size,
+                        backdrop = liquidBackdrop,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                        onIndexChange = { navigateTo(tabRoutes[it]) }
+                    ) { onPositioned ->
+                        tabRoutes.forEachIndexed { index, route ->
+                            LiquidGlassNavigationBarItem(
+                                icon = tabIcons[index],
+                                label = tabLabels[index],
+                                selected = selectedIndex == index,
+                                onClick = { navigateTo(route) },
+                                dims = dims,
+                                index = index,
+                                onPositioned = onPositioned
+                            )
+                        }
+                    }
                 }
 
-                NavigationBarItem(
-                    selected = parentRoute == "speedometer",
-                    onClick = { navController.navigate("speedometer") { launchSingleTop = true; restoreState = true } },
-                    icon = Icons.Filled.Speed,
-                    label = context.getString(R.string.tab_speedometer)
-                )
-                NavigationBarItem(
-                    selected = parentRoute == "plugins",
-                    onClick = { navController.navigate("plugins") { launchSingleTop = true; restoreState = true } },
-                    icon = Icons.Filled.Extension,
-                    label = context.getString(R.string.tab_plugins)
-                )
-                NavigationBarItem(
-                    selected = parentRoute == "history",
-                    onClick = { navController.navigate("history") { launchSingleTop = true; restoreState = true } },
-                    icon = Icons.Filled.History,
-                    label = context.getString(R.string.tab_history)
-                )
-                NavigationBarItem(
-                    selected = parentRoute == "settings",
-                    onClick = { navController.navigate("settings") { launchSingleTop = true; restoreState = true } },
-                    icon = Icons.Filled.Settings,
-                    label = context.getString(R.string.tab_settings)
-                )
+                useGlassNav && glassNavBackdrop != null -> {
+                    GlassNavigationBar(
+                        items = tabRoutes.mapIndexed { index, _ ->
+                            GlassNavigationItem(icon = tabIcons[index], label = tabLabels[index])
+                        },
+                        selectedIndex = selectedIndex,
+                        onSelect = { navigateTo(tabRoutes[it]) },
+                        backdrop = glassNavBackdrop,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(start = 24.dp, end = 24.dp, bottom = 16.dp)
+                    )
+                }
+
+                else -> {
+                    NavigationBar(
+                        modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+                    ) {
+                        NavigationBarItem(
+                            selected = selectedIndex == 0,
+                            onClick = { navigateTo("speedometer") },
+                            icon = tabIcons[0],
+                            label = tabLabels[0]
+                        )
+                        NavigationBarItem(
+                            selected = selectedIndex == 1,
+                            onClick = { navigateTo("plugins") },
+                            icon = tabIcons[1],
+                            label = tabLabels[1]
+                        )
+                        NavigationBarItem(
+                            selected = selectedIndex == 2,
+                            onClick = { navigateTo("history") },
+                            icon = tabIcons[2],
+                            label = tabLabels[2]
+                        )
+                        NavigationBarItem(
+                            selected = selectedIndex == 3,
+                            onClick = { navigateTo("settings") },
+                            icon = tabIcons[3],
+                            label = tabLabels[3]
+                        )
+                    }
+                }
             }
         }
     }

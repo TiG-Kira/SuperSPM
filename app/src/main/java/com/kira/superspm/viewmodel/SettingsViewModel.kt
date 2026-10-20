@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import com.kira.superspm.data.store.NavBarStyle
 import com.kira.superspm.data.store.SpeedUnit
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -29,6 +30,8 @@ class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewMod
     var accelerometerEnabled by mutableStateOf(false)
         private set
     var appLanguage by mutableStateOf("zh")
+        private set
+    var navBarStyle by mutableStateOf(NavBarStyle.GLASS)
         private set
 
     val effectiveDarkMode: Boolean
@@ -51,6 +54,8 @@ class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewMod
             powerSaving = prefs[booleanPreferencesKey("power_saving")] ?: false
             accelerometerEnabled = prefs[booleanPreferencesKey("accelerometer_enabled")] ?: false
             appLanguage = prefs[stringPreferencesKey("app_language")] ?: "zh"
+            val styleOrdinal = prefs[intPreferencesKey("nav_bar_style")] ?: NavBarStyle.GLASS.ordinal
+            navBarStyle = NavBarStyle.entries.getOrElse(styleOrdinal) { NavBarStyle.GLASS }
         }
     }
 
@@ -120,6 +125,13 @@ class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewMod
         appLanguage = value
         viewModelScope.launch {
             dataStore.edit { it[stringPreferencesKey("app_language")] = value }
+        }
+    }
+
+    fun updateNavBarStyle(value: NavBarStyle) {
+        navBarStyle = value
+        viewModelScope.launch {
+            dataStore.edit { it[intPreferencesKey("nav_bar_style")] = value.ordinal }
         }
     }
 }

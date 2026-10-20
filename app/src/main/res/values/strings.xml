@@ -289,4 +289,10 @@
     <string name="tab_settings">设置</string>
     <string name="follow_system_dark_mode">暗色模式跟随系统</string>
     <string name="fast_run">快跑</string>
+    <string name="nav_bar_style">底部导航栏样式</string>
+    <string name="select_nav_bar_style">选择导航栏样式</string>
+    <string name="nav_bar_style_classic">经典</string>
+    <string name="nav_bar_style_glass">悬浮玻璃</string>
+    <string name="nav_bar_style_liquid">液态玻璃</string>
+    <string name="nav_bar_style_unsupported">当前系统版本不支持玻璃效果（需 Android 13 及以上），已自动使用经典样式</string>
 </resources>

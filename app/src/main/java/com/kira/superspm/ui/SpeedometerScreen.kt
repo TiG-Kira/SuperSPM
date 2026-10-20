@@ -141,6 +141,11 @@ fun SpeedometerScreen(
             viewModel.updateSpeed(speed)
         }
 
+        // 里程 / 均速 / 最高速统一以服务为准，UI 只镜像不自算
+        LocationService.onStatsUpdate = { max, avg, dist, points ->
+            viewModel.mirrorStats(max, avg, dist, points)
+        }
+
         LocationService.onGpsSignalUpdate = { accuracy ->
             gpsAccuracy = accuracy
             val currentTime = System.currentTimeMillis()
@@ -212,8 +217,8 @@ fun SpeedometerScreen(
                 lastAccUpdateTime = currentTime
 
                 viewModel.updateSpeed(speed)
+                // 里程只交给服务累加（传感器模式无定位点可过滤），UI 通过 onStatsUpdate 回显
                 val distance = speed / 3.6 * deltaTime / 1000.0
-                viewModel.addDistance(distance)
                 LocationService.updateWithSensorData(speed, distance)
             }
             AccelerometerService.onError = { message ->

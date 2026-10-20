@@ -12,6 +12,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -19,6 +20,7 @@ import androidx.core.content.ContextCompat
 import com.kira.superspm.R
 import com.kira.superspm.data.model.LocationPoint
 import com.kira.superspm.ui.MainActivity
+import com.kira.superspm.utils.MileageTracker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -52,8 +54,13 @@ class LocationService : Service(), LocationListener {
     var sensorVelocity = 0.0
     var recordingStartTime = 0L
     private val pathPoints = mutableListOf<LocationPoint>()
-    private var lastPoint: LocationPoint? = null
     private var startTime: Long = 0
+
+    /** 里程唯一数据源：所有模式的里程都经它累加，UI 只做镜像不再自算 */
+    private val mileageTracker = MileageTracker()
+
+    /** 最近一次 GPS fix 的到达时间（毫秒），用于压制网络定位的插队 */
+    private var lastGpsFixTime = 0L
 
     interface RecordingCallback {
         fun onRecordSaved()
@@ -74,9 +81,14 @@ class LocationService : Service(), LocationListener {
         var onError: ((errorMessage: String) -> Unit)? = null
         var onGpsSignalUpdate: ((accuracy: Float) -> Unit)? = null
         var onServiceStopped: (() -> Unit)? = null
+        /** 里程/速度统计回传：UI 只做镜像，禁止自行累加，避免与服务两套口径 */
+        var onStatsUpdate: ((maxSpeed: Double, avgSpeed: Double, totalDistance: Double, dataPoints: Int) -> Unit)? = null
         var currentInterval = 1000L
         var currentFastestInterval = 500L
         var positionRefreshInterval = 120000L
+
+        /** GPS 新鲜窗口：GPS 在此时长内有过 fix，则网络定位点整点丢弃 */
+        const val GPS_FRESH_WINDOW_MS = 10_000L
         private var instance: LocationService? = null
 
         fun isRunning(): Boolean = instance?.isRunning == true
@@ -269,7 +281,8 @@ class LocationService : Service(), LocationListener {
         totalDistance = 0.0
         dataPoints = 0
         pathPoints.clear()
-        lastPoint = null
+        lastGpsFixTime = 0L
+        mileageTracker.reset()
         speedHistory.clear()
         updateNotification()
     }
@@ -317,7 +330,8 @@ class LocationService : Service(), LocationListener {
         totalDistance = 0.0
         dataPoints = 0
         pathPoints.clear()
-        lastPoint = null
+        lastGpsFixTime = 0L
+        mileageTracker.reset()
         speedHistory.clear()
     }
 
@@ -333,28 +347,19 @@ class LocationService : Service(), LocationListener {
         }
     }
 
-    private fun calculateDistance(point1: LocationPoint, point2: LocationPoint): Double {
-        val R = 6371000.0
-        val lat1 = Math.toRadians(point1.latitude)
-        val lon1 = Math.toRadians(point1.longitude)
-        val lat2 = Math.toRadians(point2.latitude)
-        val lon2 = Math.toRadians(point2.longitude)
-
-        val dLat = lat2 - lat1
-        val dLon = lon2 - lon1
-
-        val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1) * Math.cos(lat2) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2)
-        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-
-        return R * c / 1000.0
-    }
-
     private val speedHistory = mutableListOf<Double>()
     private val HISTORY_SIZE = 5
 
     override fun onLocationChanged(location: Location) {
+        // 单流优先：GPS 与 NETWORK 两个 provider 的结果会互跳（网络定位常差数百米），
+        // 同时喂进同一累加器就是"幽灵里程"的根源。GPS 新鲜期内的网络定位整点丢弃。
+        val now0 = System.currentTimeMillis()
+        if (location.provider == LocationManager.GPS_PROVIDER) {
+            lastGpsFixTime = now0
+        } else if (now0 - lastGpsFixTime < GPS_FRESH_WINDOW_MS) {
+            return
+        }
+
         var speed = location.speed * 3.6
 
         speedHistory.add(speed)
@@ -393,19 +398,26 @@ class LocationService : Service(), LocationListener {
 
         if (isRecording) {
             maxSpeed = maxOf(maxSpeed, finalSpeed)
-            dataPoints++
-            avgSpeed = ((avgSpeed * (dataPoints - 1)) + finalSpeed) / dataPoints
 
-            val currentPoint = LocationPoint(location.latitude, location.longitude, finalSpeed, System.currentTimeMillis())
-            if (lastPoint != null) {
-                if (finalSpeed >= 1.0) {
-                    totalDistance += calculateDistance(lastPoint!!, currentPoint)
-                }
+            // 里程与轨迹只认 tracker 的裁决结果：精度 / 抖动 / 跳变 / 断续四道过滤全在这里
+            val accepted = mileageTracker.add(
+                latitude = location.latitude,
+                longitude = location.longitude,
+                // 不用 Location.hasAccuracy()（API 级别不确定，minSdk 26 下有风险）；
+                // accuracy == 0 即设备未提供，按最差值处理，等价于被精度门限拒掉
+                accuracyM = if (location.accuracy > 0f) location.accuracy else Float.MAX_VALUE,
+                speedMps = location.speed,
+                timestampMs = if (location.time > 0) location.time else now0
+            )
+            if (accepted != null) {
+                pathPoints.add(accepted)
+                dataPoints = mileageTracker.acceptedPoints
+                avgSpeed = ((avgSpeed * (dataPoints - 1)) + finalSpeed) / dataPoints
             }
-            pathPoints.add(currentPoint)
-            lastPoint = currentPoint
+            totalDistance = mileageTracker.totalDistanceKm
 
             updateNotification()
+            onStatsUpdate?.invoke(maxSpeed, avgSpeed, totalDistance, dataPoints)
         }
 
         onSpeedUpdate?.invoke(speed)
@@ -454,8 +466,11 @@ class LocationService : Service(), LocationListener {
             maxSpeed = maxOf(maxSpeed, speed)
             dataPoints++
             avgSpeed = if (dataPoints > 0) ((avgSpeed * (dataPoints - 1)) + speed) / dataPoints else speed
-            totalDistance += distanceDelta
+            // 惯性推算无定位点可过滤，直接注入同一累加器，保证与 GPS 模式口径一致
+            mileageTracker.addDistance(distanceDelta)
+            totalDistance = mileageTracker.totalDistanceKm
             updateNotification()
+            onStatsUpdate?.invoke(maxSpeed, avgSpeed, totalDistance, dataPoints)
         }
     }
 
@@ -517,10 +532,20 @@ class LocationService : Service(), LocationListener {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        return buildNotificationBuilder(pendingIntent)
+        val notificationBuilder = buildNotificationBuilder(pendingIntent)
             .setContentText(getString(R.string.recording))
-            .addAction(0, getString(R.string.stop), stopPendingIntent)
-            .build()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationBuilder.addAction(
+                android.app.Notification.Action.Builder(
+                    0, getString(R.string.stop), stopPendingIntent
+                ).build()
+            )
+        } else {
+            notificationBuilder.addAction(0, getString(R.string.stop), stopPendingIntent)
+        }
+
+        return notificationBuilder.build()
     }
 
     fun updateNotification() {
@@ -544,42 +569,54 @@ class LocationService : Service(), LocationListener {
 
         val notificationBuilder = buildNotificationBuilder(pendingIntent)
             .setContentText(String.format(getString(R.string.notification_speed), currentSpeed))
-            .addAction(0, getString(R.string.stop), stopPendingIntent)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationBuilder.addAction(
+                android.app.Notification.Action.Builder(
+                    0, getString(R.string.stop), stopPendingIntent
+                ).build()
+            )
+        } else {
+            notificationBuilder.addAction(0, getString(R.string.stop), stopPendingIntent)
+        }
 
         val bigText = String.format(
             getString(R.string.notification_summary),
             currentSpeed, maxSpeed, avgSpeed, totalDistance
         )
-        notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationBuilder.setStyle(android.app.Notification.BigTextStyle().bigText(bigText))
+        } else {
+            notificationBuilder.setStyle(android.app.Notification.BigTextStyle().bigText(bigText))
+        }
 
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
-    private fun buildNotificationBuilder(pendingIntent: PendingIntent): NotificationCompat.Builder {
+    private fun buildNotificationBuilder(pendingIntent: PendingIntent): Notification.Builder {
         val notificationTitle = if (isSensorMode) getString(R.string.sensor_speed_measuring) else getString(R.string.gps_speed_measuring)
-        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val notificationBuilder = Notification.Builder(this, CHANNEL_ID)
             .setContentTitle(notificationTitle)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
 
-        if (android.os.Build.VERSION.SDK_INT >= 36) {
-            notificationBuilder.setStyle(NotificationCompat.BigTextStyle())
+        if (Build.VERSION.SDK_INT >= 36) {
+            notificationBuilder.setPriority(Notification.PRIORITY_HIGH)
             
             try {
-                val method = NotificationCompat.Builder::class.java.getMethod(
+                notificationBuilder.javaClass.getMethod(
                     "setRequestPromotedOngoing", Boolean::class.javaPrimitiveType
-                )
-                method.invoke(notificationBuilder, true)
+                ).invoke(notificationBuilder, true)
             } catch (e: Exception) {
             }
 
             try {
-                val method = NotificationCompat.Builder::class.java.getMethod(
+                notificationBuilder.javaClass.getMethod(
                     "setShortCriticalText", String::class.java
-                )
-                method.invoke(notificationBuilder, "${String.format("%.0f", currentSpeed)} km/h")
+                ).invoke(notificationBuilder, "${String.format("%.0f", currentSpeed)} km/h")
             } catch (e: Exception) {
             }
         }

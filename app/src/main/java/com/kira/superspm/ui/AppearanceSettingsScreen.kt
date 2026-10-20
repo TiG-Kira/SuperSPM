@@ -31,6 +31,7 @@ import androidx.navigation.NavHostController
 import androidx.compose.ui.platform.LocalContext
 import com.kira.superspm.data.store.SpeedUnit
 import com.kira.superspm.R
+import com.kira.superspm.data.store.NavBarStyle
 import com.kira.superspm.viewmodel.SettingsViewModel
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -59,6 +60,16 @@ fun AppearanceSettingsScreen(
 
     var showSpeedUnitDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showNavBarStyleDialog by remember { mutableStateOf(false) }
+
+    // 玻璃效果依赖 RuntimeShader，Android 13（API 33）以下只能走经典样式
+    val glassSupported = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
+
+    fun navBarStyleLabel(style: NavBarStyle): String = when (style) {
+        NavBarStyle.CLASSIC -> context.getString(R.string.nav_bar_style_classic)
+        NavBarStyle.GLASS -> context.getString(R.string.nav_bar_style_glass)
+        NavBarStyle.LIQUID -> context.getString(R.string.nav_bar_style_liquid)
+    }
 
     val scrollBehavior = MiuixScrollBehavior()
     val backgroundColor = getPageBackgroundColor(isDark)
@@ -209,6 +220,16 @@ fun AppearanceSettingsScreen(
             }
 
             item {
+                SettingClickableItem(
+                    title = context.getString(R.string.nav_bar_style),
+                    value = navBarStyleLabel(
+                        if (glassSupported) viewModel.navBarStyle else NavBarStyle.CLASSIC
+                    ),
+                    onClick = { showNavBarStyleDialog = true }
+                )
+            }
+
+            item {
                 androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(120.dp))
             }
         }
@@ -342,6 +363,85 @@ fun AppearanceSettingsScreen(
                     }
                     Button(
                         onClick = { showLanguageDialog = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            color = MiuixTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Text(text = context.getString(R.string.cancel), fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+
+    if (showNavBarStyleDialog) {
+        Dialog(
+            onDismissRequest = { showNavBarStyleDialog = false }
+        ) {
+            Card {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = context.getString(R.string.select_nav_bar_style),
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MiuixTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    if (!glassSupported) {
+                        Text(
+                            text = context.getString(R.string.nav_bar_style_unsupported),
+                            style = TextStyle(
+                                fontSize = 13.sp,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            ),
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        NavBarStyle.entries.forEach { style ->
+                            val enabled = glassSupported || style == NavBarStyle.CLASSIC
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp)
+                                    .clickable(enabled = enabled) {
+                                        viewModel.updateNavBarStyle(style)
+                                        showNavBarStyleDialog = false
+                                    },
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = navBarStyleLabel(style),
+                                    style = TextStyle(
+                                        fontSize = 16.sp,
+                                        color = if (enabled) {
+                                            MiuixTheme.colorScheme.onSurface
+                                        } else {
+                                            MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                        }
+                                    )
+                                )
+                                if (viewModel.navBarStyle == style && enabled) {
+                                    Text(
+                                        text = "✓",
+                                        style = TextStyle(
+                                            fontSize = 18.sp,
+                                            color = MiuixTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Button(
+                        onClick = { showNavBarStyleDialog = false },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
                             color = MiuixTheme.colorScheme.surfaceVariant

@@ -15,14 +15,24 @@ android {
         applicationId = "com.kira.superspm"
         minSdk = Versions.minSdk
         targetSdk = Versions.targetSdk
-        versionCode = 17
-        versionName = "1.2.5"
+        versionCode = 18
+        versionName = "1.2.6"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("D:\\KiTerminal-UX\\app\\ki-terminal-release.jks")
+            storePassword = "ki-terminal"
+            keyAlias = "ki-terminal"
+            keyPassword = "ki-terminal"
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -72,7 +82,26 @@ dependencies {
     debugImplementation(Dependencies.composeUiTooling)
 
     implementation(Dependencies.miuixUi)
+    implementation(Dependencies.miuixBlur)
     implementation(Dependencies.miuixIcons)
+
+    // miuix-glass 弹层控件（GlassDropdownPopup / GlassPopup 等）依赖
+    // NavigationBackHandler / rememberNavigationEventState，1.1.2 起提供
+    implementation(Dependencies.navigationEvent)
+
+    // Liquid Glass 效果（Android-only artifacts）。
+    // 排除 org.jetbrains.compose.* 传递依赖：它们是 KMP 侧的 androidx.compose 别名，
+    // 与本项目的 androidx.compose 1.12.0 重复，留着会 duplicate class。
+    implementation(Dependencies.backdrop) {
+        exclude(group = "org.jetbrains.compose")
+        exclude(group = "org.jetbrains.compose.ui")
+        exclude(group = "org.jetbrains.compose.foundation")
+    }
+    implementation(Dependencies.kyantShapes) {
+        exclude(group = "org.jetbrains.compose")
+        exclude(group = "org.jetbrains.compose.ui")
+        exclude(group = "org.jetbrains.compose.foundation")
+    }
 
     implementation(Dependencies.lifecycleViewModel)
     implementation(Dependencies.lifecycleRuntime)

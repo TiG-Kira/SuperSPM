@@ -15,6 +15,11 @@
 
     <uses-feature android:name="android.hardware.location.gps" />
 
+    <!-- 玻璃拟态栈（RuntimeShader 需 Android 13+）声明 minSdk 33，本项目仍支持到 26：
+         代码里已按 Build.VERSION.SDK_INT >= 33 做运行期门禁，低于 33 走经典导航栏，
+         不会触碰 blur/shader 任何类，故此处强制放行合并。 -->
+    <uses-sdk tools:overrideLibrary="top.yukonga.miuix.kmp.blur,top.yukonga.miuix.kmp.shader" />
+
     <application
         android:name=".SuperSPMApp"
         android:allowBackup="true"
