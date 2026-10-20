@@ -4,6 +4,7 @@
 build/
 local.properties
 gradle-*.zip
+/gradle-*/
 
 # Module build outputs
 app/build/
@@ -13,6 +14,10 @@ plugin-sdk/build/
 # IDE
 .idea/
 .vscode/
+
+# 签名材料（私钥库本体走仓库 Secret JKS_BASE64，口令走 Secret 环境变量）
+*.jks
+*.keystore
 
 # Misc
 *.hprof

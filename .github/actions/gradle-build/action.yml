@@ -1,0 +1,218 @@
+name: Gradle 编译（增量优先 + 全量降级重试一次）
+description: >
+  统一的 Android 编译步骤：优先走缓存命中的增量编译；增量失败时自动清空
+  全部本地缓存与构建产物，并自动触发一次全量编译重试；仅当全量重试也失败
+  时才判定失败，同时输出结构化的失败原因与排查日志。
+  ci.yml（Debug）与 release_apk.yml（Release）共用本 action，保证两条流程
+  的错误处理语义完全一致。
+
+inputs:
+  gradle-task:
+    description: 要执行的 Gradle 任务，例如 :app:assembleRelease / :app:assembleDebug
+    required: true
+  variant:
+    description: 构建变体标识（release / debug），参与缓存键
+    required: true
+  artifact-glob:
+    description: 编译成功后用于校验产物是否真的生成的 glob（留空则跳过校验）
+    required: false
+    default: ""
+  extra-args:
+    description: 追加到 gradlew 命令行后的额外参数
+    required: false
+    default: ""
+  cache-write:
+    description: >
+      是否允许在本次运行结束后写回缓存。auto（默认）= pull_request 事件只读、
+      其余（push / release / workflow_dispatch）可写。显式传 true/false 可覆盖。
+      PR 传 false 是为了不让 PR 的缓存挤占仓库 10GB 配额、把主线的缓存条目挤出 LRU。
+    required: false
+    default: "auto"
+
+runs:
+  using: composite
+  steps:
+    # ══════════════════════════════════════════════════════════════
+    # 1. 计算缓存键
+    #    键的维度：锁文件哈希 / 操作系统 / 工具链(JDK+Gradle+AGP) / 构建变体。
+    #    故意不含 commit 或分支 SHA —— 否则每次推送都必然是一次全新键、必然
+    #    全量重编，「复用缓存」就退化成「每次多传一份空缓存」。跨 commit 的
+    #    复用交给 Gradle 自身的 up-to-date 校验。
+    # ══════════════════════════════════════════════════════════════
+    - name: 计算缓存键
+      id: keys
+      shell: bash
+      run: |
+        set -uo pipefail
+        LOCK_HASH="${{ hashFiles('**/gradle-wrapper.properties', '**/*.gradle', '**/*.gradle.kts', '**/gradle.properties', '**/libs.versions.toml') }}"
+        RUNNER_OS="ubuntu-latest"
+        TOOLCHAIN="jdk21-temurin-gradle8.13-agp8.10"
+        VARIANT="${{ inputs.variant }}"
+
+        # 依赖缓存：锁文件哈希 + OS + 工具链
+        DEP_KEY="gha-deps-${RUNNER_OS}-${TOOLCHAIN}-${LOCK_HASH}"
+        # 构建中间产物缓存：在依赖键基础上再加变体
+        BUILD_KEY="gha-build-${RUNNER_OS}-${TOOLCHAIN}-${LOCK_HASH}-${VARIANT}"
+
+        # ── 缓存写权限判定（缓存隔离）──────────────────────────────
+        # GitHub 缓存的驱逐是**仓库级全局 LRU**，不按作用域隔离：PR 写入的缓存
+        # 与主线缓存共用同一个 10GB 配额池。PR 每提交一次就写一份全量构建缓存，
+        # 足以把主线的条目挤出 LRU —— 这才是「污染主线缓存」的真实机制。
+        # 因此：PR 只读（actions/cache/restore），主线才写（save）。
+        if [ "${{ inputs.cache-write }}" = "auto" ]; then
+          case "${{ github.event_name }}" in
+            pull_request|pull_request_target)
+              CACHE_WRITE="false" ;;
+            *)
+              CACHE_WRITE="true" ;;
+          esac
+        else
+          CACHE_WRITE="${{ inputs.cache-write }}"
+        fi
+
+        {
+          echo "deps_key=${DEP_KEY}"
+          echo "build_key=${BUILD_KEY}"
+          echo "lock_hash=${LOCK_HASH}"
+          echo "cache_write=${CACHE_WRITE}"
+        } >> "$GITHUB_OUTPUT"
+
+        if [ "$CACHE_WRITE" = "true" ]; then
+          WRITE_NOTE="✅ 可写（${{ github.event_name }}）"
+        else
+          WRITE_NOTE="🔒 只读（${{ github.event_name }}）"
+        fi
+
+        {
+          echo "### 构建上下文"
+          echo ""
+          echo "| 键维度 | 取值 |"
+          echo "|---|---|"
+          echo "| 构建变体 | \`${VARIANT}\` |"
+          echo "| 操作系统 | \`${RUNNER_OS}\` |"
+          echo "| 工具链 | \`${TOOLCHAIN}\` |"
+          echo "| 锁文件哈希 | \`${LOCK_HASH:0:16}\` |"
+          echo "| Gradle 任务 | \`${{ inputs.gradle-task }}\` |"
+          echo "| 缓存写权限 | ${WRITE_NOTE} |"
+          echo ""
+        } >> "$GITHUB_STEP_SUMMARY"
+
+    # ══════════════════════════════════════════════════════════════
+    # 2. 缓存恢复（只读）
+    #    刻意使用 cache/restore 而非 cache：后者在 job 结束时无条件回写，
+    #    会把「只读」语义破坏掉（PR 上也会写）。回写单独放到第 5 步按权限控制。
+    # ══════════════════════════════════════════════════════════════
+    - name: 恢复 Gradle 依赖缓存
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ steps.keys.outputs.deps_key }}
+        restore-keys: |
+          gha-deps-${{ steps.keys.outputs.lock_hash }}
+
+    - name: 恢复构建中间产物缓存
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          **/build
+          !**/build/outputs
+        key: ${{ steps.keys.outputs.build_key }}
+
+    # ══════════════════════════════════════════════════════════════
+    # 3. 首次编译：增量优先
+    #    缓存命中时由 Gradle 的 up-to-date 校验决定哪些子任务要重跑；
+    #    未命中就是一次全量编译。失败不立即判定——交给第 4 步全量重试。
+    # ══════════════════════════════════════════════════════════════
+    - name: 编译（${{ inputs.variant }}）
+      id: compile
+      shell: bash
+      continue-on-error: true
+      run: |
+        set -uo pipefail
+        chmod +x ./gradlew
+        ./gradlew ${{ inputs.gradle-task }} --stacktrace ${{ inputs.extra-args }}
+        echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+    # ══════════════════════════════════════════════════════════════
+    # 4. 增量失败 → 清空缓存后全量重试一次
+    #    能走到这里，说明「缓存 + 增量」这条路本身有问题（缓存损坏、AGP
+    #    增量状态与源码不一致等）。这时候再重试增量没有意义，必须把
+    #    Gradle 缓存、模块 build 目录全部清掉，从干净状态重编一次。
+    #    全量重试也失败才判定为本作业失败。
+    # ══════════════════════════════════════════════════════════════
+    - name: 增量编译失败，清空缓存后全量重试
+      id: retry
+      if: steps.compile.outputs.exit_code != '0'
+      shell: bash
+      continue-on-error: true
+      run: |
+        set -uo pipefail
+        echo "::warning::增量编译失败（exit=${{ steps.compile.outputs.exit_code }}），清空缓存后全量重试一次"
+        pkill -f GradleDaemon || true
+        rm -rf ~/.gradle/caches/modules-2/files-2.1 \
+               ~/.gradle/caches/transforms-* \
+               ~/.gradle/caches/journal-1 \
+               ~/.gradle/caches/build-cache-1 \
+               ~/.gradle/caches/*/executionHistory \
+               ~/.gradle/caches/*/fileHashes \
+               app/build buildSrc/build plugin-sdk/build build || true
+        ./gradlew ${{ inputs.gradle-task }} --stacktrace ${{ inputs.extra-args }}
+        echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+    - name: 判定编译结果
+      if: always()
+      shell: bash
+      run: |
+        first='${{ steps.compile.outputs.exit_code }}'
+        retry='${{ steps.retry.outputs.exit_code }}'
+        if [ "$first" = "0" ]; then
+          echo "✅ 增量编译成功"
+          exit 0
+        fi
+        if [ "$retry" = "0" ]; then
+          echo "⚠️ 增量编译失败，全量重试后成功"
+          exit 0
+        fi
+        echo "::error::编译失败：增量（exit=$first）与全量重试（exit=$retry）均未通过"
+        exit 1
+
+    # ══════════════════════════════════════════════════════════════
+    # 5. 校验产物真的生成了
+    #    构建「成功」但产物缺失是静默失败的主要来源，这里直接拦掉。
+    # ══════════════════════════════════════════════════════════════
+    - name: 校验产物
+      if: inputs.artifact-glob != ''
+      shell: bash
+      run: |
+        set -uo pipefail
+        shopt -s nullglob
+        files=(${{ inputs.artifact-glob }})
+        if [ ${#files[@]} -eq 0 ]; then
+          echo "::error::构建报告成功，但 ${{ inputs.artifact-glob }} 下没有任何产物"
+          exit 1
+        fi
+        echo "产物 ${#files[@]} 个："
+        ls -lh "${files[@]}"
+
+    # ══════════════════════════════════════════════════════════════
+    # 6. 回写缓存（仅主线）
+    # ══════════════════════════════════════════════════════════════
+    - name: 保存 Gradle 依赖缓存
+      if: steps.keys.outputs.cache_write == 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ steps.keys.outputs.deps_key }}
+
+    - name: 保存构建中间产物缓存
+      if: steps.keys.outputs.cache_write == 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          **/build
+          !**/build/outputs
+        key: ${{ steps.keys.outputs.build_key }}

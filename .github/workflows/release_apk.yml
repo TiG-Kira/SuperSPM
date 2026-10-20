@@ -1,0 +1,175 @@
+name: 发布 APK 到 Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "要附加 APK 的 Release tag（workflow_dispatch 时必填；release 事件自动取触发 tag）"
+        required: false
+        type: string
+
+# 同一 tag 的发布构建串行化：不取消进行中的运行，避免构建到一半被打断、
+# 结果 Release 上挂了个空包。
+concurrency:
+  group: release-apk-${{ github.event.release.tag_name || inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+# 【安全】签名材料全部从 Secrets 注入，本文件不得出现任何明文。
+# 放在作业级而不是 workflow 级 env，是为了把可见范围限制在真正需要签名的
+# 构建作业上 —— preflight / 上传 Release 资产等作业拿不到签名材料。
+#
+# 需要的仓库 Secrets：
+#   JKS_BASE64                 release 私钥库的 base64（必填）
+#   SUPERSPM_STORE_PASSWORD    keystore 口令（必填）
+#   SUPERSPM_KEY_PASSWORD      私钥口令（必填）
+#   SUPERSPM_KEY_ALIAS         alias，缺省回落到 ki-terminal（可选）
+# 口令取值与环境变量的对应关系见 app/build.gradle.kts 的 signingConfigs.release。
+
+jobs:
+  # ── 1. 预检：Release 里是否已经有 APK ───────────────────────────────
+  # 拆成独立作业后这个 API 调用只做一次，后续构建作业看它的输出决定是否跳过。
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.check.outputs.tag }}
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - name: 检查 Release 是否已附带 APK
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 两种触发源的 tag 取值优先级：
+          #   1. release           → github.event.release.tag_name
+          #   2. workflow_dispatch → inputs.tag
+          tag="${{ github.event.release.tag_name || inputs.tag }}"
+          if [ -z "$tag" ]; then
+            echo "::error::无法确定 tag：release 事件的 tag_name 与 workflow_dispatch 的 inputs.tag 都为空"
+            exit 1
+          fi
+          echo "目标 tag: $tag  触发源: ${{ github.event_name }}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          api_url="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${tag}"
+          assets=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$api_url" \
+            | jq -r '.assets[]?.name' 2>/dev/null | grep -i '\.apk$' || true)
+          if [ -n "$assets" ]; then
+            echo "存在 APK assets:"
+            echo "$assets"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Release 中没有 APK，开始构建..."
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ── 2. 构建签名 Release APK ────────────────────────────────────────
+  # 编译逻辑（缓存 + 增量优先 + 全量降级重试 + 失败判定）收敛到
+  # ./.github/actions/gradle-build，与 ci.yml 共用同一份实现。
+  build:
+    needs: preflight
+    if: needs.preflight.outputs.skip == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # 仅本作业可见（见文件头的说明）：preflight / upload 作业拿不到签名材料。
+      JKS_BASE64: ${{ secrets.JKS_BASE64 }}
+      SUPERSPM_STORE_PASSWORD: ${{ secrets.SUPERSPM_STORE_PASSWORD }}
+      SUPERSPM_KEY_PASSWORD: ${{ secrets.SUPERSPM_KEY_PASSWORD }}
+      SUPERSPM_KEY_ALIAS: ${{ secrets.SUPERSPM_KEY_ALIAS }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          # 刻意不启用 cache: gradle —— 它内部走 actions/cache，PR 上会无条件
+          # 回写并挤占主线缓存配额；且 ~/.gradle 已由 gradle-build action 完整
+          # 覆盖，留着属重复覆盖。
+
+      - name: 解码 JKS 到 app 目录
+        run: |
+          # app/build.gradle.kts 中 storeFile 使用的是相对 app 模块目录的路径
+          echo "$JKS_BASE64" | base64 -d > app/ki-terminal-release.jks
+          test -s app/ki-terminal-release.jks
+          echo "JKS 写入完成：$(stat -c%s app/ki-terminal-release.jks) 字节"
+
+      # 签名配置（signingConfigs.release / buildTypes.release.signingConfig）
+      # 由 app/build.gradle.kts 读取上面解码出的 JKS 与三个环境变量。
+      - name: 编译 Release APK（增量优先，失败自动全量重试一次）
+        uses: ./.github/actions/gradle-build
+        with:
+          gradle-task: ':app:assembleRelease'
+          variant: release
+          artifact-glob: 'app/build/outputs/apk/release/*.apk'
+
+      - name: 列出产物
+        run: ls -lh app/build/outputs/apk/release/
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: SuperSPM-release
+          archive: false
+          if-no-files-found: error
+          path: app/build/outputs/apk/release/*.apk
+
+  # ── 3. 上传到 Release ──────────────────────────────────────────────
+  publish:
+    needs: [preflight, build]
+    if: always() && needs.preflight.outputs.skip == 'false' && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 下载 APK 产物
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: 列出待上传文件
+        run: ls -lh dist/
+
+      - name: 上传 APK 到 Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ needs.preflight.outputs.tag }}"
+          upload_url="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${tag}"
+          # 从 API 拿 upload_url（带 ?name= 参数模板）
+          upload_base=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$upload_url" \
+            | jq -r '.upload_url' | sed 's/{?name,label}//')
+          echo "upload_base=$upload_base"
+
+          shopt -s nullglob
+          apks=(dist/*.apk)
+          if [ ${#apks[@]} -eq 0 ]; then
+            echo "::error::dist/ 下没有任何 APK 产物，无法发布"
+            exit 1
+          fi
+
+          for apk in "${apks[@]}"; do
+            name=$(basename "$apk")
+            size=$(stat -c%s "$apk")
+            echo "上传 $name ($size bytes) ..."
+            resp=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
+                     -H "Authorization: token $GITHUB_TOKEN" \
+                     -H "Content-Type: application/vnd.android.package-archive" \
+                     --data-binary @"$apk" \
+                     "${upload_base}?name=${name}")
+            body=$(echo "$resp" | sed '$d')
+            http_code=$(echo "$resp" | tail -1 | sed 's/HTTP_CODE://')
+            if [ "$http_code" = "201" ]; then
+              url=$(echo "$body" | jq -r '.html_url // .url // empty')
+              echo "✅ 上传成功: $url"
+            else
+              echo "❌ 上传失败 HTTP $http_code"
+              echo "$body"
+              exit 1
+            fi
+          done

@@ -21,10 +21,28 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("D:\\KiTerminal-UX\\app\\ki-terminal-release.jks")
-            storePassword = "ki-terminal"
-            keyAlias = "ki-terminal"
-            keyPassword = "ki-terminal"
+            // 私钥库本体不入仓库（.gitignore 已排除 *.jks）：
+            //   CI    —— 由仓库 Secret JKS_BASE64 解码写入该路径
+            //   本地   —— 从 Termux Ultra 的 app/ 目录复制一份放到这里
+            storeFile = file("ki-terminal-release.jks")
+            // 【安全】签名口令一律外置，不得写回本文件：本仓库是公开的，
+            // 一旦口令与私钥同时落到明文仓库里，任何人都能签出外观无差的包。
+            //
+            // 取值顺序：Gradle 属性 → 环境变量 → 空。
+            //   CI   ：由 Secrets 注入同名环境变量（见 .github/workflows/release_apk.yml）
+            //   本地 ：./gradlew assembleRelease -Psuperspm.storePassword=... -Psuperspm.keyPassword=...
+            //        或先 export SUPERSPM_STORE_PASSWORD / SUPERSPM_KEY_PASSWORD
+            // 口令留空不会污染 debug 构建，但 release 签名会直接失败——这是刻意的：
+            // 宁可构建报错，也不要静默产出一个签名不对的包。
+            storePassword = (project.findProperty("superspm.storePassword")
+                ?: System.getenv("SUPERSPM_STORE_PASSWORD")
+                ?: "").toString()
+            keyAlias = (project.findProperty("superspm.keyAlias")
+                ?: System.getenv("SUPERSPM_KEY_ALIAS")
+                ?: "ki-terminal").toString()
+            keyPassword = (project.findProperty("superspm.keyPassword")
+                ?: System.getenv("SUPERSPM_KEY_PASSWORD")
+                ?: "").toString()
         }
     }
 
