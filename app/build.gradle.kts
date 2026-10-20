@@ -15,8 +15,8 @@ android {
         applicationId = "com.kira.superspm"
         minSdk = Versions.minSdk
         targetSdk = Versions.targetSdk
-        versionCode = 18
-        versionName = "1.2.6"
+        versionCode = 118
+        versionName = "2.0.0"
     }
 
     signingConfigs {
