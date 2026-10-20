@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # 项目 sourceCompatibility / jvmTarget 均为 17，但 AGP 8.10 + Gradle 8.13
       # 在 JDK 21 下已验证可构建，故用 21 以获得更好的 Kotlin 编译性能。
@@ -41,7 +41,7 @@ jobs:
       #   2) 它只覆盖 ~/.gradle，而下面的 gradle-build action 已完整缓存
       #      ~/.gradle/{caches,wrapper} + **/build —— 留着是重复覆盖。
       - name: 设置 JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -54,7 +54,7 @@ jobs:
           artifact-glob: 'app/build/outputs/apk/debug/*.apk'
 
       - name: 上传 Debug APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: SuperSPM-debug
           archive: false
