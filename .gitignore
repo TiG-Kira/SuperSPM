@@ -1,2 +1,21 @@
-gradle-8.11.1
-java_pid48520.hprof
+# Gradle / Kotlin
+.gradle/
+.kotlin/
+build/
+local.properties
+gradle-*.zip
+
+# Module build outputs
+app/build/
+buildSrc/build/
+plugin-sdk/build/
+
+# IDE
+.idea/
+.vscode/
+
+# Misc
+*.hprof
+*.log
+*.iml
+.cxx/
